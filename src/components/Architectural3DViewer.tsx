@@ -10,6 +10,8 @@ import {
   Box,
   RotateCcw,
   Sun,
+  Moon,
+  Monitor,
   Eye,
   Layers,
   Sparkles,
@@ -36,6 +38,7 @@ interface Architectural3DViewerProps {
 export type ProfileFinish = 'black' | 'charcoal' | 'white' | 'bronze' | 'silver' | 'woodgrain';
 export type GlassTint = 'clear' | 'blue_reflective' | 'bronze_tint' | 'green_lowe' | 'frosted';
 export type CameraPreset = 'perspective' | 'front' | 'top' | 'side' | 'isometric';
+export type BackgroundTheme = 'white' | 'dark' | 'system';
 
 export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
   itemResult,
@@ -49,6 +52,42 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
   const animFrameIdRef = useRef<number | null>(null);
   const windowGroupRef = useRef<THREE.Group | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Background Theme State (White, Dark, System)
+  const [bgTheme, setBgTheme] = useState<BackgroundTheme>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('omas_3d_bg_theme');
+      if (saved === 'dark' || saved === 'white' || saved === 'system') {
+        return saved as BackgroundTheme;
+      }
+    }
+    return 'white';
+  });
+
+  // Track OS system theme
+  const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const listener = (e: MediaQueryListEvent) => setSystemIsDark(e.matches);
+    mq.addEventListener('change', listener);
+    return () => mq.removeEventListener('change', listener);
+  }, []);
+
+  const handleBgThemeChange = (theme: BackgroundTheme) => {
+    setBgTheme(theme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('omas_3d_bg_theme', theme);
+    }
+  };
+
+  const effectiveIsDark = bgTheme === 'system' ? systemIsDark : bgTheme === 'dark';
 
   // Dynamic state
   const [profileFinish, setProfileFinish] = useState<ProfileFinish>('charcoal');
@@ -241,13 +280,13 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     });
 
     const wallMaterial = new THREE.MeshStandardMaterial({
-      color: 0xdbe2ea,
+      color: effectiveIsDark ? 0xdbe2ea : 0xe2e8f0,
       roughness: 0.85,
       metalness: 0.05,
     });
 
     const wallSillMaterial = new THREE.MeshStandardMaterial({
-      color: 0x94a3b8,
+      color: effectiveIsDark ? 0x94a3b8 : 0x64748b,
       roughness: 0.4,
       metalness: 0.2,
     });
@@ -257,10 +296,10 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     });
 
     const lineWireMaterial = new THREE.LineBasicMaterial({
-      color: 0x38bdf8,
+      color: effectiveIsDark ? 0x38bdf8 : 0x0284c7,
       linewidth: 1.5,
       transparent: true,
-      opacity: 0.75,
+      opacity: effectiveIsDark ? 0.75 : 0.85,
     });
 
     return {
@@ -274,7 +313,7 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       gasket: gasketMaterial,
       wire: lineWireMaterial,
     };
-  }, [profileFinish, glassTint]);
+  }, [profileFinish, glassTint, effectiveIsDark]);
 
   // Main ThreeJS Scene Setup & Re-render Loop
   useEffect(() => {
@@ -286,10 +325,9 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     // 1. Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color(0x0b1120); // Deep architectural blueprint slate
-
-    // Fog for depth
-    scene.fog = new THREE.FogExp2(0x0b1120, 0.00035);
+    const sceneBgColor = effectiveIsDark ? 0x0b1120 : 0xf8fafc;
+    scene.background = new THREE.Color(sceneBgColor);
+    scene.fog = new THREE.FogExp2(sceneBgColor, 0.00035);
 
     // 2. Camera
     const camera = new THREE.PerspectiveCamera(42, width / height, 10, 20000);
@@ -312,7 +350,7 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = effectiveIsDark ? 1.1 : 1.05;
 
     // Clear previous canvas
     while (mountRef.current.firstChild) {
@@ -330,11 +368,11 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     controls.target.set(0, H / 2, 0);
     controls.update();
 
-    // 5. Lighting Rig (Studio Architectural Quality)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    // 5. Lighting Rig (Studio Architectural Quality adjusted for dark vs white backgrounds)
+    const ambientLight = new THREE.AmbientLight(0xffffff, effectiveIsDark ? 0.9 : 1.15);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xfffaed, 2.2);
+    const keyLight = new THREE.DirectionalLight(0xfffaed, effectiveIsDark ? 2.2 : 1.85);
     keyLight.position.set(maxDim * 1.5, maxDim * 2.2, maxDim * 1.8);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 2048;
@@ -349,26 +387,40 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     keyLight.shadow.bias = -0.0003;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xcde8ff, 1.3);
+    const fillLight = new THREE.DirectionalLight(
+      effectiveIsDark ? 0xcde8ff : 0xdbeafe,
+      effectiveIsDark ? 1.3 : 1.0
+    );
     fillLight.position.set(-maxDim * 1.5, maxDim * 1.2, maxDim * 1.2);
     scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.4);
+    const rimLight = new THREE.DirectionalLight(
+      effectiveIsDark ? 0x38bdf8 : 0x94a3b8,
+      effectiveIsDark ? 1.4 : 0.85
+    );
     rimLight.position.set(0, maxDim * 1.5, -maxDim * 2);
     scene.add(rimLight);
 
-    const groundBounce = new THREE.DirectionalLight(0x64748b, 0.6);
+    const groundBounce = new THREE.DirectionalLight(
+      effectiveIsDark ? 0x64748b : 0xcfdbe8,
+      effectiveIsDark ? 0.6 : 0.45
+    );
     groundBounce.position.set(0, -maxDim, 0);
     scene.add(groundBounce);
 
     // Ground Grid & Shadow Receiver
     if (showEnvironmentGrid) {
-      const gridHelper = new THREE.GridHelper(maxDim * 4, 30, 0x38bdf8, 0x1e293b);
+      const gridHelper = new THREE.GridHelper(
+        maxDim * 4,
+        30,
+        effectiveIsDark ? 0x38bdf8 : 0x0284c7,
+        effectiveIsDark ? 0x1e293b : 0xdbe2ea
+      );
       gridHelper.position.y = -5;
       scene.add(gridHelper);
 
       const shadowPlaneGeo = new THREE.PlaneGeometry(maxDim * 5, maxDim * 5);
-      const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.35 });
+      const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: effectiveIsDark ? 0.35 : 0.18 });
       const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
       shadowPlane.rotation.x = -Math.PI / 2;
       shadowPlane.position.y = -6;
@@ -461,6 +513,7 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     showWireframeOverlay,
     showDimensions3D,
     showEnvironmentGrid,
+    effectiveIsDark,
   ]);
 
   // Set Camera Preset handler
@@ -512,94 +565,211 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl transition-all ${
-        isFullscreen ? 'fixed inset-0 z-50 rounded-none w-screen h-screen' : 'w-full'
-      }`}
+      className={`relative overflow-hidden shadow-2xl transition-colors duration-300 ${
+        effectiveIsDark
+          ? 'bg-slate-950 border border-slate-800 text-white'
+          : 'bg-slate-50 border border-slate-200 text-slate-900'
+      } ${isFullscreen ? 'fixed inset-0 z-50 rounded-none w-screen h-screen' : 'w-full rounded-2xl'}`}
     >
       {/* Top Floating Control Bar */}
-      <div className="absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-3 bg-slate-900/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-800 text-white text-xs">
+      <div
+        className={`absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-xs backdrop-blur-md transition-colors ${
+          effectiveIsDark
+            ? 'bg-slate-900/85 border-slate-800 text-white shadow-xl'
+            : 'bg-white/90 border-slate-200 text-slate-800 shadow-md'
+        }`}
+      >
         {/* Left Unit Title & Type Badge */}
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 bg-blue-600/30 border border-blue-500/40 rounded-lg text-blue-400">
+          <div
+            className={`p-1.5 rounded-lg border ${
+              effectiveIsDark
+                ? 'bg-blue-600/30 border-blue-500/40 text-blue-400'
+                : 'bg-blue-50 border-blue-200 text-blue-700'
+            }`}
+          >
             <Box className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-white tracking-wide">{tag}</span>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 font-semibold px-2 py-0.5 rounded-full border border-blue-400/20 capitalize">
+              <span className="font-bold tracking-wide">{tag}</span>
+              <span
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${
+                  effectiveIsDark
+                    ? 'bg-blue-500/20 text-blue-300 border-blue-400/20'
+                    : 'bg-blue-100 text-blue-800 border-blue-200'
+                }`}
+              >
                 {kind.replace(/_/g, ' ')}
               </span>
             </div>
-            <div className="text-[11px] font-mono text-slate-400">
+            <div
+              className={`text-[11px] font-mono ${
+                effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
+              }`}
+            >
               {W} × {H} mm &bull; Extrusion Depth: 65mm &bull; Qty: {item.quantity}
             </div>
           </div>
         </div>
 
-        {/* Camera Views Quick Selector */}
-        <div className="flex items-center bg-slate-950/80 p-1 rounded-lg border border-slate-800 gap-1">
-          <button
-            onClick={() => setCameraPreset('perspective')}
-            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-              activeCameraPreset === 'perspective'
-                ? 'bg-blue-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
+        {/* Center: Camera Views Quick Selector & Background Theme Selector */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Background Theme Selector: White, Dark, System */}
+          <div
+            className={`flex items-center p-1 rounded-lg border gap-0.5 ${
+              effectiveIsDark
+                ? 'bg-slate-950/80 border-slate-800'
+                : 'bg-slate-100 border-slate-200'
             }`}
-            title="3D Perspective View"
           >
-            3D Orbit
-          </button>
-          <button
-            onClick={() => setCameraPreset('front')}
-            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-              activeCameraPreset === 'front'
-                ? 'bg-blue-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 text-slate-400 hidden sm:inline">
+              Canvas:
+            </span>
+
+            <button
+              type="button"
+              onClick={() => handleBgThemeChange('white')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                bgTheme === 'white'
+                  ? 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="White Architectural Studio Canvas"
+            >
+              <Sun className="w-3.5 h-3.5 text-amber-500" />
+              <span>White</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleBgThemeChange('dark')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                bgTheme === 'dark'
+                  ? effectiveIsDark
+                    ? 'bg-blue-600 text-white font-bold shadow-xs'
+                    : 'bg-slate-800 text-white font-bold shadow-xs'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Dark Blueprint Night Studio Canvas"
+            >
+              <Moon className="w-3.5 h-3.5 text-sky-400" />
+              <span>Dark</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleBgThemeChange('system')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                bgTheme === 'system'
+                  ? effectiveIsDark
+                    ? 'bg-blue-600 text-white font-bold shadow-xs'
+                    : 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="System (Auto Match Device / Browser Theme)"
+            >
+              <Monitor className="w-3.5 h-3.5 text-slate-400" />
+              <span>System</span>
+              {bgTheme === 'system' && (
+                <span className="text-[9px] font-mono opacity-80">
+                  ({systemIsDark ? 'Dark' : 'White'})
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Camera Views Quick Selector */}
+          <div
+            className={`flex items-center p-1 rounded-lg border gap-1 ${
+              effectiveIsDark
+                ? 'bg-slate-950/80 border-slate-800'
+                : 'bg-slate-100 border-slate-200'
             }`}
-            title="Front Elevation"
           >
-            Front
-          </button>
-          <button
-            onClick={() => setCameraPreset('top')}
-            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-              activeCameraPreset === 'top'
-                ? 'bg-blue-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Plan View (Top-Down)"
-          >
-            Plan (Top)
-          </button>
-          <button
-            onClick={() => setCameraPreset('side')}
-            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-              activeCameraPreset === 'side'
-                ? 'bg-blue-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Side Section"
-          >
-            Side
-          </button>
-          <button
-            onClick={() => setCameraPreset('isometric')}
-            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-              activeCameraPreset === 'isometric'
-                ? 'bg-blue-600 text-white font-bold shadow-xs'
-                : 'text-slate-400 hover:text-white'
-            }`}
-            title="Isometric Projection"
-          >
-            ISO
-          </button>
+            <button
+              onClick={() => setCameraPreset('perspective')}
+              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                activeCameraPreset === 'perspective'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="3D Perspective Orbit View"
+            >
+              3D Orbit
+            </button>
+            <button
+              onClick={() => setCameraPreset('front')}
+              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                activeCameraPreset === 'front'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Front Elevation"
+            >
+              Front
+            </button>
+            <button
+              onClick={() => setCameraPreset('top')}
+              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                activeCameraPreset === 'top'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Plan View (Top-Down)"
+            >
+              Plan (Top)
+            </button>
+            <button
+              onClick={() => setCameraPreset('side')}
+              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                activeCameraPreset === 'side'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Side Section"
+            >
+              Side
+            </button>
+            <button
+              onClick={() => setCameraPreset('isometric')}
+              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
+                activeCameraPreset === 'isometric'
+                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                  : effectiveIsDark
+                  ? 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+              title="Isometric Projection"
+            >
+              ISO
+            </button>
+          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleResetCamera}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition-colors"
+            className={`p-1.5 rounded-lg border transition-colors ${
+              effectiveIsDark
+                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
+                : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200 shadow-xs'
+            }`}
             title="Reset Camera Target"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -607,16 +777,24 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
 
           <button
             onClick={handleCaptureSnapshot}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-lg border border-slate-700 text-[11px] font-semibold transition-colors"
+            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
+              effectiveIsDark
+                ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
+                : 'bg-white hover:bg-slate-100 text-slate-800 hover:text-blue-700 border-slate-200 shadow-xs'
+            }`}
             title="Download 3D Architectural Snapshot"
           >
-            <Camera className="w-3.5 h-3.5 text-sky-400" />
+            <Camera className="w-3.5 h-3.5 text-sky-500" />
             <span>Render PNG</span>
           </button>
 
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition-colors"
+            className={`p-1.5 rounded-lg border transition-colors ${
+              effectiveIsDark
+                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
+                : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200 shadow-xs'
+            }`}
             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen 3D Studio'}
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -633,9 +811,19 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       {/* Left Floating Material / Architectural Finish Control Palette */}
       <div className="absolute top-18 left-3 z-20 space-y-2 max-w-[240px] pointer-events-auto">
         {/* Powder Coat Finish Selector */}
-        <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800/90 text-white shadow-xl space-y-2">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Palette className="w-3 h-3 text-blue-400" />
+        <div
+          className={`p-3 rounded-xl border shadow-xl space-y-2 backdrop-blur-md ${
+            effectiveIsDark
+              ? 'bg-slate-900/90 border-slate-800/90 text-white'
+              : 'bg-white/90 border-slate-200 text-slate-900'
+          }`}
+        >
+          <div
+            className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+              effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
+            }`}
+          >
+            <Palette className="w-3 h-3 text-blue-500" />
             <span>Aluminium Finish</span>
           </div>
           <div className="grid grid-cols-3 gap-1.5">
@@ -652,12 +840,16 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
                 onClick={() => setProfileFinish(fin.id as ProfileFinish)}
                 className={`group flex flex-col items-center p-1.5 rounded-lg border text-[9.5px] transition-all ${
                   profileFinish === fin.id
-                    ? 'border-blue-500 bg-blue-500/15 text-white font-bold ring-1 ring-blue-500'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    ? effectiveIsDark
+                      ? 'border-blue-500 bg-blue-500/15 text-white font-bold ring-1 ring-blue-500'
+                      : 'border-blue-600 bg-blue-50 text-blue-900 font-bold ring-1 ring-blue-500 shadow-xs'
+                    : effectiveIsDark
+                    ? 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-slate-300'
                 }`}
               >
                 <span
-                  className="w-4 h-4 rounded-full border border-white/20 mb-1 shadow-inner"
+                  className="w-4 h-4 rounded-full border border-black/10 mb-1 shadow-xs"
                   style={{ backgroundColor: fin.color }}
                 />
                 <span className="truncate w-full text-center">{fin.label}</span>
@@ -667,9 +859,19 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
         </div>
 
         {/* Glass Tint Selector */}
-        <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800/90 text-white shadow-xl space-y-2">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-sky-400" />
+        <div
+          className={`p-3 rounded-xl border shadow-xl space-y-2 backdrop-blur-md ${
+            effectiveIsDark
+              ? 'bg-slate-900/90 border-slate-800/90 text-white'
+              : 'bg-white/90 border-slate-200 text-slate-900'
+          }`}
+        >
+          <div
+            className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+              effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
+            }`}
+          >
+            <Sparkles className="w-3 h-3 text-sky-500" />
             <span>Glass Infill Tint</span>
           </div>
           <div className="flex flex-wrap gap-1">
@@ -678,18 +880,22 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
               { id: 'blue_reflective', label: 'Blue Solar', dot: '#38bdf8' },
               { id: 'bronze_tint', label: 'Bronze Tint', dot: '#a3714b' },
               { id: 'green_lowe', label: 'Green Low-E', dot: '#5eead4' },
-              { id: 'frosted', label: 'Frosted Sat.', dot: '#ffffff' },
+              { id: 'frosted', label: 'Frosted Sat.', dot: '#cbd5e1' },
             ].map((gt) => (
               <button
                 key={gt.id}
                 onClick={() => setGlassTint(gt.id as GlassTint)}
                 className={`px-2 py-1 rounded-md text-[10px] border flex items-center gap-1.5 transition-all ${
                   glassTint === gt.id
-                    ? 'border-sky-400 bg-sky-500/20 text-white font-bold ring-1 ring-sky-400'
-                    : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'
+                    ? effectiveIsDark
+                      ? 'border-sky-400 bg-sky-500/20 text-white font-bold ring-1 ring-sky-400'
+                      : 'border-sky-500 bg-sky-50 text-sky-900 font-bold ring-1 ring-sky-400 shadow-xs'
+                    : effectiveIsDark
+                    ? 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'
+                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: gt.dot }}></span>
+                <span className="w-2 h-2 rounded-full border border-black/10" style={{ backgroundColor: gt.dot }}></span>
                 <span>{gt.label}</span>
               </button>
             ))}
@@ -700,18 +906,30 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       {/* Right Floating Architectural Simulation & View Layers */}
       <div className="absolute top-18 right-3 z-20 space-y-2 max-w-[250px] pointer-events-auto">
         {/* Sash Open / Close Slider & Interactive Animation */}
-        <div className="bg-slate-900/90 backdrop-blur-md p-3.5 rounded-xl border border-slate-800/90 text-white shadow-xl space-y-2.5">
+        <div
+          className={`p-3.5 rounded-xl border shadow-xl space-y-2.5 backdrop-blur-md ${
+            effectiveIsDark
+              ? 'bg-slate-900/90 border-slate-800/90 text-white'
+              : 'bg-white/90 border-slate-200 text-slate-900'
+          }`}
+        >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <Sliders className="w-3 h-3 text-blue-400" />
+            <span
+              className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                effectiveIsDark ? 'text-slate-300' : 'text-slate-600'
+              }`}
+            >
+              <Sliders className="w-3 h-3 text-blue-500" />
               <span>Sash Operability</span>
             </span>
             <button
               onClick={() => setIsAutoAnimating(!isAutoAnimating)}
               className={`p-1 rounded text-[10px] font-semibold flex items-center gap-1 transition-colors ${
                 isAutoAnimating
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                  : 'bg-slate-800 text-slate-300 hover:text-white'
+                  ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
+                  : effectiveIsDark
+                  ? 'bg-slate-800 text-slate-300 hover:text-white'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
               title="Auto Animate Open/Close"
             >
@@ -721,9 +939,13 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
           </div>
 
           <div>
-            <div className="flex justify-between text-[11px] font-mono text-slate-400 mb-1">
+            <div
+              className={`flex justify-between text-[11px] font-mono mb-1 ${
+                effectiveIsDark ? 'text-slate-400' : 'text-slate-600'
+              }`}
+            >
               <span>Position:</span>
-              <span className="text-blue-400 font-bold">
+              <span className="text-blue-600 dark:text-blue-400 font-bold">
                 {openPercentage === 0 ? 'Fully Closed (0%)' : `${openPercentage}% Open`}
               </span>
             </div>
@@ -736,9 +958,13 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
                 setIsAutoAnimating(false);
                 setOpenPercentage(Number(e.target.value));
               }}
-              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
-            <div className="flex justify-between text-[9px] text-slate-500 mt-1">
+            <div
+              className={`flex justify-between text-[9px] mt-1 ${
+                effectiveIsDark ? 'text-slate-500' : 'text-slate-400'
+              }`}
+            >
               <span>0° / Closed</span>
               <span>Slide / Swing Angle</span>
               <span>90° / Full</span>
@@ -746,13 +972,21 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
           </div>
 
           {/* Exploded View Assembly Slider */}
-          <div className="pt-2 border-t border-slate-800/80">
-            <div className="flex justify-between text-[10px] font-bold uppercase text-slate-300 mb-1">
+          <div
+            className={`pt-2 border-t ${
+              effectiveIsDark ? 'border-slate-800/80' : 'border-slate-200'
+            }`}
+          >
+            <div
+              className={`flex justify-between text-[10px] font-bold uppercase mb-1 ${
+                effectiveIsDark ? 'text-slate-300' : 'text-slate-600'
+              }`}
+            >
               <span className="flex items-center gap-1">
-                <Layers className="w-3 h-3 text-emerald-400" />
+                <Layers className="w-3 h-3 text-emerald-500" />
                 <span>Exploded Assembly</span>
               </span>
-              <span className="text-emerald-400 font-mono">{explodedView}%</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-mono">{explodedView}%</span>
             </div>
             <input
               type="range"
@@ -760,50 +994,72 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
               max="100"
               value={explodedView}
               onChange={(e) => setExplodedView(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
             />
           </div>
         </div>
 
         {/* View Layer Toggles */}
-        <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800/90 text-white shadow-xl space-y-2">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        <div
+          className={`p-3 rounded-xl border shadow-xl space-y-2 backdrop-blur-md ${
+            effectiveIsDark
+              ? 'bg-slate-900/90 border-slate-800/90 text-white'
+              : 'bg-white/90 border-slate-200 text-slate-900'
+          }`}
+        >
+          <div
+            className={`text-[10px] font-bold uppercase tracking-wider ${
+              effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
+            }`}
+          >
             Architectural Layers
           </div>
           <div className="space-y-1.5 text-xs">
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-300">
-              <span className="text-[11px] text-slate-300 flex items-center gap-1.5">
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
                 <Building2 className="w-3 h-3 text-slate-400" /> Wall Aperture Opening
               </span>
               <input
                 type="checkbox"
                 checked={showWallOpening}
                 onChange={(e) => setShowWallOpening(e.target.checked)}
-                className="rounded border-slate-700 text-blue-600 focus:ring-0"
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-300">
-              <span className="text-[11px] text-slate-300 flex items-center gap-1.5">
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
                 <Grid className="w-3 h-3 text-slate-400" /> Technical Wireframe Edges
               </span>
               <input
                 type="checkbox"
                 checked={showWireframeOverlay}
                 onChange={(e) => setShowWireframeOverlay(e.target.checked)}
-                className="rounded border-slate-700 text-blue-600 focus:ring-0"
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-300">
-              <span className="text-[11px] text-slate-300 flex items-center gap-1.5">
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
                 <Eye className="w-3 h-3 text-slate-400" /> 3D Floating Dimensions
               </span>
               <input
                 type="checkbox"
                 checked={showDimensions3D}
                 onChange={(e) => setShowDimensions3D(e.target.checked)}
-                className="rounded border-slate-700 text-blue-600 focus:ring-0"
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
               />
             </label>
           </div>
@@ -811,50 +1067,76 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
 
         {/* Selected Part HUD Inspector if clicked */}
         {selectedPartInfo && (
-          <div className="bg-blue-950/90 backdrop-blur-md p-3.5 rounded-xl border border-blue-600/70 text-white shadow-2xl space-y-1.5 animate-in fade-in duration-200">
+          <div
+            className={`p-3.5 rounded-xl border shadow-2xl space-y-1.5 animate-in fade-in duration-200 backdrop-blur-md ${
+              effectiveIsDark
+                ? 'bg-blue-950/90 border-blue-600/70 text-white'
+                : 'bg-blue-50/95 border-blue-300 text-slate-900'
+            }`}
+          >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-300 flex items-center gap-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-300 flex items-center gap-1">
                 <Info className="w-3 h-3" /> Part Inspector
               </span>
               <button
                 onClick={() => setSelectedPartInfo(null)}
-                className="text-slate-400 hover:text-white text-xs font-mono"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-mono"
               >
                 ✕
               </button>
             </div>
-            <div className="font-bold text-xs text-white">{selectedPartInfo.title}</div>
-            <div className="text-[11px] text-blue-200">{selectedPartInfo.description}</div>
-            <div className="text-[10px] font-mono text-slate-300 pt-1 border-t border-blue-800/80 flex justify-between">
+            <div className="font-bold text-xs">{selectedPartInfo.title}</div>
+            <div className="text-[11px] text-blue-700 dark:text-blue-200">{selectedPartInfo.description}</div>
+            <div
+              className={`text-[10px] font-mono pt-1 border-t flex justify-between ${
+                effectiveIsDark ? 'border-blue-800/80 text-slate-300' : 'border-blue-200 text-slate-600'
+              }`}
+            >
               <span>Cut / Size:</span>
-              <span className="font-bold text-white">{selectedPartInfo.dimensions}</span>
+              <span className="font-bold text-slate-900 dark:text-white">{selectedPartInfo.dimensions}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Bottom Floating Tips and HUD */}
-      <div className="absolute bottom-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-slate-400 text-[11px]">
-        <div className="bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800/90 flex items-center gap-3">
-          <span className="flex items-center gap-1 text-slate-300">
-            <Compass className="w-3 h-3 text-blue-400" />
+      <div
+        className={`absolute bottom-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-[11px] ${
+          effectiveIsDark ? 'text-slate-400' : 'text-slate-600'
+        }`}
+      >
+        <div
+          className={`px-3 py-1.5 rounded-lg border flex items-center gap-3 backdrop-blur-md shadow-md ${
+            effectiveIsDark
+              ? 'bg-slate-900/85 border-slate-800/90 text-slate-300'
+              : 'bg-white/90 border-slate-200 text-slate-700'
+          }`}
+        >
+          <span className="flex items-center gap-1 font-medium">
+            <Compass className="w-3 h-3 text-blue-500" />
             <strong>Left Drag:</strong> Orbit 3D
           </span>
           <span>•</span>
-          <span className="text-slate-300">
+          <span>
             <strong>Right Drag:</strong> Pan
           </span>
           <span>•</span>
-          <span className="text-slate-300">
+          <span>
             <strong>Scroll:</strong> Zoom
           </span>
           <span>•</span>
-          <span className="text-slate-300">
+          <span>
             <strong>Click Part:</strong> Inspect Cut Dimensions
           </span>
         </div>
 
-        <div className="bg-slate-900/85 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800/90 font-mono text-[10px] text-slate-400">
+        <div
+          className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] backdrop-blur-md shadow-md ${
+            effectiveIsDark
+              ? 'bg-slate-900/85 border-slate-800/90 text-slate-400'
+              : 'bg-white/90 border-slate-200 text-slate-500'
+          }`}
+        >
           WebGL Architectural Core &bull; 60 FPS
         </div>
       </div>
