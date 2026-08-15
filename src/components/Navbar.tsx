@@ -29,11 +29,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         className="flex items-center gap-3 cursor-pointer group"
       >
         <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center font-extrabold text-base text-white shadow-xs group-hover:bg-blue-400 transition-colors">
-          A
+          O
         </div>
         <div>
           <h1 className="text-sm sm:text-base font-bold tracking-tight uppercase text-white flex items-center gap-2">
-            <span>Alu-Fab Precision System</span>
+            <span>OMAS ALUMINIUM PRECISION SYSTEM</span>
             <span className="hidden md:inline-block text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-400/30">
               PRO
             </span>

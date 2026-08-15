@@ -44,7 +44,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white uppercase">
-            Alu-Fab Precision System
+            OMAS ALUMINIUM PRECISION SYSTEM
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
             Automated calculations for window and door profile stock bars (5800mm), 1D cutting plans with kerf waste analysis, 1-pane glass sizing schedules, and accessories bills of quantities.

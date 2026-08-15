@@ -21,7 +21,7 @@ export function downloadProfilesMaterialsPdf(
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('ALUMINUM FABRICATION SYSTEM', 14, 12);
+  doc.text('OMAS ALUMINIUM PRECISION SYSTEM', 14, 12);
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -141,7 +141,7 @@ export function downloadProfilesMaterialsPdf(
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(
-      `Aluminum Fabrication System - Generated for ${calc.projectName} - Page ${i} of ${totalPages}`,
+      `OMAS Aluminium Precision System - Generated for ${calc.projectName} - Page ${i} of ${totalPages}`,
       pageWidth / 2,
       290,
       { align: 'center' }
@@ -165,7 +165,7 @@ export function downloadFrameMeasurementsPdf(
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text('ALUMINUM FABRICATION SYSTEM', 14, 12);
+  doc.text('OMAS ALUMINIUM PRECISION SYSTEM', 14, 12);
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -253,7 +253,7 @@ export function downloadFrameMeasurementsPdf(
     doc.setFontSize(8);
     doc.setTextColor(100, 116, 139);
     doc.text(
-      `Aluminum Fabrication System - Frame & Glass Schedule - ${calc.projectName} - Page ${i} of ${totalPages}`,
+      `OMAS Aluminium Precision System - Frame & Glass Schedule - ${calc.projectName} - Page ${i} of ${totalPages}`,
       pageWidth / 2,
       290,
       { align: 'center' }
@@ -279,7 +279,7 @@ export function downloadQuotationPdf(
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('ALUMINUM FABRICATION & GLAZING', 14, 14);
+  doc.text('OMAS ALUMINIUM PRECISION SYSTEM', 14, 14);
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -529,7 +529,7 @@ export function downloadQuotationPdf(
     doc.setFontSize(7.5);
     doc.setTextColor(148, 163, 184);
     doc.text(
-      `Aluminum Fabrication System - Official Quotation - ${calc.projectName} - Page ${i} of ${totalPages}`,
+      `OMAS Aluminium Precision System - Official Quotation - ${calc.projectName} - Page ${i} of ${totalPages}`,
       pageWidth / 2,
       290,
       { align: 'center' }
