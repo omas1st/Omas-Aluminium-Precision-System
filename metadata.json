@@ -1,6 +1,6 @@
 {
   "name": "Aluminum Fabrication System",
-  "description": "Professional aluminum window and door fabrication calculator for profile stock estimation, cutting schedule, glass sizing, and SVG wireframe previews.",
+  "description": "Professional aluminum window and door fabrication calculator with 3D architectural studio visualization, 2D CAD blueprints, cutting schedules, glass sizing, and quotation management.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

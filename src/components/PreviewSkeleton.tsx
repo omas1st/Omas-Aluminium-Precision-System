@@ -4,6 +4,7 @@ import {
   CombinedProjectCalculation,
   ConstantProfilesConfig,
 } from '../types';
+import { Architectural3DViewer } from './Architectural3DViewer';
 import {
   Layers,
   ZoomIn,
@@ -15,6 +16,10 @@ import {
   ChevronRight,
   Download,
   Eye,
+  Box,
+  LayoutGrid,
+  Columns,
+  Sparkles,
 } from 'lucide-react';
 
 interface PreviewSkeletonProps {
@@ -27,6 +32,7 @@ export const PreviewSkeleton: React.FC<PreviewSkeletonProps> = ({
   constants,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [viewMode, setViewMode] = useState<'3d' | '2d' | 'split'>('3d');
   const [showLabels, setShowLabels] = useState(true);
   const [showDimensions, setShowDimensions] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -62,13 +68,58 @@ export const PreviewSkeleton: React.FC<PreviewSkeletonProps> = ({
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-800 text-base">
-              Interactive Architectural Skeleton Preview
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-slate-800 text-base">
+                Interactive Architectural Preview
+              </h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                2D & 3D Studio
+              </span>
+            </div>
             <p className="text-xs text-slate-500">
-              Visual rectangular wireframe with exact frame profiles, sash positions, and glass sizes
+              Photorealistic 3D architectural simulation, opening mechanisms, and 2D CAD blueprint wireframes
             </p>
           </div>
+        </div>
+
+        {/* View Mode Tabs (3D, 2D, Dual Split) */}
+        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button
+            onClick={() => setViewMode('3d')}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              viewMode === '3d'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5" />
+            <span>3D Architectural</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('2d')}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              viewMode === '2d'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>2D CAD Blueprint</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('split')}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              viewMode === 'split'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+            }`}
+            title="Side-by-side 2D & 3D CAD workspace"
+          >
+            <Columns className="w-3.5 h-3.5" />
+            <span>Dual 2D + 3D</span>
+          </button>
         </div>
 
         {/* Item Selector Tabs / Carousel */}
@@ -81,8 +132,8 @@ export const PreviewSkeleton: React.FC<PreviewSkeletonProps> = ({
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-xs font-semibold text-slate-700 px-2">
-            Item {selectedIndex + 1} of {calculation.items.length}
+          <span className="text-xs font-semibold text-slate-700 px-2 font-mono">
+            Unit {selectedIndex + 1} of {calculation.items.length}
           </span>
           <button
             onClick={() =>
@@ -96,52 +147,54 @@ export const PreviewSkeleton: React.FC<PreviewSkeletonProps> = ({
           </button>
         </div>
 
-        {/* View toggles & Zoom */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowLabels(!showLabels)}
-            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              showLabels
-                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Tag className="w-3.5 h-3.5" />
-            Labels: {showLabels ? 'ON' : 'OFF'}
-          </button>
-
-          <button
-            onClick={() => setShowDimensions(!showDimensions)}
-            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              showDimensions
-                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            <Eye className="w-3.5 h-3.5" />
-            Dimensions: {showDimensions ? 'ON' : 'OFF'}
-          </button>
-
-          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
+        {/* 2D Zoom & View Toggles (if 2D or split mode is active) */}
+        {viewMode !== '3d' && (
+          <div className="flex items-center gap-2 animate-in fade-in">
             <button
-              onClick={() => setZoomLevel((prev) => Math.max(0.6, Number((prev - 0.15).toFixed(2))))}
-              className="p-1.5 text-slate-600 hover:bg-slate-100"
-              title="Zoom out"
+              onClick={() => setShowLabels(!showLabels)}
+              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                showLabels
+                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              }`}
             >
-              <ZoomOut className="w-3.5 h-3.5" />
+              <Tag className="w-3.5 h-3.5" />
+              Labels: {showLabels ? 'ON' : 'OFF'}
             </button>
-            <span className="text-[11px] font-mono font-medium text-slate-700 px-2">
-              {Math.round(zoomLevel * 100)}%
-            </span>
+
             <button
-              onClick={() => setZoomLevel((prev) => Math.min(1.8, Number((prev + 0.15).toFixed(2))))}
-              className="p-1.5 text-slate-600 hover:bg-slate-100"
-              title="Zoom in"
+              onClick={() => setShowDimensions(!showDimensions)}
+              className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                showDimensions
+                  ? 'bg-blue-50 text-blue-700 border-blue-200'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+              }`}
             >
-              <ZoomIn className="w-3.5 h-3.5" />
+              <Eye className="w-3.5 h-3.5" />
+              Dimensions: {showDimensions ? 'ON' : 'OFF'}
             </button>
+
+            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
+              <button
+                onClick={() => setZoomLevel((prev) => Math.max(0.6, Number((prev - 0.15).toFixed(2))))}
+                className="p-1.5 text-slate-600 hover:bg-slate-100"
+                title="Zoom out"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[11px] font-mono font-medium text-slate-700 px-2">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => setZoomLevel((prev) => Math.min(1.8, Number((prev + 0.15).toFixed(2))))}
+                className="p-1.5 text-slate-600 hover:bg-slate-100"
+                title="Zoom in"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Item Quick Carousel Selector Cards */}
@@ -182,239 +235,426 @@ export const PreviewSkeleton: React.FC<PreviewSkeletonProps> = ({
         })}
       </div>
 
-      {/* Main Canvas & Technical Details Split Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* SVG Drawing Canvas Area */}
-        <div className="lg:col-span-8 bg-slate-900 rounded-xl border border-slate-800 p-6 shadow-inner flex flex-col items-center justify-center min-h-[480px] overflow-hidden relative">
-          <div className="absolute top-3 left-4 text-xs font-mono text-slate-400 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-bold text-slate-200">{tag}</span>
-            <span className="text-slate-600">|</span>
-            <span className="capitalize text-slate-300">{kind.replace(/_/g, ' ')}</span>
+      {/* VIEWPORT MODE RENDERING */}
+
+      {/* 1. PURE 3D ARCHITECTURAL STUDIO MODE */}
+      {viewMode === '3d' && (
+        <div className="space-y-6">
+          <Architectural3DViewer
+            key={`3d-view-${currentItem.item.id}-${selectedIndex}`}
+            itemResult={currentItem}
+            constants={constants}
+          />
+
+          {/* Quick specs bar under 3D */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Unit Identification</span>
+                <div className="font-bold text-sm text-slate-800 capitalize mt-0.5">
+                  {currentItem.item.tag} &bull; {currentItem.item.kind.replace(/_/g, ' ')}
+                </div>
+              </div>
+              <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg border border-blue-200">
+                Qty: {currentItem.item.quantity}
+              </span>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Overall Fabrication Size</span>
+                <div className="font-mono font-bold text-sm text-slate-800 mt-0.5">
+                  {W} mm (W) × {H} mm (H)
+                </div>
+              </div>
+              <span className="text-[11px] font-mono text-slate-500">
+                Area: {((W * H) / 1000000).toFixed(2)} m²
+              </span>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Glass Panes & Cuts</span>
+                <div className="font-bold text-sm text-slate-800 mt-0.5">
+                  {glasses.length} Glass Pane(s) &bull; {cuts.length} Aluminium Cuts
+                </div>
+              </div>
+              <button
+                onClick={() => setViewMode('2d')}
+                className="text-xs font-bold text-blue-600 hover:text-blue-800 underline"
+              >
+                View 2D Cuts &rarr;
+              </button>
+            </div>
           </div>
+        </div>
+      )}
 
-          <div
-            className="w-full h-full flex items-center justify-center transition-transform duration-200 overflow-auto p-4"
-            style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center center' }}
-          >
-            <svg
-              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-              className="max-h-[420px] max-w-full drop-shadow-md select-none"
-              style={{ minWidth: '320px' }}
-            >
-              <defs>
-                {/* Glass Gradient */}
-                <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
-                  <stop offset="50%" stopColor="#0284c7" stopOpacity="0.15" />
-                  <stop offset="100%" stopColor="#0369a1" stopOpacity="0.28" />
-                </linearGradient>
-                {/* Aluminum Profile Pattern */}
-                <pattern id="aluHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                  <line x1="0" y1="0" x2="0" y2="8" stroke="#64748b" strokeWidth="1" opacity="0.3" />
-                </pattern>
-                {/* Arrow markers for dimensions */}
-                <marker id="dimArrowStart" markerWidth="6" markerHeight="6" refX="2" refY="3" orient="auto">
-                  <path d="M6,0 L0,3 L6,6 L4,3 Z" fill="#94a3b8" />
-                </marker>
-                <marker id="dimArrowEnd" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
-                  <path d="M0,0 L6,3 L0,6 L2,3 Z" fill="#94a3b8" />
-                </marker>
-              </defs>
-
-              {/* Background blueprint grid subtle lines */}
-              <rect x="0" y="0" width={svgWidth} height={svgHeight} fill="#0f172a" />
-
-              {/* 1. OUTER MAIN FRAME RECTANGLE */}
-              <rect
-                x={originX}
-                y={originY}
-                width={W}
-                height={H}
-                fill="#1e293b"
-                stroke="#94a3b8"
-                strokeWidth="4"
-                rx="2"
+      {/* 2. DUAL SPLIT VIEW (2D CAD WIREFRAME + 3D STUDIO SIDE-BY-SIDE) */}
+      {viewMode === 'split' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* 3D Viewer Side */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Box className="w-3.5 h-3.5 text-blue-600" />
+                  <span>3D Architectural View</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Orbit / Zoom Enabled</span>
+              </div>
+              <Architectural3DViewer
+                key={`split-3d-${currentItem.item.id}-${selectedIndex}`}
+                itemResult={currentItem}
+                constants={constants}
               />
+            </div>
 
-              {/* Render Type-Specific Elements */}
-              {renderSkeletonLayout(item, constants, originX, originY, W, H, glasses, showLabels)}
-
-              {/* 2. DIMENSION LINES */}
-              {showDimensions && (
-                <g className="dimension-lines">
-                  {/* Top Width Dimension Line */}
-                  <line
-                    x1={originX}
-                    y1={originY - 35}
-                    x2={originX + W}
-                    y2={originY - 35}
-                    stroke="#94a3b8"
-                    strokeWidth="1.5"
-                    markerStart="url(#dimArrowStart)"
-                    markerEnd="url(#dimArrowEnd)"
-                  />
-                  {/* Extension lines */}
-                  <line x1={originX} y1={originY - 5} x2={originX} y2={originY - 45} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
-                  <line x1={originX + W} y1={originY - 5} x2={originX + W} y2={originY - 45} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
-                  {/* Text Badge */}
-                  <rect
-                    x={originX + W / 2 - 50}
-                    y={originY - 48}
-                    width="100"
-                    height="24"
-                    rx="4"
-                    fill="#0f172a"
-                    stroke="#38bdf8"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={originX + W / 2}
-                    y={originY - 32}
-                    fill="#38bdf8"
-                    fontSize="13"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                    fontFamily="monospace"
+            {/* 2D CAD Blueprint Side */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <LayoutGrid className="w-3.5 h-3.5 text-sky-600" />
+                  <span>2D CAD Blueprint & Dimensions</span>
+                </span>
+                <span className="text-[10px] text-slate-500 font-mono">Drafting Layout</span>
+              </div>
+              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-4 shadow-inner flex flex-col items-center justify-center min-h-[500px] sm:min-h-[560px] overflow-hidden relative">
+                <div className="w-full h-full flex items-center justify-center overflow-auto">
+                  <svg
+                    viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                    className="max-h-[460px] max-w-full drop-shadow-md select-none"
+                    style={{ minWidth: '280px' }}
                   >
-                    W: {W} mm
-                  </text>
+                    <defs>
+                      <linearGradient id="glassGradSplit" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
+                        <stop offset="50%" stopColor="#0284c7" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="#0369a1" stopOpacity="0.28" />
+                      </linearGradient>
+                      <marker id="dimArrowStartSplit" markerWidth="6" markerHeight="6" refX="2" refY="3" orient="auto">
+                        <path d="M6,0 L0,3 L6,6 L4,3 Z" fill="#94a3b8" />
+                      </marker>
+                      <marker id="dimArrowEndSplit" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+                        <path d="M0,0 L6,3 L0,6 L2,3 Z" fill="#94a3b8" />
+                      </marker>
+                    </defs>
 
-                  {/* Left Height Dimension Line */}
-                  <line
-                    x1={originX - 35}
-                    y1={originY}
-                    x2={originX - 35}
-                    y2={originY + H}
-                    stroke="#94a3b8"
-                    strokeWidth="1.5"
-                    markerStart="url(#dimArrowStart)"
-                    markerEnd="url(#dimArrowEnd)"
-                  />
-                  {/* Extension lines */}
-                  <line x1={originX - 5} y1={originY} x2={originX - 45} y2={originY} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
-                  <line x1={originX - 5} y1={originY + H} x2={originX - 45} y2={originY + H} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
-                  {/* Text Badge */}
-                  <rect
-                    x={originX - 95}
-                    y={originY + H / 2 - 12}
-                    width="100"
-                    height="24"
-                    rx="4"
-                    fill="#0f172a"
-                    stroke="#38bdf8"
-                    strokeWidth="1"
-                  />
-                  <text
-                    x={originX - 45}
-                    y={originY + H / 2 + 4}
-                    fill="#38bdf8"
-                    fontSize="13"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                    fontFamily="monospace"
-                  >
-                    H: {H} mm
-                  </text>
-                </g>
-              )}
-            </svg>
-          </div>
+                    <rect x="0" y="0" width={svgWidth} height={svgHeight} fill="#0f172a" />
+                    <rect x={originX} y={originY} width={W} height={H} fill="#1e293b" stroke="#94a3b8" strokeWidth="4" rx="2" />
 
-          {/* Blueprint Legend bar */}
-          <div className="w-full mt-4 flex flex-wrap gap-4 text-[10px] uppercase font-bold text-slate-400 border-t border-slate-800 pt-3">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-slate-400 rounded-sm"></span> Main Outer Frame
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span> Operable Sash
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-sky-400 rounded-sm"></span> Glass Infill
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 bg-amber-400 rounded-full"></span> Rollers / Handles
-            </span>
-          </div>
-        </div>
+                    {renderSkeletonLayout(item, constants, originX, originY, W, H, glasses, showLabels)}
 
-        {/* Right Details Panel: Components, Cut Specifications & Glass Sizes */}
-        <div className="lg:col-span-4 space-y-4">
-          {/* Unit Card Header */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-                #{selectedIndex + 1} | {item.tag}
-              </span>
-              <span className="text-xs font-medium text-slate-500">
-                Qty: <strong className="text-slate-800 font-semibold">{quantity} unit(s)</strong>
-              </span>
-            </div>
-            <div className="text-sm font-semibold text-slate-800 capitalize">
-              {kind.replace(/_/g, ' ')}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              Overall Size: <span className="font-mono font-medium text-slate-700">{W} × {H} mm</span>
-            </div>
-          </div>
+                    {showDimensions && (
+                      <g className="dimension-lines">
+                        <line x1={originX} y1={originY - 35} x2={originX + W} y2={originY - 35} stroke="#94a3b8" strokeWidth="1.5" markerStart="url(#dimArrowStartSplit)" markerEnd="url(#dimArrowEndSplit)" />
+                        <line x1={originX} y1={originY - 5} x2={originX} y2={originY - 45} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <line x1={originX + W} y1={originY - 5} x2={originX + W} y2={originY - 45} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <rect x={originX + W / 2 - 50} y={originY - 48} width="100" height="24" rx="4" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
+                        <text x={originX + W / 2} y={originY - 32} fill="#38bdf8" fontSize="13" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                          W: {W} mm
+                        </text>
 
-          {/* Glass Sizes for this unit */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
-              <span>1-Pane Glass Cut Sizes</span>
-              <span className="text-[11px] text-blue-600 font-normal">{glasses.length} pane(s)</span>
-            </h4>
-            <div className="space-y-2.5">
-              {glasses.map((g, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded-lg bg-sky-50/60 border border-sky-200/80 flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <div className="font-semibold text-sky-950">{g.paneDescription}</div>
-                    <div className="text-[11px] text-sky-700 font-mono mt-0.5">
-                      {g.width} mm (W) × {g.height} mm (H)
-                    </div>
-                  </div>
-                  <div className="text-right font-mono">
-                    <div className="font-bold text-sky-900">{g.areaM2} m²</div>
-                    <div className="text-[10px] text-sky-600">Qty: {g.quantity}</div>
-                  </div>
+                        <line x1={originX - 35} y1={originY} x2={originX - 35} y2={originY + H} stroke="#94a3b8" strokeWidth="1.5" markerStart="url(#dimArrowStartSplit)" markerEnd="url(#dimArrowEndSplit)" />
+                        <line x1={originX - 5} y1={originY} x2={originX - 45} y2={originY} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <line x1={originX - 5} y1={originY + H} x2={originX - 45} y2={originY + H} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <rect x={originX - 95} y={originY + H / 2 - 12} width="100" height="24" rx="4" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
+                        <text x={originX - 45} y={originY + H / 2 + 4} fill="#38bdf8" fontSize="13" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                          H: {H} mm
+                        </text>
+                      </g>
+                    )}
+                  </svg>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
 
-          {/* Profile Frame Cuts for this unit */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
-              <span>Frame Cuts Required</span>
-              <span className="text-[11px] text-slate-500 font-normal">{cuts.length} pieces</span>
-            </h4>
-            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
-              {cuts.map((c) => (
-                <div
-                  key={c.id}
-                  className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs"
-                >
-                  <div>
-                    <div className="font-medium text-slate-800">{c.purpose}</div>
-                    <div className="text-[10px] text-slate-500 truncate max-w-[170px]">
-                      {c.profileName}
+          {/* Cuts & Glass Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Glass Sizes */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
+                <span>Glass Cut Sizes ({glasses.length} Panes)</span>
+                <span className="text-[11px] text-blue-600 font-mono">{((W * H) / 1000000).toFixed(2)} m² Total Area</span>
+              </h4>
+              <div className="space-y-2.5">
+                {glasses.map((g, idx) => (
+                  <div key={idx} className="p-2.5 rounded-lg bg-sky-50/60 border border-sky-200/80 flex items-center justify-between text-xs">
+                    <div>
+                      <div className="font-semibold text-sky-950">{g.paneDescription}</div>
+                      <div className="text-[11px] text-sky-700 font-mono mt-0.5">
+                        {g.width} mm (W) × {g.height} mm (H)
+                      </div>
+                    </div>
+                    <div className="text-right font-mono">
+                      <div className="font-bold text-sky-900">{g.areaM2} m²</div>
+                      <div className="text-[10px] text-sky-600">Qty: {g.quantity}</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono font-bold text-slate-800">{c.length} mm</div>
-                    <div className="text-[10px] text-slate-500">
-                      {c.quantity} pcs ({c.cutAngle})
+                ))}
+              </div>
+            </div>
+
+            {/* Profile Frame Cuts */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
+                <span>Aluminium Profile Cuts Required ({cuts.length} Pieces)</span>
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                {cuts.map((c) => (
+                  <div key={c.id} className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                    <div className="truncate pr-1">
+                      <div className="font-medium text-slate-800 truncate">{c.purpose}</div>
+                      <div className="text-[10px] text-slate-500 truncate">{c.profileName}</div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="font-mono font-bold text-slate-800">{c.length} mm</div>
+                      <div className="text-[10px] text-slate-500">{c.quantity} pcs ({c.cutAngle})</div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* 3. PURE 2D BLUEPRINT CAD WIREFRAME MODE */}
+      {viewMode === '2d' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* SVG Drawing Canvas Area */}
+          <div className="lg:col-span-8 bg-slate-900 rounded-xl border border-slate-800 p-6 shadow-inner flex flex-col items-center justify-center min-h-[480px] overflow-hidden relative">
+            <div className="absolute top-3 left-4 text-xs font-mono text-slate-400 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="font-bold text-slate-200">{tag}</span>
+              <span className="text-slate-600">|</span>
+              <span className="capitalize text-slate-300">{kind.replace(/_/g, ' ')}</span>
+            </div>
+
+            <div
+              className="w-full h-full flex items-center justify-center transition-transform duration-200 overflow-auto p-4"
+              style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center center' }}
+            >
+              <svg
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+                className="max-h-[420px] max-w-full drop-shadow-md select-none"
+                style={{ minWidth: '320px' }}
+              >
+                <defs>
+                  {/* Glass Gradient */}
+                  <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.25" />
+                    <stop offset="50%" stopColor="#0284c7" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#0369a1" stopOpacity="0.28" />
+                  </linearGradient>
+                  {/* Aluminum Profile Pattern */}
+                  <pattern id="aluHatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <line x1="0" y1="0" x2="0" y2="8" stroke="#64748b" strokeWidth="1" opacity="0.3" />
+                  </pattern>
+                  {/* Arrow markers for dimensions */}
+                  <marker id="dimArrowStart" markerWidth="6" markerHeight="6" refX="2" refY="3" orient="auto">
+                    <path d="M6,0 L0,3 L6,6 L4,3 Z" fill="#94a3b8" />
+                  </marker>
+                  <marker id="dimArrowEnd" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto">
+                    <path d="M0,0 L6,3 L0,6 L2,3 Z" fill="#94a3b8" />
+                  </marker>
+                </defs>
+
+                {/* Background blueprint grid subtle lines */}
+                <rect x="0" y="0" width={svgWidth} height={svgHeight} fill="#0f172a" />
+
+                {/* 1. OUTER MAIN FRAME RECTANGLE */}
+                <rect
+                  x={originX}
+                  y={originY}
+                  width={W}
+                  height={H}
+                  fill="#1e293b"
+                  stroke="#94a3b8"
+                  strokeWidth="4"
+                  rx="2"
+                />
+
+                {/* Render Type-Specific Elements */}
+                {renderSkeletonLayout(item, constants, originX, originY, W, H, glasses, showLabels)}
+
+                {/* 2. DIMENSION LINES */}
+                {showDimensions && (
+                  <g className="dimension-lines">
+                    {/* Top Width Dimension Line */}
+                    <line
+                      x1={originX}
+                      y1={originY - 35}
+                      x2={originX + W}
+                      y2={originY - 35}
+                      stroke="#94a3b8"
+                      strokeWidth="1.5"
+                      markerStart="url(#dimArrowStart)"
+                      markerEnd="url(#dimArrowEnd)"
+                    />
+                    {/* Extension lines */}
+                    <line x1={originX} y1={originY - 5} x2={originX} y2={originY - 45} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1={originX + W} y1={originY - 5} x2={originX + W} y2={originY - 45} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                    {/* Text Badge */}
+                    <rect
+                      x={originX + W / 2 - 50}
+                      y={originY - 48}
+                      width="100"
+                      height="24"
+                      rx="4"
+                      fill="#0f172a"
+                      stroke="#38bdf8"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={originX + W / 2}
+                      y={originY - 32}
+                      fill="#38bdf8"
+                      fontSize="13"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      fontFamily="monospace"
+                    >
+                      W: {W} mm
+                    </text>
+
+                    {/* Left Height Dimension Line */}
+                    <line
+                      x1={originX - 35}
+                      y1={originY}
+                      x2={originX - 35}
+                      y2={originY + H}
+                      stroke="#94a3b8"
+                      strokeWidth="1.5"
+                      markerStart="url(#dimArrowStart)"
+                      markerEnd="url(#dimArrowEnd)"
+                    />
+                    {/* Extension lines */}
+                    <line x1={originX - 5} y1={originY} x2={originX - 45} y2={originY} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1={originX - 5} y1={originY + H} x2={originX - 45} y2={originY + H} stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                    {/* Text Badge */}
+                    <rect
+                      x={originX - 95}
+                      y={originY + H / 2 - 12}
+                      width="100"
+                      height="24"
+                      rx="4"
+                      fill="#0f172a"
+                      stroke="#38bdf8"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={originX - 45}
+                      y={originY + H / 2 + 4}
+                      fill="#38bdf8"
+                      fontSize="13"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      fontFamily="monospace"
+                    >
+                      H: {H} mm
+                    </text>
+                  </g>
+                )}
+              </svg>
+            </div>
+
+            {/* Blueprint Legend bar */}
+            <div className="w-full mt-4 flex flex-wrap gap-4 text-[10px] uppercase font-bold text-slate-400 border-t border-slate-800 pt-3">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-slate-400 rounded-sm"></span> Main Outer Frame
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-blue-500 rounded-sm"></span> Operable Sash
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-sky-400 rounded-sm"></span> Glass Infill
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 bg-amber-400 rounded-full"></span> Rollers / Handles
+              </span>
+            </div>
+          </div>
+
+          {/* Right Details Panel: Components, Cut Specifications & Glass Sizes */}
+          <div className="lg:col-span-4 space-y-4">
+            {/* Unit Card Header */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
+                  #{selectedIndex + 1} | {item.tag}
+                </span>
+                <span className="text-xs font-medium text-slate-500">
+                  Qty: <strong className="text-slate-800 font-semibold">{quantity} unit(s)</strong>
+                </span>
+              </div>
+              <div className="text-sm font-semibold text-slate-800 capitalize">
+                {kind.replace(/_/g, ' ')}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">
+                Overall Size: <span className="font-mono font-medium text-slate-700">{W} × {H} mm</span>
+              </div>
+            </div>
+
+            {/* Glass Sizes for this unit */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
+                <span>1-Pane Glass Cut Sizes</span>
+                <span className="text-[11px] text-blue-600 font-normal">{glasses.length} pane(s)</span>
+              </h4>
+              <div className="space-y-2.5">
+                {glasses.map((g, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2.5 rounded-lg bg-sky-50/60 border border-sky-200/80 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div className="font-semibold text-sky-950">{g.paneDescription}</div>
+                      <div className="text-[11px] text-sky-700 font-mono mt-0.5">
+                        {g.width} mm (W) × {g.height} mm (H)
+                      </div>
+                    </div>
+                    <div className="text-right font-mono">
+                      <div className="font-bold text-sky-900">{g.areaM2} m²</div>
+                      <div className="text-[10px] text-sky-600">Qty: {g.quantity}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Profile Frame Cuts for this unit */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-3 flex items-center justify-between">
+                <span>Frame Cuts Required</span>
+                <span className="text-[11px] text-slate-500 font-normal">{cuts.length} pieces</span>
+              </h4>
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {cuts.map((c) => (
+                  <div
+                    key={c.id}
+                    className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs"
+                  >
+                    <div>
+                      <div className="font-medium text-slate-800">{c.purpose}</div>
+                      <div className="text-[10px] text-slate-500 truncate max-w-[170px]">
+                        {c.profileName}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono font-bold text-slate-800">{c.length} mm</div>
+                      <div className="text-[10px] text-slate-500">
+                        {c.quantity} pcs ({c.cutAngle})
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

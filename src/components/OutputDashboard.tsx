@@ -127,7 +127,7 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
 
       {/* THE 4 OUTPUT TABS (PREVIEW, PROFILES, FRAMES, QUOTATION) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Tab 1: Preview Wireframe */}
+        {/* Tab 1: Preview Wireframe & 3D */}
         <button
           type="button"
           onClick={() => setActiveTab('preview')}
@@ -145,10 +145,13 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
             <Eye className="w-4 h-4" />
           </div>
           <div>
-            <div className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Module 1</div>
-            <div className="font-bold text-xs text-slate-900 mt-0.5">Wireframe Preview</div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Module 1</span>
+              <span className="text-[9px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.2 rounded font-mono">3D + 2D</span>
+            </div>
+            <div className="font-bold text-xs text-slate-900 mt-0.5">Wireframe & 3D Preview</div>
             <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-              Proportional architectural SVG diagrams & dimensions.
+              Interactive 3D studio, sash animation, and 2D CAD blueprint.
             </div>
           </div>
         </button>
