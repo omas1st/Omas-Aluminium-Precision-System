@@ -19,11 +19,23 @@ export function calculateSingleItem(
 
   const { width: W, height: H, quantity: qty, tag, id: itemId, kind } = item;
 
-  if (kind.startsWith('sliding_')) {
+  if (kind === 'sliding_fixed_window') {
+    calculateSlidingFixedItem(item, constants, cuts, glasses, accessories);
+  } else if (kind === 'sliding_1_fixed_1_sliding') {
+    calculateSlidingOneFixedOneSlidingItem(item, constants, cuts, glasses, accessories);
+  } else if (kind.startsWith('sliding_')) {
     calculateSlidingItem(item, constants, cuts, glasses, accessories);
+  } else if (kind === 'transom_2_panel') {
+    calculateTransomTwoPanelItem(item, constants, cuts, glasses, accessories);
+  } else if (kind === 'transom_window') {
+    calculateTransomSinglePanelItem(item, constants, cuts, glasses, accessories);
+  } else if (kind === 'casement_fixed_window') {
+    calculateCasementFixedItem(item, constants, cuts, glasses, accessories);
+  } else if (kind === 'casement_1_fixed_1_open') {
+    calculateCasementOneFixedOneOpenItem(item, constants, cuts, glasses, accessories);
   } else if (kind.startsWith('casement_window') || kind.startsWith('casement_')) {
     calculateCasementItem(item, constants, cuts, glasses, accessories);
-  } else if (kind === 'fixed_window' || kind === 'transom_window') {
+  } else if (kind === 'fixed_window') {
     calculateFixedItem(item, constants, cuts, glasses, accessories);
   } else if (kind === 'casement_door_single' || kind === 'casement_door_double') {
     calculateDoorItem(item, constants, cuts, glasses, accessories);
@@ -270,6 +282,769 @@ function calculateSlidingItem(
     quantity: siliconeTubes,
     unit: 'tubes (300ml)',
     description: 'Perimeter waterproofing and perimeter framing joint seal',
+  });
+}
+
+function calculateSlidingFixedItem(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  glasses: GlassCutSize[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
+  const topTrack = constants.topBottomTrack;
+  const sideJamb = constants.sideJambs;
+
+  const topBottomTrackLength = Math.round(W);
+  cuts.push({
+    id: `${itemId}-fixed-top-track`,
+    itemId,
+    itemTag: tag,
+    profileType: 'top_bottom_track',
+    profileName: topTrack.name,
+    length: topBottomTrackLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Fixed Sliding Frame Head Track',
+    componentType: 'outer_frame',
+  });
+
+  cuts.push({
+    id: `${itemId}-fixed-bottom-track`,
+    itemId,
+    itemTag: tag,
+    profileType: 'top_bottom_track',
+    profileName: topTrack.name,
+    length: topBottomTrackLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Fixed Sliding Frame Sill Track',
+    componentType: 'outer_frame',
+  });
+
+  const trackDiff = Math.max(0, topTrack.faceWidth - topTrack.pocketDepth);
+  const sideJambLength = Math.round(H - 2 * trackDiff);
+
+  cuts.push({
+    id: `${itemId}-fixed-side-jambs`,
+    itemId,
+    itemTag: tag,
+    profileType: 'side_jamb',
+    profileName: sideJamb.name,
+    length: sideJambLength,
+    quantity: 2 * qty,
+    cutAngle: '90°',
+    purpose: 'Fixed Sliding Frame Side Jambs (Left & Right)',
+    componentType: 'outer_frame',
+  });
+
+  // Glass Size for Fixed Sliding Frame:
+  const jambDiff = Math.max(0, sideJamb.faceWidth - sideJamb.pocketDepth);
+  const glassW = Math.round(W - 2 * jambDiff - constants.glassClearance);
+  const glassH = Math.round(sideJambLength - constants.glassClearance);
+  const paneAreaM2 = (glassW * glassH) / 1000000;
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 1,
+    width: glassW,
+    height: glassH,
+    quantity: 1 * qty,
+    areaM2: Number((paneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Fixed Sliding Picture Window 1-Pane Glass',
+  });
+
+  const gasketMeters = Math.ceil(((glassW * 2 + glassH * 2) * qty) / 1000);
+  accessories.push({
+    name: 'Glazing Wedge EPDM Rubber Gasket & Setting Blocks',
+    category: 'seal',
+    quantity: gasketMeters,
+    unit: 'meters',
+    description: 'Neoprene setting blocks and wedge rubber for fixed frame glass',
+  });
+
+  accessories.push({
+    name: 'Self-Tapping Assembly Screws (#8 x 1½")',
+    category: 'fastener',
+    quantity: 12 * qty,
+    unit: 'pcs',
+    description: 'Corner assembly for outer sliding track frame',
+  });
+
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 8000));
+  accessories.push({
+    name: 'Neutral Cure Weatherproof Silicone Sealant',
+    category: 'chemical',
+    quantity: siliconeTubes,
+    unit: 'tubes (300ml)',
+    description: 'Perimeter waterproofing and perimeter framing joint seal',
+  });
+}
+
+function calculateSlidingOneFixedOneSlidingItem(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  glasses: GlassCutSize[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
+  const topTrack = constants.topBottomTrack;
+  const sideJamb = constants.sideJambs;
+  const bottomSash = constants.bottomSashRail;
+  const topSash = constants.topSashRail;
+  const lockStile = constants.lockFrameStile;
+  const interlockStile = constants.interlockFrameStile;
+
+  // Outer frame
+  const topBottomTrackLength = Math.round(W);
+  cuts.push({
+    id: `${itemId}-top-track`,
+    itemId,
+    itemTag: tag,
+    profileType: 'top_bottom_track',
+    profileName: topTrack.name,
+    length: topBottomTrackLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Top Track (Head Rail)',
+    componentType: 'outer_frame',
+  });
+
+  cuts.push({
+    id: `${itemId}-bottom-track`,
+    itemId,
+    itemTag: tag,
+    profileType: 'top_bottom_track',
+    profileName: topTrack.name,
+    length: topBottomTrackLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Bottom Track (Threshold/Sill)',
+    componentType: 'outer_frame',
+  });
+
+  const trackDiff = Math.max(0, topTrack.faceWidth - topTrack.pocketDepth);
+  const sideJambLength = Math.round(H - 2 * trackDiff);
+
+  cuts.push({
+    id: `${itemId}-side-jambs`,
+    itemId,
+    itemTag: tag,
+    profileType: 'side_jamb',
+    profileName: sideJamb.name,
+    length: sideJambLength,
+    quantity: 2 * qty,
+    cutAngle: '90°',
+    purpose: 'Side Jambs (Left & Right)',
+    componentType: 'outer_frame',
+  });
+
+  // 1 Operable Sash (Sliding Panel)
+  const jambDiff = Math.max(0, sideJamb.faceWidth - sideJamb.pocketDepth);
+  const totalStileDeduction = lockStile.faceWidth + interlockStile.faceWidth;
+  const sashRailLength = Math.max(100, Math.round(W / 2 - totalStileDeduction / 2 - 2 * jambDiff + 12));
+  const verticalStileLength = Math.round(sideJambLength - topTrack.faceWidth - constants.sashClearance);
+
+  cuts.push({
+    id: `${itemId}-top-sash-rail`,
+    itemId,
+    itemTag: tag,
+    profileType: 'top_sash_rail',
+    profileName: topSash.name,
+    length: sashRailLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Top Sash Rail (1 Operable Sliding Panel)',
+    componentType: 'sash',
+  });
+
+  cuts.push({
+    id: `${itemId}-bottom-sash-rail`,
+    itemId,
+    itemTag: tag,
+    profileType: 'bottom_sash_rail',
+    profileName: bottomSash.name,
+    length: sashRailLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Bottom Sash Rail with Roller Cavity (1 Operable Sliding Panel)',
+    componentType: 'sash',
+  });
+
+  cuts.push({
+    id: `${itemId}-lock-stile`,
+    itemId,
+    itemTag: tag,
+    profileType: 'lock_stile',
+    profileName: lockStile.name,
+    length: verticalStileLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Lock Frame Stile (Handle Side)',
+    componentType: 'sash',
+  });
+
+  cuts.push({
+    id: `${itemId}-interlock-stile`,
+    itemId,
+    itemTag: tag,
+    profileType: 'interlock_stile',
+    profileName: interlockStile.name,
+    length: verticalStileLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Interlock Meeting Hook Stile (Center Joint)',
+    componentType: 'sash',
+  });
+
+  // Glass: 1 Fixed Pane + 1 Operable Sash Glass Pane
+  // Operable Glass:
+  const topSashAllowance = Math.max(0, topSash.faceWidth - topSash.pocketDepth);
+  const bottomSashAllowance = Math.max(0, bottomSash.faceWidth - bottomSash.pocketDepth);
+  const sashGlassW = Math.round(sashRailLength + lockStile.pocketDepth + interlockStile.pocketDepth - constants.glassClearance);
+  const sashGlassH = Math.round(verticalStileLength - (topSashAllowance + bottomSashAllowance) - constants.glassClearance);
+  const sashPaneAreaM2 = (sashGlassW * sashGlassH) / 1000000;
+
+  // Fixed Glass:
+  const fixedGlassW = Math.round(W / 2 + 10 - jambDiff - constants.glassClearance);
+  const fixedGlassH = Math.round(sideJambLength - constants.glassClearance);
+  const fixedPaneAreaM2 = (fixedGlassW * fixedGlassH) / 1000000;
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 1,
+    width: fixedGlassW,
+    height: fixedGlassH,
+    quantity: 1 * qty,
+    areaM2: Number((fixedPaneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Fixed Bay Glass Pane (Panel #1)',
+  });
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 2,
+    width: sashGlassW,
+    height: sashGlassH,
+    quantity: 1 * qty,
+    areaM2: Number((sashPaneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Sliding Operable Sash Glass (Panel #2)',
+  });
+
+  // Accessories: 2 rollers, 1 lock, seals, screws, silicone
+  accessories.push({
+    name: 'Sliding Sash Ball Bearing Rollers',
+    category: 'hardware',
+    quantity: 2 * qty,
+    unit: 'pcs',
+    description: '2 rollers for 1 operable sliding panel',
+  });
+
+  accessories.push({
+    name: 'Crescent Sash Lock / Flush Lock',
+    category: 'hardware',
+    quantity: 1 * qty,
+    unit: 'pcs',
+    description: 'Locking mechanism for sliding sash',
+  });
+
+  const woolpileMeters = Math.ceil(((verticalStileLength * 4 + sashRailLength * 4) * qty) / 1000);
+  accessories.push({
+    name: 'Woolpile Weatherstripping Seal (Brush Gasket)',
+    category: 'seal',
+    quantity: woolpileMeters,
+    unit: 'meters',
+    description: 'Draft seal for operable sash and meeting interlock',
+  });
+
+  const rubberGasketMeters = Math.ceil(((sashGlassW * 2 + sashGlassH * 2 + fixedGlassW * 2 + fixedGlassH * 2) * qty) / 1000);
+  accessories.push({
+    name: 'U-Channel Rubber Glazing Gasket & Wedge',
+    category: 'seal',
+    quantity: rubberGasketMeters,
+    unit: 'meters',
+    description: 'Shock-absorbing glass wrapper for sliding and fixed pane',
+  });
+
+  accessories.push({
+    name: 'Self-Tapping Assembly Screws (#8 x 1½")',
+    category: 'fastener',
+    quantity: 16 * qty,
+    unit: 'pcs',
+    description: 'Assembly screws for frame and sash joints',
+  });
+
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 8000));
+  accessories.push({
+    name: 'Neutral Cure Weatherproof Silicone Sealant',
+    category: 'chemical',
+    quantity: siliconeTubes,
+    unit: 'tubes (300ml)',
+    description: 'Perimeter waterproofing and perimeter framing joint seal',
+  });
+}
+
+function calculateCasementFixedItem(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  glasses: GlassCutSize[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
+  const outer = constants.casementOuterFrame;
+  const bead = constants.casementGlazingBead || { name: 'Casement Glazing Snap-in Bead', faceWidth: 15, pocketDepth: 12 };
+
+  // Outer frame cuts (45° miter cuts on all corners)
+  cuts.push({
+    id: `${itemId}-casement-fixed-top-bottom`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_outer',
+    profileName: outer.name,
+    length: Math.round(W),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Casement Fixed Frame Top & Bottom Rails',
+    componentType: 'outer_frame',
+  });
+
+  cuts.push({
+    id: `${itemId}-casement-fixed-sides`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_outer',
+    profileName: outer.name,
+    length: Math.round(H),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Casement Fixed Frame Side Jambs',
+    componentType: 'outer_frame',
+  });
+
+  // Glazing Beads (45° miter cuts):
+  const beadW = Math.round(W - 2 * outer.faceWidth);
+  const beadH = Math.round(H - 2 * outer.faceWidth);
+
+  cuts.push({
+    id: `${itemId}-casement-fixed-bead-w`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_bead',
+    profileName: bead.name,
+    length: beadW,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Casement Fixed Snap-in Glazing Beads (Top & Bottom)',
+    componentType: 'bead',
+  });
+
+  cuts.push({
+    id: `${itemId}-casement-fixed-bead-h`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_bead',
+    profileName: bead.name,
+    length: beadH,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Casement Fixed Snap-in Glazing Beads (Sides)',
+    componentType: 'bead',
+  });
+
+  // Glass Size for Casement Fixed Light:
+  const glassW = Math.round(W - 2 * (outer.faceWidth - outer.pocketDepth) - constants.glassClearance);
+  const glassH = Math.round(H - 2 * (outer.faceWidth - outer.pocketDepth) - constants.glassClearance);
+  const paneAreaM2 = (glassW * glassH) / 1000000;
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 1,
+    width: glassW,
+    height: glassH,
+    quantity: 1 * qty,
+    areaM2: Number((paneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Casement Fixed Window 1-Pane Glass',
+  });
+
+  const gasketMeters = Math.ceil(((glassW * 2 + glassH * 2) * qty) / 1000);
+  accessories.push({
+    name: 'Glazing Wedge EPDM Rubber Gasket & Setting Blocks',
+    category: 'seal',
+    quantity: gasketMeters,
+    unit: 'meters',
+    description: 'Rubber wedge gasket and neoprene glass setting blocks',
+  });
+
+  accessories.push({
+    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    category: 'fastener',
+    quantity: 4 * qty,
+    unit: 'pcs',
+    description: 'Mechanical locking corner cleats for outer frame 45° miters',
+  });
+
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 8000));
+  accessories.push({
+    name: 'Neutral Cure Weatherproof Silicone Sealant',
+    category: 'chemical',
+    quantity: siliconeTubes,
+    unit: 'tubes (300ml)',
+    description: 'Perimeter waterproofing and perimeter framing joint seal',
+  });
+}
+
+function calculateCasementOneFixedOneOpenItem(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  glasses: GlassCutSize[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
+  const outer = constants.casementOuterFrame;
+  const mullion = constants.casementMullion;
+  const deCurve = constants.casementDeCurveSash;
+  const bead = constants.casementGlazingBead || { name: 'Casement Glazing Snap-in Bead', faceWidth: 15, pocketDepth: 12 };
+
+  // Outer frame cuts (45° miter cuts)
+  cuts.push({
+    id: `${itemId}-casement-outer-top-bottom`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_outer',
+    profileName: outer.name,
+    length: Math.round(W),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Outer Frame Top & Bottom Rails',
+    componentType: 'outer_frame',
+  });
+
+  cuts.push({
+    id: `${itemId}-casement-outer-sides`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_outer',
+    profileName: outer.name,
+    length: Math.round(H),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Outer Frame Side Jambs',
+    componentType: 'outer_frame',
+  });
+
+  // Center Vertical Mullion T-Bar
+  const mullionLength = Math.round(H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  cuts.push({
+    id: `${itemId}-casement-mullion`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_mullion',
+    profileName: mullion.name,
+    length: mullionLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Center Vertical Dividing Mullion (T-Bar)',
+    componentType: 'mullion',
+  });
+
+  // Bay dimensions:
+  const innerOpeningWidth = W - 2 * (outer.faceWidth - outer.edgeOverlap) - (mullion.faceWidth - 2 * mullion.edgeOverlap);
+  const bayWidth = Math.max(150, innerOpeningWidth / 2);
+  const bayHeight = Math.max(150, H - 2 * (outer.faceWidth - outer.edgeOverlap));
+
+  // 1 Operable Sash (De-Curve):
+  const sashW = Math.round(bayWidth + 2 * deCurve.edgeOverlap - 4);
+  const sashH = Math.round(bayHeight + 2 * deCurve.edgeOverlap - 4);
+
+  cuts.push({
+    id: `${itemId}-decurve-width`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_decurve',
+    profileName: deCurve.name,
+    length: sashW,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'De Curve Operable Sash Top & Bottom (1 Openable Sash)',
+    componentType: 'sash',
+  });
+
+  cuts.push({
+    id: `${itemId}-decurve-height`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_decurve',
+    profileName: deCurve.name,
+    length: sashH,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'De Curve Operable Sash Left & Right (1 Openable Sash)',
+    componentType: 'sash',
+  });
+
+  // Glazing beads for the 1 Fixed Bay:
+  const fixedBeadW = Math.round(bayWidth);
+  const fixedBeadH = Math.round(bayHeight);
+
+  cuts.push({
+    id: `${itemId}-fixed-bead-w`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_bead',
+    profileName: bead.name,
+    length: fixedBeadW,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Snap-in Glazing Beads for Fixed Bay (Top & Bottom)',
+    componentType: 'bead',
+  });
+
+  cuts.push({
+    id: `${itemId}-fixed-bead-h`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_bead',
+    profileName: bead.name,
+    length: fixedBeadH,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Snap-in Glazing Beads for Fixed Bay (Sides)',
+    componentType: 'bead',
+  });
+
+  // Glass: 1 Fixed Glass Pane + 1 Operable Sash Glass Pane
+  const fixedGlassW = Math.round(bayWidth + 2 * outer.pocketDepth - constants.glassClearance);
+  const fixedGlassH = Math.round(bayHeight + 2 * outer.pocketDepth - constants.glassClearance);
+  const fixedPaneAreaM2 = (fixedGlassW * fixedGlassH) / 1000000;
+
+  const openGlassW = Math.round(sashW - 2 * (deCurve.faceWidth - deCurve.pocketDepth) - constants.glassClearance);
+  const openGlassH = Math.round(sashH - 2 * (deCurve.faceWidth - deCurve.pocketDepth) - constants.glassClearance);
+  const openPaneAreaM2 = (openGlassW * openGlassH) / 1000000;
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 1,
+    width: fixedGlassW,
+    height: fixedGlassH,
+    quantity: 1 * qty,
+    areaM2: Number((fixedPaneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Fixed Light Bay Glass (Pane #1)',
+  });
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 2,
+    width: openGlassW,
+    height: openGlassH,
+    quantity: 1 * qty,
+    areaM2: Number((openPaneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Operable Casement Sash Glass (Pane #2)',
+  });
+
+  // Accessories: 1 pair friction stays, 1 handle, seals, cleats, screws
+  accessories.push({
+    name: 'Heavy Duty Stainless Steel Friction Stays',
+    category: 'hardware',
+    quantity: 1 * qty,
+    unit: 'pairs',
+    description: 'Friction hinges for 1 operable side-hung sash',
+  });
+
+  accessories.push({
+    name: 'Casement Cockspur / Espagnolette Multipoint Handle',
+    category: 'hardware',
+    quantity: 1 * qty,
+    unit: 'pcs',
+    description: 'Locking handle for operable sash',
+  });
+
+  const gasketMeters = Math.ceil(((sashW * 2 + sashH * 2 + fixedGlassW * 2 + fixedGlassH * 2) * qty) / 1000);
+  accessories.push({
+    name: 'Casement Bubble & Glazing Wedge EPDM Rubber Gasket',
+    category: 'seal',
+    quantity: gasketMeters,
+    unit: 'meters',
+    description: 'Acoustic rebate seal and glass wrapper gasket',
+  });
+
+  accessories.push({
+    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    category: 'fastener',
+    quantity: (4 + 4) * qty, // 4 for outer frame + 4 for sash
+    unit: 'pcs',
+    description: 'Mechanical locking cleats for 45° corner joints',
+  });
+
+  accessories.push({
+    name: 'Self-Tapping Stainless Assembly Screws (#8 x 1½")',
+    category: 'fastener',
+    quantity: 16 * qty,
+    unit: 'pcs',
+    description: 'Mullion bracket and hinge fixing screws',
+  });
+
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 8000));
+  accessories.push({
+    name: 'Neutral Cure Weatherproof Silicone Sealant',
+    category: 'chemical',
+    quantity: siliconeTubes,
+    unit: 'tubes (300ml)',
+    description: 'Perimeter waterproofing and perimeter framing joint seal',
+  });
+}
+
+function calculateTransomSinglePanelItem(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  glasses: GlassCutSize[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
+  const outer = constants.transomOuterFrame || constants.casementOuterFrame;
+  const sash = constants.transomTopHungSash || constants.casementDeCurveSash;
+
+  // Outer frame cuts (45° miter cuts on all 4 corners)
+  cuts.push({
+    id: `${itemId}-transom-outer-top-bottom`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_outer',
+    profileName: outer.name,
+    length: Math.round(W),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Transom Window Outer Frame Top & Bottom Rails',
+    componentType: 'outer_frame',
+  });
+
+  cuts.push({
+    id: `${itemId}-transom-outer-sides`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_outer',
+    profileName: outer.name,
+    length: Math.round(H),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Transom Window Outer Frame Side Jambs',
+    componentType: 'outer_frame',
+  });
+
+  // Top-Hung Vent Sash (45° miter cuts)
+  const innerOpeningW = W - 2 * (outer.faceWidth - outer.edgeOverlap);
+  const innerOpeningH = H - 2 * (outer.faceWidth - outer.edgeOverlap);
+  const sashW = Math.round(innerOpeningW + 2 * sash.edgeOverlap - 4);
+  const sashH = Math.round(innerOpeningH + 2 * sash.edgeOverlap - 4);
+
+  cuts.push({
+    id: `${itemId}-transom-sash-w`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_sash',
+    profileName: sash.name,
+    length: sashW,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Transom Top-Hung Vent Sash Top & Bottom Rails',
+    componentType: 'sash',
+  });
+
+  cuts.push({
+    id: `${itemId}-transom-sash-h`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_sash',
+    profileName: sash.name,
+    length: sashH,
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Transom Top-Hung Vent Sash Left & Right Stiles',
+    componentType: 'sash',
+  });
+
+  // Glass Size for 1-Panel Transom Top-Hung Vent
+  const glassW = Math.round(sashW - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
+  const glassH = Math.round(sashH - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
+  const paneAreaM2 = (glassW * glassH) / 1000000;
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 1,
+    width: glassW,
+    height: glassH,
+    quantity: 1 * qty,
+    areaM2: Number((paneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Transom 1-Panel Top-Hung Vent Glass',
+  });
+
+  // Accessories: 1 pair friction stays, 1 handle, seal, cleats, screws, silicone
+  accessories.push({
+    name: 'Stainless Steel Friction Stays (10" / 12")',
+    category: 'hardware',
+    quantity: 1 * qty,
+    unit: 'pairs',
+    description: 'Top-hung projected friction hinges for transom vent',
+  });
+
+  accessories.push({
+    name: 'Transom / Casement Cockspur Cam Handle',
+    category: 'hardware',
+    quantity: 1 * qty,
+    unit: 'pcs',
+    description: 'Locking cam handle with strike plate',
+  });
+
+  const totalPerimeterMeters = Math.ceil(((sashW * 2 + sashH * 2) * qty) / 1000);
+  accessories.push({
+    name: 'Weatherseal Woolpile (Silicone-Treated Strip)',
+    category: 'seal',
+    quantity: totalPerimeterMeters,
+    unit: 'meters',
+    description: 'Draft excluder strip around transom vent perimeter',
+  });
+
+  accessories.push({
+    name: 'Glazing Wedge EPDM Rubber Gasket',
+    category: 'seal',
+    quantity: totalPerimeterMeters,
+    unit: 'meters',
+    description: 'Glass channel wrap and pressure seal',
+  });
+
+  accessories.push({
+    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    category: 'fastener',
+    quantity: (4 + 4) * qty, // 4 for outer frame + 4 for sash
+    unit: 'pcs',
+    description: 'Mechanical locking cleats for 45° corner joints',
+  });
+
+  accessories.push({
+    name: 'Self-Tapping Stainless Assembly Screws (#8 x 1½")',
+    category: 'fastener',
+    quantity: 14 * qty,
+    unit: 'pcs',
+    description: 'Hinge and frame assembly fasteners',
+  });
+
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 7500));
+  accessories.push({
+    name: 'Neutral Cure Weatherproof Silicone Sealant',
+    category: 'chemical',
+    quantity: siliconeTubes,
+    unit: 'tubes (300ml)',
+    description: 'Perimeter waterproofing and outer frame glass bead seals',
   });
 }
 
@@ -525,6 +1300,191 @@ function calculateFixedItem(
     quantity: 8 * qty,
     unit: 'pcs',
     description: 'Masonry wall fixing screws',
+  });
+}
+
+function calculateTransomTwoPanelItem(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  glasses: GlassCutSize[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
+  const outer = constants.transomOuterFrame || constants.casementOuterFrame;
+  const mullion = constants.transomMullion || constants.casementMullion;
+  const sash = constants.transomTopHungSash || constants.casementDeCurveSash;
+
+  const panelsCount = 2;
+  const mullionsCount = 1;
+
+  // 1. Outer Frame Cuts (45° miter cuts on all 4 corners)
+  cuts.push({
+    id: `${itemId}-transom-outer-top-bottom`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_outer',
+    profileName: outer.name,
+    length: Math.round(W),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Transom Outer Frame Top & Bottom Rails',
+    componentType: 'outer_frame',
+  });
+
+  cuts.push({
+    id: `${itemId}-transom-outer-sides`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_outer',
+    profileName: outer.name,
+    length: Math.round(H),
+    quantity: 2 * qty,
+    cutAngle: '45°',
+    purpose: 'Transom Outer Frame Side Jambs',
+    componentType: 'outer_frame',
+  });
+
+  // 2. Central Vertical Transom Mullion (T-Bar)
+  const mullionLength = Math.round(H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  cuts.push({
+    id: `${itemId}-transom-mullion`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_mullion',
+    profileName: mullion.name,
+    length: mullionLength,
+    quantity: 1 * qty,
+    cutAngle: '90°',
+    purpose: 'Center Vertical Transom Dividing Mullion (T-Bar)',
+    componentType: 'mullion',
+  });
+
+  // 3. Inner Operable Top-Hung / Transom Sashes (Vent Sash):
+  // Inner opening width split in 2 by mullion
+  const innerOpeningWidth = W - 2 * (outer.faceWidth - outer.edgeOverlap) - (mullion.faceWidth - 2 * mullion.edgeOverlap);
+  const bayWidth = Math.max(150, innerOpeningWidth / 2);
+  const bayHeight = Math.max(150, H - 2 * (outer.faceWidth - outer.edgeOverlap));
+
+  // Top-hung sash cut sizes (45° miter cuts)
+  const sashW = Math.round(bayWidth + 2 * sash.edgeOverlap - 4);
+  const sashH = Math.round(bayHeight + 2 * sash.edgeOverlap - 4);
+
+  cuts.push({
+    id: `${itemId}-transom-sash-width`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_sash',
+    profileName: sash.name,
+    length: sashW,
+    quantity: 4 * qty, // 2 panels * 2 (top & bottom)
+    cutAngle: '45°',
+    purpose: 'Transom Top-Hung Sash Top & Bottom Rails (2 Sashes)',
+    componentType: 'sash',
+  });
+
+  cuts.push({
+    id: `${itemId}-transom-sash-height`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_sash',
+    profileName: sash.name,
+    length: sashH,
+    quantity: 4 * qty, // 2 panels * 2 (left & right)
+    cutAngle: '45°',
+    purpose: 'Transom Top-Hung Sash Left & Right Stiles (2 Sashes)',
+    componentType: 'sash',
+  });
+
+  // 4. Glass Cut Sizes (2 panes)
+  const glassW = Math.round(sashW - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
+  const glassH = Math.round(sashH - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
+  const paneAreaM2 = (glassW * glassH) / 1000000;
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 1,
+    width: glassW,
+    height: glassH,
+    quantity: 1 * qty,
+    areaM2: Number((paneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Transom Left Top-Hung Sash Glass (1-Pane)',
+  });
+
+  glasses.push({
+    itemId,
+    itemTag: tag,
+    paneNumber: 2,
+    width: glassW,
+    height: glassH,
+    quantity: 1 * qty,
+    areaM2: Number((paneAreaM2 * qty).toFixed(3)),
+    paneDescription: 'Transom Right Top-Hung Sash Glass (1-Pane)',
+  });
+
+  // 5. Hardware & Accessories
+  // Friction stays: 2 pairs for 2 top-hung sashes
+  accessories.push({
+    name: 'Heavy Duty Stainless Steel Friction Stays (10" / 12")',
+    category: 'hardware',
+    quantity: 2 * qty,
+    unit: 'pairs',
+    description: 'Top-hung projected friction hinges for 2 transom operable panels',
+  });
+
+  // Cockspur / Cam Handles: 2 pcs
+  accessories.push({
+    name: 'Casement / Transom Cockspur Locking Cam Handle',
+    category: 'hardware',
+    quantity: 2 * qty,
+    unit: 'pcs',
+    description: 'Quarter-turn compression locking handles with strike keepers',
+  });
+
+  // Woolpile & Rubber Gasket
+  const totalPerimeterMeters = Math.ceil(((sashW * 2 + sashH * 2) * 2 * qty) / 1000);
+  accessories.push({
+    name: 'Weatherseal Woolpile (Silicone-Treated Strip)',
+    category: 'seal',
+    quantity: totalPerimeterMeters,
+    unit: 'meters',
+    description: 'Draft excluder strip around transom operable sash perimeters',
+  });
+
+  accessories.push({
+    name: 'Glazing Wedge EPDM Rubber Gasket',
+    category: 'seal',
+    quantity: totalPerimeterMeters,
+    unit: 'meters',
+    description: 'Glass channel wrap and pressure seal',
+  });
+
+  // Corner Cleats
+  accessories.push({
+    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    category: 'fastener',
+    quantity: (8 + 4) * qty, // 8 for 2 sashes + 4 for outer frame
+    unit: 'pcs',
+    description: 'Mechanical locking cleats for 45° corner joints',
+  });
+
+  // Screws & Sealant
+  accessories.push({
+    name: 'Self-Tapping Stainless Screws (#8 x 1½")',
+    category: 'fastener',
+    quantity: 24 * qty,
+    unit: 'pcs',
+    description: 'Friction stay fixing and mullion assembly fasteners',
+  });
+
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 7500));
+  accessories.push({
+    name: 'Neutral Cure Weatherproof Silicone Sealant',
+    category: 'chemical',
+    quantity: siliconeTubes,
+    unit: 'tubes (300ml)',
+    description: 'Perimeter waterproofing and outer frame glass bead seals',
   });
 }
 

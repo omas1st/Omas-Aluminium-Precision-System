@@ -4,12 +4,17 @@ export type WindowType =
   | 'sliding_2_panel'
   | 'sliding_3_panel'
   | 'sliding_4_panel'
+  | 'sliding_fixed_window'
+  | 'sliding_1_fixed_1_sliding'
+  | 'casement_fixed_window'
+  | 'casement_1_fixed_1_open'
   | 'casement_1_panel'
   | 'casement_2_panel'
   | 'casement_3_panel'
   | 'casement_4_panel'
   | 'fixed_window'
-  | 'transom_window';
+  | 'transom_window'
+  | 'transom_2_panel';
 
 export type DoorType =
   | 'sliding_door_2_panel'
@@ -24,7 +29,7 @@ export interface ConstantProfilesConfig {
   stockProfileLength: number; // default 5800mm
   bladeKerf: number; // default 4mm saw cut loss
   
-  // Sliding Window / Door Constants (Outer Frame)
+  // 1. Sliding Window / Door Constants (Outer Frame)
   topBottomTrack: {
     name: string;
     faceWidth: number; // default 30mm or 60mm
@@ -38,7 +43,7 @@ export interface ConstantProfilesConfig {
     stockLength: number; // 5800mm
   };
   
-  // Sliding Sash Profiles (Operable Panels)
+  // 2. Sliding Sash Profiles (Operable Panels)
   bottomSashRail: {
     name: string;
     faceWidth: number; // default 50mm
@@ -64,7 +69,7 @@ export interface ConstantProfilesConfig {
     stockLength: number; // 5800mm
   };
 
-  // Casement Profiles
+  // 3. Casement Window Profiles
   casementOuterFrame: {
     name: string;
     faceWidth: number; // default 40mm
@@ -85,8 +90,42 @@ export interface ConstantProfilesConfig {
     pocketDepth: number; // default 10mm
     stockLength: number; // 5800mm
   };
+  casementGlazingBead: {
+    name: string;
+    faceWidth: number; // default 15mm
+    pocketDepth: number; // default 12mm
+    stockLength: number; // 5800mm
+  };
 
-  // Fixed / Transom Profiles
+  // 4. Transom Window Profiles (Separated from Casement)
+  transomOuterFrame: {
+    name: string;
+    faceWidth: number; // default 45mm
+    edgeOverlap: number; // default 10mm
+    pocketDepth: number; // default 15mm
+    stockLength: number; // 5800mm
+  };
+  transomMullion: {
+    name: string;
+    faceWidth: number; // default 55mm
+    edgeOverlap: number; // default 10mm
+    stockLength: number; // 5800mm
+  };
+  transomTopHungSash: {
+    name: string;
+    faceWidth: number; // default 50mm
+    edgeOverlap: number; // default 10mm
+    pocketDepth: number; // default 10mm
+    stockLength: number; // 5800mm
+  };
+  transomGlazingBead: {
+    name: string;
+    faceWidth: number; // default 15mm
+    pocketDepth: number; // default 12mm
+    stockLength: number; // 5800mm
+  };
+
+  // 5. Fixed / General Profiles
   fixedFrame: {
     name: string;
     faceWidth: number; // default 40mm
@@ -95,7 +134,7 @@ export interface ConstantProfilesConfig {
     stockLength: number; // 5800mm
   };
 
-  // Door Specific Profiles
+  // 6. Door Specific Profiles
   doorOuterFrame: {
     name: string;
     faceWidth: number; // default 45mm
@@ -223,4 +262,122 @@ export interface SavedProject {
   dateUpdated: string;
   items: FabricationItemInput[];
   constantsSnapshot?: ConstantProfilesConfig;
+}
+
+export interface MaterialPricesConfig {
+  currency: string; // e.g. 'USD', 'NGN', 'EUR', 'GBP', 'KES', 'GHS', 'INR'
+  currencySymbol: string; // e.g. '$', '₦', '€', '£', etc.
+
+  // Profile bar prices (per 5.8m standard extrusion bar)
+  profileBarPrices: {
+    // Sliding Profiles
+    topBottomTrack: number;
+    sideJambs: number;
+    bottomSashRail: number;
+    topSashRail: number;
+    lockFrameStile: number;
+    interlockFrameStile: number;
+
+    // Casement Profiles
+    casementOuterFrame: number;
+    casementMullion: number;
+    casementDeCurveSash: number;
+    casementGlazingBead: number;
+
+    // Transom Profiles (Separated from Casement)
+    transomOuterFrame: number;
+    transomMullion: number;
+    transomTopHungSash: number;
+    transomGlazingBead: number;
+
+    // Fixed & Door Profiles
+    fixedFrame: number;
+    snapInGlassBead: number;
+    doorOuterFrame: number;
+    doorStile: number;
+    doorTopRail: number;
+    doorBottomRail: number;
+    [customKey: string]: number;
+  };
+
+  // Glass Price per m²
+  glassPricePerM2: number;
+  glassTypeName: string; // e.g. '5mm Clear / Tinted Float Glass'
+
+  // Hardware & Accessories unit prices
+  accessoryPrices: {
+    slidingRollerPair: number;
+    crescentHookLock: number;
+    woolpilePerMeter: number;
+    rubberGasketPerMeter: number;
+    cornerCleatPiece: number;
+    frictionStayPair: number;
+    casementCamHandle: number;
+    assemblyScrewPiece: number;
+    siliconeSealantTube: number;
+    wallAnchorPlug: number;
+    doorHingePair: number;
+    doorMortiseLockset: number;
+    flushBoltPiece: number;
+    [accessoryName: string]: number;
+  };
+
+  // Labor & Fabrication Charges
+  laborRateType: 'per_unit' | 'per_sqm' | 'percentage';
+  laborRateValue: number; // e.g. 25 per unit, 15 per m2, or 20% of materials
+
+  // Installation & Logistics
+  installationRatePerUnit: number;
+  transportationFlat: number;
+
+  // Commercial margins
+  profitMarginPercent: number; // e.g. 15%
+  taxVatPercent: number; // e.g. 7.5%
+}
+
+export interface QuotationLineItem {
+  id: string;
+  category: 'profile' | 'glass' | 'accessory' | 'labor' | 'logistics';
+  name: string;
+  description?: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface QuotationBreakdown {
+  currency: string;
+  currencySymbol: string;
+  profileLines: QuotationLineItem[];
+  glassLines: QuotationLineItem[];
+  accessoryLines: QuotationLineItem[];
+  laborLines: QuotationLineItem[];
+  logisticsLines: QuotationLineItem[];
+  
+  totalProfilesCost: number;
+  totalGlassCost: number;
+  totalAccessoriesCost: number;
+  totalMaterialsCost: number;
+  totalLaborCost: number;
+  totalLogisticsCost: number;
+  
+  directProjectCost: number; // Materials + Labor + Logistics
+  profitMarginPercent: number;
+  profitMarginAmount: number;
+  netQuoteBeforeTax: number;
+  taxVatPercent: number;
+  taxVatAmount: number;
+  grandTotalQuotation: number;
+}
+
+export interface ClientQuotationInfo {
+  clientName: string;
+  clientCompany?: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  projectSiteAddress?: string;
+  quoteRefNumber: string;
+  validityDays: number;
+  notesOrTerms?: string;
 }

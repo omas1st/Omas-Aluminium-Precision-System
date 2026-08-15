@@ -65,8 +65,42 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
     pocketDepth: 10, // mm
     stockLength: 5800,
   },
+  casementGlazingBead: {
+    name: 'Casement Glazing Snap-in Bead',
+    faceWidth: 15, // mm
+    pocketDepth: 12, // mm
+    stockLength: 5800,
+  },
 
-  // 4. Fixed & Transom Profiles
+  // 4. Transom Window Profiles (Separated from Casement)
+  transomOuterFrame: {
+    name: 'Transom Window Outer Frame Profile',
+    faceWidth: 45, // mm
+    edgeOverlap: 10, // mm
+    pocketDepth: 15, // mm
+    stockLength: 5800,
+  },
+  transomMullion: {
+    name: 'Transom Intermediate Mullion T-Bar',
+    faceWidth: 55, // mm
+    edgeOverlap: 10, // mm
+    stockLength: 5800,
+  },
+  transomTopHungSash: {
+    name: 'Transom Top-Hung Vent Sash Profile',
+    faceWidth: 50, // mm
+    edgeOverlap: 10, // mm
+    pocketDepth: 10, // mm
+    stockLength: 5800,
+  },
+  transomGlazingBead: {
+    name: 'Transom Glazing Bead Profile',
+    faceWidth: 15, // mm
+    pocketDepth: 12, // mm
+    stockLength: 5800,
+  },
+
+  // 5. Fixed Frame Profiles
   fixedFrame: {
     name: 'Fixed Window Outer Frame / Bead Profile',
     faceWidth: 40, // mm
@@ -75,7 +109,7 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
     stockLength: 5800,
   },
 
-  // 5. Door Profiles
+  // 6. Door Profiles
   doorOuterFrame: {
     name: 'Heavy Duty Door Outer Frame',
     faceWidth: 45, // mm

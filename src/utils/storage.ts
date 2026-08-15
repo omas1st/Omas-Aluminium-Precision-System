@@ -1,9 +1,11 @@
-import { SavedProject, ConstantProfilesConfig } from '../types';
+import { SavedProject, ConstantProfilesConfig, MaterialPricesConfig } from '../types';
 import { DEFAULT_FABRICATION_CONSTANTS } from '../constants/defaultConstants';
+import { DEFAULT_MATERIAL_PRICES } from '../constants/defaultPrices';
 
 const STORAGE_KEYS = {
   PROJECTS: 'alu_fab_saved_projects_v1',
   CONSTANTS: 'alu_fab_constant_measurements_v1',
+  PRICES: 'alu_fab_material_prices_v1',
   ACTIVE_DRAFT: 'alu_fab_active_draft_v1',
 };
 
@@ -131,7 +133,28 @@ export function getStoredConstants(): ConstantProfilesConfig {
       return DEFAULT_FABRICATION_CONSTANTS;
     }
     const parsed = JSON.parse(raw);
-    return { ...DEFAULT_FABRICATION_CONSTANTS, ...parsed };
+    return {
+      ...DEFAULT_FABRICATION_CONSTANTS,
+      ...parsed,
+      topBottomTrack: { ...DEFAULT_FABRICATION_CONSTANTS.topBottomTrack, ...(parsed.topBottomTrack || parsed.slidingTopBottomTrack || {}) },
+      sideJambs: { ...DEFAULT_FABRICATION_CONSTANTS.sideJambs, ...(parsed.sideJambs || parsed.slidingSideJamb || {}) },
+      bottomSashRail: { ...DEFAULT_FABRICATION_CONSTANTS.bottomSashRail, ...(parsed.bottomSashRail || parsed.slidingBottomSashRail || {}) },
+      topSashRail: { ...DEFAULT_FABRICATION_CONSTANTS.topSashRail, ...(parsed.topSashRail || parsed.slidingTopSashRail || {}) },
+      lockFrameStile: { ...DEFAULT_FABRICATION_CONSTANTS.lockFrameStile, ...(parsed.lockFrameStile || parsed.slidingLockStile || {}) },
+      interlockFrameStile: { ...DEFAULT_FABRICATION_CONSTANTS.interlockFrameStile, ...(parsed.interlockFrameStile || parsed.slidingInterlockStile || {}) },
+      casementOuterFrame: { ...DEFAULT_FABRICATION_CONSTANTS.casementOuterFrame, ...(parsed.casementOuterFrame || {}) },
+      casementMullion: { ...DEFAULT_FABRICATION_CONSTANTS.casementMullion, ...(parsed.casementMullion || {}) },
+      casementDeCurveSash: { ...DEFAULT_FABRICATION_CONSTANTS.casementDeCurveSash, ...(parsed.casementDeCurveSash || {}) },
+      casementGlazingBead: { ...DEFAULT_FABRICATION_CONSTANTS.casementGlazingBead, ...(parsed.casementGlazingBead || {}) },
+      transomOuterFrame: { ...DEFAULT_FABRICATION_CONSTANTS.transomOuterFrame, ...(parsed.transomOuterFrame || {}) },
+      transomMullion: { ...DEFAULT_FABRICATION_CONSTANTS.transomMullion, ...(parsed.transomMullion || {}) },
+      transomTopHungSash: { ...DEFAULT_FABRICATION_CONSTANTS.transomTopHungSash, ...(parsed.transomTopHungSash || {}) },
+      transomGlazingBead: { ...DEFAULT_FABRICATION_CONSTANTS.transomGlazingBead, ...(parsed.transomGlazingBead || {}) },
+      fixedFrame: { ...DEFAULT_FABRICATION_CONSTANTS.fixedFrame, ...(parsed.fixedFrame || {}) },
+      doorOuterFrame: { ...DEFAULT_FABRICATION_CONSTANTS.doorOuterFrame, ...(parsed.doorOuterFrame || {}) },
+      doorStile: { ...DEFAULT_FABRICATION_CONSTANTS.doorStile, ...(parsed.doorStile || {}) },
+      doorBottomRail: { ...DEFAULT_FABRICATION_CONSTANTS.doorBottomRail, ...(parsed.doorBottomRail || {}) },
+    };
   } catch (e) {
     console.error('Failed to load constants:', e);
     return DEFAULT_FABRICATION_CONSTANTS;
@@ -153,5 +176,48 @@ export function resetStoredConstants(): ConstantProfilesConfig {
   } catch (e) {
     console.error('Failed to reset constants:', e);
     return DEFAULT_FABRICATION_CONSTANTS;
+  }
+}
+
+export function getStoredPrices(): MaterialPricesConfig {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.PRICES);
+    if (!raw) {
+      return DEFAULT_MATERIAL_PRICES;
+    }
+    const parsed = JSON.parse(raw);
+    return {
+      ...DEFAULT_MATERIAL_PRICES,
+      ...parsed,
+      profileBarPrices: {
+        ...DEFAULT_MATERIAL_PRICES.profileBarPrices,
+        ...(parsed.profileBarPrices || {}),
+      },
+      accessoryPrices: {
+        ...DEFAULT_MATERIAL_PRICES.accessoryPrices,
+        ...(parsed.accessoryPrices || {}),
+      },
+    };
+  } catch (e) {
+    console.error('Failed to load prices:', e);
+    return DEFAULT_MATERIAL_PRICES;
+  }
+}
+
+export function saveStoredPrices(prices: MaterialPricesConfig): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.PRICES, JSON.stringify(prices));
+  } catch (e) {
+    console.error('Failed to save prices:', e);
+  }
+}
+
+export function resetStoredPrices(): MaterialPricesConfig {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.PRICES);
+    return DEFAULT_MATERIAL_PRICES;
+  } catch (e) {
+    console.error('Failed to reset prices:', e);
+    return DEFAULT_MATERIAL_PRICES;
   }
 }

@@ -3,9 +3,15 @@ import {
   FabricationItemInput,
   CombinedProjectCalculation,
   ConstantProfilesConfig,
+  MaterialPricesConfig,
   SavedProject,
 } from './types';
-import { getStoredConstants, getSavedProjects } from './utils/storage';
+import {
+  getStoredConstants,
+  getStoredPrices,
+  saveStoredPrices,
+  getSavedProjects,
+} from './utils/storage';
 import { calculateEntireProject } from './utils/calculator';
 import { Navbar } from './components/Navbar';
 import { HomePage } from './components/HomePage';
@@ -16,8 +22,9 @@ import { AdminPanel } from './components/AdminPanel';
 
 export default function App() {
   const [constants, setConstants] = useState<ConstantProfilesConfig>(getStoredConstants());
+  const [prices, setPrices] = useState<MaterialPricesConfig>(getStoredPrices());
   const [currentView, setCurrentView] = useState<'home' | 'input' | 'output' | 'saved' | 'admin'>('home');
-  const [outputInitialTab, setOutputInitialTab] = useState<'preview' | 'profiles' | 'frames'>('preview');
+  const [outputInitialTab, setOutputInitialTab] = useState<'preview' | 'profiles' | 'frames' | 'quotation'>('preview');
 
   // Active Project Data
   const [activeProjectName, setActiveProjectName] = useState<string>('Villa Windows & Doors Project');
@@ -131,7 +138,7 @@ export default function App() {
 
   const handleOpenSavedProject = (
     project: SavedProject,
-    initialTab: 'preview' | 'profiles' | 'frames' = 'preview'
+    initialTab: 'preview' | 'profiles' | 'frames' | 'quotation' = 'preview'
   ) => {
     setActiveProjectName(project.name);
     setActiveItems(project.items);
@@ -157,6 +164,11 @@ export default function App() {
       const calc = calculateEntireProject(activeProjectName, activeItems, newConstants);
       setActiveCalculation(calc);
     }
+  };
+
+  const handleUpdatePrices = (newPrices: MaterialPricesConfig) => {
+    setPrices(newPrices);
+    saveStoredPrices(newPrices);
   };
 
   return (
@@ -195,6 +207,7 @@ export default function App() {
           <OutputDashboard
             calculation={activeCalculation}
             constants={constants}
+            prices={prices}
             initialTab={outputInitialTab}
             rawItems={activeItems}
             onBackToEdit={() => navigateTo('input')}
@@ -202,6 +215,7 @@ export default function App() {
               setSavedProjectsList(getSavedProjects());
               navigateTo('saved');
             }}
+            onOpenAdminPrices={() => navigateTo('admin')}
           />
         )}
 
@@ -216,7 +230,9 @@ export default function App() {
         {currentView === 'admin' && (
           <AdminPanel
             constants={constants}
+            prices={prices}
             onUpdateConstants={handleUpdateConstants}
+            onUpdatePrices={handleUpdatePrices}
             onBackToHome={() => navigateTo('home')}
           />
         )}
@@ -231,13 +247,13 @@ export default function App() {
           <div className="flex items-center gap-4 text-slate-400">
             <span>Standard Stock: {constants.stockProfileLength}mm</span>
             <span>•</span>
-            <span>Saw Kerf: {constants.bladeKerf}mm</span>
+            <span>Currency: {prices.currency}</span>
             <span>•</span>
             <button
               onClick={() => navigateTo('admin')}
               className="text-indigo-400 hover:underline"
             >
-              Admin Config (/admin)
+              Admin Config & Material Prices (/admin)
             </button>
           </div>
         </div>

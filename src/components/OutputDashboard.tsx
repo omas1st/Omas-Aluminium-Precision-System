@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import {
   CombinedProjectCalculation,
   ConstantProfilesConfig,
+  MaterialPricesConfig,
   SavedProject,
   FabricationItemInput,
 } from '../types';
 import { PreviewSkeleton } from './PreviewSkeleton';
 import { ProfilesOutput } from './ProfilesOutput';
 import { FrameMeasurementsOutput } from './FrameMeasurementsOutput';
+import { QuotationOutput } from './QuotationOutput';
 import { saveProject } from '../utils/storage';
 import {
   Eye,
@@ -17,28 +19,33 @@ import {
   Save,
   ArrowLeft,
   Check,
-  Share2,
+  DollarSign,
   Calendar,
+  Sparkles,
 } from 'lucide-react';
 
 interface OutputDashboardProps {
   calculation: CombinedProjectCalculation;
   constants: ConstantProfilesConfig;
-  initialTab?: 'preview' | 'profiles' | 'frames';
+  prices: MaterialPricesConfig;
+  initialTab?: 'preview' | 'profiles' | 'frames' | 'quotation';
   rawItems: FabricationItemInput[];
   onBackToEdit: () => void;
   onGoToSaved: () => void;
+  onOpenAdminPrices?: () => void;
 }
 
 export const OutputDashboard: React.FC<OutputDashboardProps> = ({
   calculation,
   constants,
+  prices,
   initialTab = 'preview',
   rawItems,
   onBackToEdit,
   onGoToSaved,
+  onOpenAdminPrices,
 }) => {
-  const [activeTab, setActiveTab] = useState<'preview' | 'profiles' | 'frames'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'preview' | 'profiles' | 'frames' | 'quotation'>(initialTab);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleSaveProject = () => {
@@ -56,7 +63,7 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Top Project Banner */}
       <div className="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div>
@@ -84,6 +91,8 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
                 <span className="font-semibold text-slate-700">{calculation.items.length} Units Scheduled</span>
                 <span>•</span>
                 <span className="font-mono font-bold text-blue-600">{calculation.totalBarsCount} Market Bars (5.8m)</span>
+                <span>•</span>
+                <span className="font-mono font-bold text-emerald-700">{calculation.totalGlassAreaM2} m² Glass</span>
               </div>
             </div>
           </div>
@@ -116,82 +125,111 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
         </div>
       )}
 
-      {/* THE 3 PRIMARY OUTPUT BUTTONS (AS REQUESTED) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Button 1: Preview Button */}
+      {/* THE 4 OUTPUT TABS (PREVIEW, PROFILES, FRAMES, QUOTATION) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Tab 1: Preview Wireframe */}
         <button
           type="button"
           onClick={() => setActiveTab('preview')}
-          className={`p-5 rounded-xl border text-left transition-all flex items-start gap-4 ${
+          className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
             activeTab === 'preview'
               ? 'bg-white border-blue-500 border-l-4 border-l-blue-600 shadow-md ring-1 ring-blue-500/20'
               : 'bg-white border-slate-200 border-l-4 border-l-slate-300 hover:border-slate-300 hover:bg-slate-50'
           }`}
         >
           <div
-            className={`p-2.5 rounded-lg shrink-0 ${
+            className={`p-2 rounded-lg shrink-0 ${
               activeTab === 'preview' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
             }`}
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
           </div>
           <div>
-            <div className="font-bold text-xs uppercase tracking-wider text-slate-500">View Module 1</div>
-            <div className="font-bold text-sm text-slate-900 mt-0.5">1. Skeleton Wireframe Preview</div>
-            <div className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Proportional architectural SVG diagrams with structural component labels and dimensions.
+            <div className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Module 1</div>
+            <div className="font-bold text-xs text-slate-900 mt-0.5">Wireframe Preview</div>
+            <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              Proportional architectural SVG diagrams & dimensions.
             </div>
           </div>
         </button>
 
-        {/* Button 2: Profiles & Materials Output Button */}
+        {/* Tab 2: Profiles Output */}
         <button
           type="button"
           onClick={() => setActiveTab('profiles')}
-          className={`p-5 rounded-xl border text-left transition-all flex items-start gap-4 ${
+          className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
             activeTab === 'profiles'
               ? 'bg-white border-blue-500 border-l-4 border-l-blue-600 shadow-md ring-1 ring-blue-500/20'
               : 'bg-white border-slate-200 border-l-4 border-l-slate-300 hover:border-slate-300 hover:bg-slate-50'
           }`}
         >
           <div
-            className={`p-2.5 rounded-lg shrink-0 ${
+            className={`p-2 rounded-lg shrink-0 ${
               activeTab === 'profiles' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
             }`}
           >
-            <PackageCheck className="w-5 h-5" />
+            <PackageCheck className="w-4 h-4" />
           </div>
           <div>
-            <div className="font-bold text-xs uppercase tracking-wider text-slate-500">View Module 2</div>
-            <div className="font-bold text-sm text-slate-900 mt-0.5">2. Profiles & Materials Output</div>
-            <div className="text-xs text-slate-500 mt-1 leading-relaxed">
-              5.8m market bar count, 1D bin-packing linear cut schedule, kerf waste & accessories BOQ.
+            <div className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Module 2</div>
+            <div className="font-bold text-xs text-slate-900 mt-0.5">Profiles & Materials</div>
+            <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              5.8m market bar count, 1D bin-packing cuts & BOQ.
             </div>
           </div>
         </button>
 
-        {/* Button 3: Frame / Materials Measurements Output Button */}
+        {/* Tab 3: Frame / Cut Measurements */}
         <button
           type="button"
           onClick={() => setActiveTab('frames')}
-          className={`p-5 rounded-xl border text-left transition-all flex items-start gap-4 ${
+          className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
             activeTab === 'frames'
               ? 'bg-white border-blue-500 border-l-4 border-l-blue-600 shadow-md ring-1 ring-blue-500/20'
               : 'bg-white border-slate-200 border-l-4 border-l-slate-300 hover:border-slate-300 hover:bg-slate-50'
           }`}
         >
           <div
-            className={`p-2.5 rounded-lg shrink-0 ${
+            className={`p-2 rounded-lg shrink-0 ${
               activeTab === 'frames' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'
             }`}
           >
-            <Ruler className="w-5 h-5" />
+            <Ruler className="w-4 h-4" />
           </div>
           <div>
-            <div className="font-bold text-xs uppercase tracking-wider text-slate-500">View Module 3</div>
-            <div className="font-bold text-sm text-slate-900 mt-0.5">3. Frame & Glass Cut Measurements</div>
-            <div className="text-xs text-slate-500 mt-1 leading-relaxed">
-              Workshop cutting lists (mm), 90°/45° miter angles, and single-pane glass schedules.
+            <div className="font-bold text-[10px] uppercase tracking-wider text-slate-500">Module 3</div>
+            <div className="font-bold text-xs text-slate-900 mt-0.5">Cut Measurements</div>
+            <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              Workshop cut lengths (mm), 45°/90° miters & glass sizes.
+            </div>
+          </div>
+        </button>
+
+        {/* Tab 4: Expense Quotation Tab */}
+        <button
+          type="button"
+          onClick={() => setActiveTab('quotation')}
+          className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
+            activeTab === 'quotation'
+              ? 'bg-white border-emerald-500 border-l-4 border-l-emerald-600 shadow-md ring-1 ring-emerald-500/20'
+              : 'bg-white border-slate-200 border-l-4 border-l-slate-300 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          <div
+            className={`p-2 rounded-lg shrink-0 ${
+              activeTab === 'quotation' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700'
+            }`}
+          >
+            <DollarSign className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="font-bold text-[10px] uppercase tracking-wider text-emerald-700">Module 4</div>
+            <div className="font-bold text-xs text-slate-900 mt-0.5 flex items-center gap-1">
+              <span>Expenses Quotation</span>
+              <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">NEW</span>
+            </div>
+            <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+              Bill of expenses, materials pricing, labor & official PDF.
             </div>
           </div>
         </button>
@@ -208,6 +246,14 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
 
       {activeTab === 'frames' && (
         <FrameMeasurementsOutput calculation={calculation} constants={constants} />
+      )}
+
+      {activeTab === 'quotation' && (
+        <QuotationOutput
+          calc={calculation}
+          prices={prices}
+          onOpenAdminPrices={onOpenAdminPrices}
+        />
       )}
     </div>
   );

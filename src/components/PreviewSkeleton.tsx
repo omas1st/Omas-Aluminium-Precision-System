@@ -433,6 +433,132 @@ function renderSkeletonLayout(
   const kind = item.kind;
   const frameThickness = 30; // visual representation in px
 
+  // 1. Fixed Window in Sliding Outer Frame
+  if (kind === 'sliding_fixed_window') {
+    const glassX = x + frameThickness + 10;
+    const glassY = y + frameThickness + 10;
+    const glassW = Math.max(10, w - (frameThickness + 10) * 2);
+    const glassH = Math.max(10, h - (frameThickness + 10) * 2);
+    const glassItem = glasses[0];
+
+    return (
+      <g>
+        {/* Top Track */}
+        <rect x={x} y={y} width={w} height={frameThickness} fill="#334155" stroke="#64748b" strokeWidth="1" />
+        {/* Bottom Track */}
+        <rect x={x} y={y + h - frameThickness} width={w} height={frameThickness} fill="#334155" stroke="#64748b" strokeWidth="1" />
+        {/* Left Jamb */}
+        <rect x={x} y={y + frameThickness} width={frameThickness} height={h - frameThickness * 2} fill="#334155" stroke="#64748b" strokeWidth="1" />
+        {/* Right Jamb */}
+        <rect x={x + w - frameThickness} y={y + frameThickness} width={frameThickness} height={h - frameThickness * 2} fill="#334155" stroke="#64748b" strokeWidth="1" />
+
+        {/* Fixed Glass Infill */}
+        <rect x={glassX} y={glassY} width={glassW} height={glassH} fill="url(#glassGrad)" stroke="#38bdf8" strokeWidth="2" />
+        <line x1={glassX + 20} y1={glassY + 20} x2={glassX + glassW - 20} y2={glassY + glassH - 20} stroke="#ffffff" strokeWidth="1" strokeOpacity="0.2" />
+
+        {showLabels && (
+          <g>
+            <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="10" fontWeight="bold" textAnchor="middle">
+              Sliding Head Track [{w}mm] (Fixed Pane System)
+            </text>
+            {glassItem && (
+              <g transform={`translate(${glassX + glassW / 2}, ${glassY + glassH / 2})`}>
+                <rect x="-85" y="-16" width="170" height="32" rx="4" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
+                <text x="0" y="-1" fill="#93c5fd" fontSize="10" fontWeight="bold" textAnchor="middle">
+                  Sliding Fixed Glass Pane
+                </text>
+                <text x="0" y="11" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  {glassItem.width} × {glassItem.height} mm
+                </text>
+              </g>
+            )}
+          </g>
+        )}
+      </g>
+    );
+  }
+
+  // 2. Sliding 2-Panel with 1 Fixed Panel + 1 Sliding Sash ("OX")
+  if (kind === 'sliding_1_fixed_1_sliding') {
+    const bayW = (w - frameThickness * 2) / 2;
+    const sashBorder = 25;
+
+    // Left Fixed Pane
+    const fixedGlassX = x + frameThickness + 10;
+    const fixedGlassY = y + frameThickness + 10;
+    const fixedGlassW = bayW - 15;
+    const fixedGlassH = h - frameThickness * 2 - 20;
+
+    // Right Operable Sliding Sash
+    const sashX = x + frameThickness + bayW - 10;
+    const sashY = y + frameThickness + 5;
+    const sashW = bayW + 10;
+    const sashH = h - frameThickness * 2 - 10;
+
+    const opGlassX = sashX + sashBorder;
+    const opGlassY = sashY + sashBorder;
+    const opGlassW = Math.max(10, sashW - sashBorder * 2);
+    const opGlassH = Math.max(10, sashH - sashBorder * 2);
+
+    return (
+      <g>
+        {/* Outer Frame */}
+        <rect x={x} y={y} width={w} height={frameThickness} fill="#334155" stroke="#64748b" strokeWidth="1" />
+        <rect x={x} y={y + h - frameThickness} width={w} height={frameThickness} fill="#334155" stroke="#64748b" strokeWidth="1" />
+        <rect x={x} y={y + frameThickness} width={frameThickness} height={h - frameThickness * 2} fill="#334155" stroke="#64748b" strokeWidth="1" />
+        <rect x={x + w - frameThickness} y={y + frameThickness} width={frameThickness} height={h - frameThickness * 2} fill="#334155" stroke="#64748b" strokeWidth="1" />
+
+        {/* Panel 1: Fixed Glass */}
+        <rect x={fixedGlassX} y={fixedGlassY} width={fixedGlassW} height={fixedGlassH} fill="url(#glassGrad)" stroke="#64748b" strokeWidth="1.5" />
+        <g transform={`translate(${fixedGlassX + fixedGlassW / 2}, ${fixedGlassY + 25})`}>
+          <rect x="-35" y="-10" width="70" height="20" rx="3" fill="#334155" />
+          <text x="0" y="4" fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
+            FIXED (O)
+          </text>
+        </g>
+
+        {/* Panel 2: Operable Sliding Sash */}
+        <rect x={sashX} y={sashY} width={sashW} height={sashH} fill="#1e293b" stroke="#60a5fa" strokeWidth="2.5" rx="2" />
+        <rect x={opGlassX} y={opGlassY} width={opGlassW} height={opGlassH} fill="url(#glassGrad)" stroke="#38bdf8" strokeWidth="1.5" />
+
+        {/* Sliding Arrow */}
+        <g transform={`translate(${sashX + sashW / 2}, ${sashY + sashH / 2})`}>
+          <line x1="25" y1="0" x2="-25" y2="0" stroke="#38bdf8" strokeWidth="2" strokeDasharray="4 2" markerEnd="url(#dimArrowEnd)" />
+          <circle cx="0" cy="0" r="14" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
+          <text x="0" y="4" fill="#e2e8f0" fontSize="9.5" fontWeight="bold" textAnchor="middle">
+            SLIDE (X)
+          </text>
+        </g>
+
+        {/* Rollers */}
+        <circle cx={sashX + 25} cy={sashY + sashH - 4} r="3" fill="#f59e0b" />
+        <circle cx={sashX + sashW - 25} cy={sashY + sashH - 4} r="3" fill="#f59e0b" />
+
+        {showLabels && (
+          <g>
+            {glasses[0] && (
+              <g transform={`translate(${fixedGlassX + fixedGlassW / 2}, ${fixedGlassY + fixedGlassH - 25})`}>
+                <rect x="-60" y="-10" width="120" height="20" rx="3" fill="#0f172a" stroke="#64748b" strokeWidth="0.8" />
+                <text x="0" y="3.5" fill="#e2e8f0" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  Fixed: {glasses[0].width}×{glasses[0].height}mm
+                </text>
+              </g>
+            )}
+            {glasses[1] && (
+              <g transform={`translate(${opGlassX + opGlassW / 2}, ${opGlassY + opGlassH - 25})`}>
+                <rect x="-60" y="-10" width="120" height="20" rx="3" fill="#0369a1" stroke="#7dd3fc" strokeWidth="0.8" />
+                <text x="0" y="3.5" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  Sash: {glasses[1].width}×{glasses[1].height}mm
+                </text>
+              </g>
+            )}
+          </g>
+        )}
+      </g>
+    );
+  }
+
+  // 3. Sliding Standard 2, 3, 4 Panel
   if (kind.startsWith('sliding_')) {
     let panels = 2;
     if (kind.includes('3_panel')) panels = 3;
@@ -571,15 +697,12 @@ function renderSkeletonLayout(
         {/* Global Component Callouts if Labels ON */}
         {showLabels && (
           <g>
-            {/* Top Track Callout */}
             <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="10" fontWeight="bold" textAnchor="middle">
               Top Track (Head) [{w}mm]
             </text>
-            {/* Bottom Track Callout */}
             <text x={x + w / 2} y={y + h - 11} fill="#cbd5e1" fontSize="10" fontWeight="bold" textAnchor="middle">
               Bottom Track (Sill) [{w}mm]
             </text>
-            {/* Side Jamb Callout */}
             <text
               x={x + 16}
               y={y + h / 2}
@@ -590,6 +713,216 @@ function renderSkeletonLayout(
               transform={`rotate(-90 ${x + 16} ${y + h / 2})`}
             >
               Side Jamb
+            </text>
+          </g>
+        )}
+      </g>
+    );
+  }
+
+  // 4. Casement Fixed Window (Picture Light with Casement Frame + Snap Bead)
+  if (kind === 'casement_fixed_window') {
+    const beadBorder = 20;
+    const glassX = x + frameThickness + beadBorder;
+    const glassY = y + frameThickness + beadBorder;
+    const glassW = Math.max(10, w - (frameThickness + beadBorder) * 2);
+    const glassH = Math.max(10, h - (frameThickness + beadBorder) * 2);
+    const glassItem = glasses[0];
+
+    return (
+      <g>
+        {/* Casement Outer Frame (Mitered 45°) */}
+        <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
+        {/* Snap-in Glazing Bead Frame */}
+        <rect
+          x={x + frameThickness}
+          y={y + frameThickness}
+          width={w - frameThickness * 2}
+          height={h - frameThickness * 2}
+          fill="#0f172a"
+          stroke="#475569"
+          strokeWidth="2"
+        />
+        {/* Fixed Glass Infill */}
+        <rect x={glassX} y={glassY} width={glassW} height={glassH} fill="url(#glassGrad)" stroke="#38bdf8" strokeWidth="2" />
+        <line x1={glassX + 20} y1={glassY + 20} x2={glassX + glassW - 20} y2={glassY + glassH - 20} stroke="#ffffff" strokeWidth="1" strokeOpacity="0.2" />
+
+        {showLabels && (
+          <g>
+            <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
+              Casement Outer Frame (Fixed Picture)
+            </text>
+            {glassItem && (
+              <g transform={`translate(${glassX + glassW / 2}, ${glassY + glassH / 2})`}>
+                <rect x="-85" y="-16" width="170" height="32" rx="4" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
+                <text x="0" y="-1" fill="#93c5fd" fontSize="10" fontWeight="bold" textAnchor="middle">
+                  Casement Fixed Glass
+                </text>
+                <text x="0" y="11" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  {glassItem.width} × {glassItem.height} mm
+                </text>
+              </g>
+            )}
+          </g>
+        )}
+      </g>
+    );
+  }
+
+  // 5. Casement 2-Bay (1 Fixed Light + 1 Openable De-Curve Sash)
+  if (kind === 'casement_1_fixed_1_open') {
+    const mullionWidth = 20;
+    const bayW = (w - frameThickness * 2 - mullionWidth) / 2;
+    const bayH = h - frameThickness * 2;
+    const mx = x + frameThickness + bayW;
+    const sashBorder = 22;
+
+    // Left Bay = Fixed Light
+    const fixedGlassX = x + frameThickness + 15;
+    const fixedGlassY = y + frameThickness + 15;
+    const fixedGlassW = bayW - 30;
+    const fixedGlassH = bayH - 30;
+
+    // Right Bay = Openable De-Curve Sash
+    const sx = mx + mullionWidth + 5;
+    const sy = y + frameThickness + 5;
+    const sw = bayW - 10;
+    const sh = bayH - 10;
+
+    const opGlassX = sx + sashBorder;
+    const opGlassY = sy + sashBorder;
+    const opGlassW = Math.max(10, sw - sashBorder * 2);
+    const opGlassH = Math.max(10, sh - sashBorder * 2);
+
+    return (
+      <g>
+        {/* Outer Frame */}
+        <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
+
+        {/* Central Dividing Mullion T-Bar */}
+        <rect x={mx} y={y + frameThickness} width={mullionWidth} height={bayH} fill="#334155" stroke="#94a3b8" strokeWidth="1.5" />
+
+        {/* Bay 1: Fixed Light Glass with Snap-in Bead */}
+        <rect x={x + frameThickness + 5} y={y + frameThickness + 5} width={bayW - 10} height={bayH - 10} fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
+        <rect x={fixedGlassX} y={fixedGlassY} width={fixedGlassW} height={fixedGlassH} fill="url(#glassGrad)" stroke="#38bdf8" strokeWidth="1.5" />
+        <g transform={`translate(${fixedGlassX + fixedGlassW / 2}, ${fixedGlassY + 25})`}>
+          <rect x="-35" y="-10" width="70" height="20" rx="3" fill="#334155" />
+          <text x="0" y="4" fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
+            FIXED
+          </text>
+        </g>
+
+        {/* Bay 2: Openable De-Curve Sash */}
+        <rect x={sx} y={sy} width={sw} height={sh} fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+        <rect x={opGlassX} y={opGlassY} width={opGlassW} height={opGlassH} fill="url(#glassGrad)" stroke="#0284c7" strokeWidth="1.5" />
+
+        {/* Casement Swing Lines */}
+        <line x1={opGlassX} y1={opGlassY} x2={opGlassX + opGlassW} y2={opGlassY + opGlassH / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+        <line x1={opGlassX} y1={opGlassY + opGlassH} x2={opGlassX + opGlassW} y2={opGlassY + opGlassH / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+        {/* Handle */}
+        <circle cx={opGlassX + opGlassW - 8} cy={opGlassY + opGlassH / 2} r="4" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+
+        {showLabels && (
+          <g>
+            <text x={mx + mullionWidth / 2} y={y + h - 12} fill="#fbbf24" fontSize="8.5" fontWeight="bold" textAnchor="middle">
+              Casement Mullion
+            </text>
+            {glasses[0] && (
+              <g transform={`translate(${fixedGlassX + fixedGlassW / 2}, ${fixedGlassY + fixedGlassH - 25})`}>
+                <rect x="-55" y="-10" width="110" height="20" rx="3" fill="#0f172a" stroke="#64748b" strokeWidth="0.8" />
+                <text x="0" y="3.5" fill="#e2e8f0" fontSize="8.5" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  Fixed: {glasses[0].width}×{glasses[0].height}mm
+                </text>
+              </g>
+            )}
+            {glasses[1] && (
+              <g transform={`translate(${opGlassX + opGlassW / 2}, ${opGlassY + opGlassH - 25})`}>
+                <rect x="-55" y="-10" width="110" height="20" rx="3" fill="#0369a1" stroke="#7dd3fc" strokeWidth="0.8" />
+                <text x="0" y="3.5" fill="#ffffff" fontSize="8.5" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                  Open: {glasses[1].width}×{glasses[1].height}mm
+                </text>
+              </g>
+            )}
+          </g>
+        )}
+      </g>
+    );
+  }
+
+  if (kind === 'transom_2_panel') {
+    const panels = 2;
+    const mullionsCount = 1;
+    const mullionWidth = 20;
+    const bayW = (w - frameThickness * 2 - mullionWidth) / 2;
+    const bayH = h - frameThickness * 2;
+    const sashBorder = 22;
+
+    const mx = x + frameThickness + bayW;
+
+    return (
+      <g>
+        {/* Outer Frame (Mitered) */}
+        <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
+
+        {/* Central Dividing Mullion T-Bar */}
+        <rect
+          x={mx}
+          y={y + frameThickness}
+          width={mullionWidth}
+          height={bayH}
+          fill="#334155"
+          stroke="#94a3b8"
+          strokeWidth="1.5"
+        />
+
+        {/* 2 Top-Hung Operable Transom Sashes */}
+        {Array.from({ length: 2 }).map((_, pIdx) => {
+          const sx = x + frameThickness + pIdx * (bayW + mullionWidth) + 5;
+          const sy = y + frameThickness + 5;
+          const sw = bayW - 10;
+          const sh = bayH - 10;
+
+          const gx = sx + sashBorder;
+          const gy = sy + sashBorder;
+          const gw = Math.max(10, sw - sashBorder * 2);
+          const gh = Math.max(10, sh - sashBorder * 2);
+
+          const glassItem = glasses[pIdx] || glasses[0];
+
+          return (
+            <g key={pIdx}>
+              {/* De Curve Sash Frame */}
+              <rect x={sx} y={sy} width={sw} height={sh} fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+              {/* Glass Infill */}
+              <rect x={gx} y={gy} width={gw} height={gh} fill="url(#glassGrad)" stroke="#0284c7" strokeWidth="1.5" />
+
+              {/* Top-Hung Projection Lines (Dashed V-shape from top center to bottom corners) */}
+              <line x1={gx + gw / 2} y1={gy} x2={gx} y2={gy + gh} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+              <line x1={gx + gw / 2} y1={gy} x2={gx + gw} y2={gy + gh} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+
+              {/* Bottom Cockspur Locking Handle */}
+              <rect x={gx + gw / 2 - 8} y={gy + gh - 10} width="16" height="6" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+
+              {showLabels && glassItem && (
+                <g transform={`translate(${gx + gw / 2}, ${gy + gh / 2})`}>
+                  <rect x="-68" y="-12" width="136" height="24" rx="3" fill="#0369a1" fillOpacity="0.9" />
+                  <text x="0" y="4" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
+                    Glass: {glassItem.width}×{glassItem.height}mm
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })}
+
+        {/* Global Component Callouts if Labels ON */}
+        {showLabels && (
+          <g>
+            <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
+              Transom Outer Frame (Head)
+            </text>
+            <text x={mx + mullionWidth / 2} y={y + h - 12} fill="#fbbf24" fontSize="8.5" fontWeight="bold" textAnchor="middle">
+              Center Mullion
             </text>
           </g>
         )}

@@ -72,6 +72,10 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
         return 'Sliding 3-Panel Window';
       case 'sliding_4_panel':
         return 'Sliding 4-Panel Window';
+      case 'sliding_fixed_window':
+        return 'Sliding Fixed Window (1-Pane Picture)';
+      case 'sliding_1_fixed_1_sliding':
+        return 'Sliding Window (1 Fixed + 1 Sliding Sash)';
       case 'casement_1_panel':
         return 'Casement 1-Panel (Single Sash)';
       case 'casement_2_panel':
@@ -80,10 +84,16 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
         return 'Casement 3-Panel Operable';
       case 'casement_4_panel':
         return 'Casement 4-Panel Operable';
+      case 'casement_fixed_window':
+        return 'Casement Fixed Window (Picture Light)';
+      case 'casement_1_fixed_1_open':
+        return 'Casement 2-Bay (1 Fixed + 1 Openable Sash)';
       case 'fixed_window':
         return 'Fixed Window';
       case 'transom_window':
-        return 'Transom Window / Highlight';
+        return 'Transom Window / Highlight (1-Panel)';
+      case 'transom_2_panel':
+        return 'Transom 2-Panel Window (Dual Operable / Mullion)';
       case 'sliding_door_2_panel':
         return 'Sliding Door 2-Panel';
       case 'sliding_door_3_panel':
@@ -387,19 +397,24 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                       className="w-full px-3 py-2.5 border border-slate-300 rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 text-xs font-semibold text-slate-800 focus:outline-hidden"
                     >
                       <optgroup label="Sliding Windows">
-                        <option value="sliding_2_panel">Sliding Window (2 Panel Slider)</option>
-                        <option value="sliding_3_panel">Sliding Window (3 Panel Slider)</option>
-                        <option value="sliding_4_panel">Sliding Window (4 Panel Slider)</option>
+                        <option value="sliding_2_panel">Sliding Window (2-Panel Slider)</option>
+                        <option value="sliding_3_panel">Sliding Window (3-Panel Slider)</option>
+                        <option value="sliding_4_panel">Sliding Window (4-Panel Slider)</option>
+                        <option value="sliding_1_fixed_1_sliding">Sliding Window (1 Fixed + 1 Sliding Sash - "OX")</option>
+                        <option value="sliding_fixed_window">Sliding Fixed Window (1-Pane Picture in Sliding Frame)</option>
                       </optgroup>
                       <optgroup label="Casement Windows">
                         <option value="casement_1_panel">Casement (1 Panel Single Operable)</option>
                         <option value="casement_2_panel">Casement (2 Panel Operable Window)</option>
                         <option value="casement_3_panel">Casement (3 Panel Operable Window)</option>
                         <option value="casement_4_panel">Casement (4 Panel Operable Window)</option>
+                        <option value="casement_1_fixed_1_open">Casement 2-Bay (1 Fixed Light + 1 Openable Sash)</option>
+                        <option value="casement_fixed_window">Casement Fixed Window (Picture Light with Snap Bead)</option>
                       </optgroup>
-                      <optgroup label="Fixed & Highlights">
-                        <option value="fixed_window">Fixed Window (Picture Window)</option>
-                        <option value="transom_window">Transom Window (Highlight / Top Hung)</option>
+                      <optgroup label="Transom & Highlight Windows">
+                        <option value="transom_2_panel">Transom 2-Panel Window (Dual Operable Top-Hung)</option>
+                        <option value="transom_window">Transom Window (1-Panel Top-Hung / Vent)</option>
+                        <option value="fixed_window">Fixed Picture Window (Standard 1-Pane)</option>
                       </optgroup>
                     </select>
                   ) : (
