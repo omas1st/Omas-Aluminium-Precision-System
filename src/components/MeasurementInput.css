@@ -1,0 +1,49 @@
+/* MeasurementInput.css - Dedicated styling for project measurements input page */
+
+.omas-input-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.omas-input-header-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.omas-input-table-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.omas-input-row {
+  transition: background-color 0.15s ease;
+}
+
+.omas-input-row:hover {
+  background-color: #f8fafc;
+}
+
+.omas-field-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.omas-field-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}

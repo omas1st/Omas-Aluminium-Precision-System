@@ -8,27 +8,32 @@ import {
   Layers,
   Wrench,
   Sparkles,
+  CloudDownload,
+  CloudUpload,
 } from 'lucide-react';
+import './Navbar.css';
 
 interface NavbarProps {
   currentView: 'home' | 'input' | 'output' | 'saved' | 'admin';
   onNavigate: (view: 'home' | 'input' | 'output' | 'saved' | 'admin') => void;
   hasActiveCalculation: boolean;
+  onOpenRestoreModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentView,
   onNavigate,
   hasActiveCalculation,
+  onOpenRestoreModal,
 }) => {
   return (
-    <header className="h-16 flex-none bg-[#1E293B] text-white flex items-center justify-between px-4 sm:px-8 border-b border-slate-700 shadow-md select-none sticky top-0 z-50">
+    <header className="omas-navbar-header">
       {/* Brand Logo & Monogram */}
       <div
         onClick={() => onNavigate('home')}
-        className="flex items-center gap-3 cursor-pointer group"
+        className="omas-nav-brand group"
       >
-        <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center font-extrabold text-base text-white shadow-xs group-hover:bg-blue-400 transition-colors">
+        <div className="omas-nav-logo-box group-hover:bg-blue-400 transition-colors">
           O
         </div>
         <div>
@@ -45,70 +50,74 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* Navigation Tabs */}
-      <nav className="flex items-center h-full gap-1">
-        <button
-          onClick={() => onNavigate('home')}
-          className={`h-full px-3 sm:px-5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors ${
-            currentView === 'home'
-              ? 'bg-slate-800 text-white border-b-4 border-blue-400'
-              : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-          }`}
-        >
-          <Home className="w-4 h-4" />
-          <span className="hidden md:inline">Home</span>
-        </button>
-
-        <button
-          onClick={() => onNavigate('input')}
-          className={`h-full px-3 sm:px-5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors ${
-            currentView === 'input'
-              ? 'bg-blue-600 text-white border-b-4 border-blue-300 shadow-xs'
-              : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-          }`}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Calculator</span>
-        </button>
-
-        {hasActiveCalculation && (
+      <div className="flex items-center h-full gap-2">
+        <nav className="omas-nav-tabs-wrapper">
           <button
-            onClick={() => onNavigate('output')}
-            className={`h-full px-3 sm:px-5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors ${
-              currentView === 'output'
-                ? 'bg-blue-600 text-white border-b-4 border-blue-300 shadow-xs'
-                : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+            onClick={() => onNavigate('home')}
+            className={`omas-nav-tab-btn ${
+              currentView === 'home' ? 'active-slate' : ''
             }`}
           >
-            <Layers className="w-4 h-4" />
-            <span>Output</span>
+            <Home className="w-4 h-4" />
+            <span className="hidden md:inline">Home</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('input')}
+            className={`omas-nav-tab-btn ${
+              currentView === 'input' ? 'active-primary' : ''
+            }`}
+          >
+            <Plus className="w-4 h-4" />
+            <span>Calculator</span>
+          </button>
+
+          {hasActiveCalculation && (
+            <button
+              onClick={() => onNavigate('output')}
+              className={`omas-nav-tab-btn ${
+                currentView === 'output' ? 'active-primary' : ''
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>Output</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => onNavigate('saved')}
+            className={`omas-nav-tab-btn ${
+              currentView === 'saved' ? 'active-slate' : ''
+            }`}
+          >
+            <FolderOpen className="w-4 h-4" />
+            <span className="hidden sm:inline">Saved Data</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('admin')}
+            className={`omas-nav-tab-btn border-l border-slate-700/80 ${
+              currentView === 'admin' ? 'active-slate text-indigo-300' : 'text-slate-300'
+            }`}
+            title="Admin Panel (/admin)"
+          >
+            <Sliders className="w-4 h-4 text-indigo-400" />
+            <span className="hidden sm:inline">Admin</span>
+          </button>
+        </nav>
+
+        {/* Restore Data Modal Action */}
+        {onOpenRestoreModal && (
+          <button
+            onClick={onOpenRestoreModal}
+            className="omas-nav-restore-btn"
+            title="Restore Data on a new phone or browser via 5-Digit Gmail OTP"
+          >
+            <CloudDownload className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">Restore Data</span>
           </button>
         )}
-
-        <button
-          onClick={() => onNavigate('saved')}
-          className={`h-full px-3 sm:px-5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors ${
-            currentView === 'saved'
-              ? 'bg-slate-800 text-white border-b-4 border-blue-400'
-              : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-          }`}
-        >
-          <FolderOpen className="w-4 h-4" />
-          <span className="hidden sm:inline">Saved Data</span>
-        </button>
-
-        <button
-          onClick={() => onNavigate('admin')}
-          className={`h-full px-3 sm:px-5 flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-colors border-l border-slate-700/80 ${
-            currentView === 'admin'
-              ? 'bg-slate-800 text-indigo-300 border-b-4 border-indigo-400'
-              : 'text-slate-300 hover:bg-slate-800/80 hover:text-indigo-300'
-          }`}
-          title="Admin Panel (/admin)"
-        >
-          <Sliders className="w-4 h-4 text-indigo-400" />
-          <span className="hidden sm:inline">Admin Panel</span>
-        </button>
-      </nav>
+      </div>
     </header>
   );
 };

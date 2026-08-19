@@ -1,0 +1,18 @@
+/* QuotationOutput.css - Dedicated styling for cost estimate & breakdown */
+
+.omas-quotation-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.omas-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 0.875rem;
+}

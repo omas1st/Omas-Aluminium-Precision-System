@@ -23,6 +23,7 @@ import {
   FolderOpen,
   X,
 } from 'lucide-react';
+import './MeasurementInput.css';
 
 interface MeasurementInputProps {
   initialProjectName?: string;
@@ -311,6 +312,10 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
               <span>Continue to Calculation</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-700 font-medium pt-0.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Auto-saves job to local storage on continue</span>
+            </div>
           </div>
         </div>
 

@@ -7,6 +7,7 @@ import {
   resetStoredPrices,
 } from '../utils/storage';
 import { POPULAR_CURRENCIES } from '../constants/defaultPrices';
+import { sendAdminOTP, verifyAdminOTP } from '../services/api';
 import {
   Sliders,
   Save,
@@ -26,7 +27,16 @@ import {
   Hammer,
   Truck,
   Percent,
+  Lock,
+  Mail,
+  KeyRound,
+  LogOut,
+  AlertTriangle,
+  Loader2,
+  ShieldAlert,
+  RefreshCw,
 } from 'lucide-react';
+import './AdminPanel.css';
 
 interface AdminPanelProps {
   constants: ConstantProfilesConfig;
@@ -45,12 +55,92 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onBackToHome,
   initialMainTab = 'prices',
 }) => {
+  // Authentication Guard State
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('omas_admin_authenticated') === 'true';
+  });
+  const [adminEmailInput, setAdminEmailInput] = useState<string>('');
+  const [otpCodeInput, setOtpCodeInput] = useState<string>('');
+  const [authStep, setAuthStep] = useState<'input_email' | 'enter_otp'>('input_email');
+  const [authLoading, setAuthLoading] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string>('');
+  const [authSuccess, setAuthSuccess] = useState<string>('');
+
   const [mainMode, setMainMode] = useState<'prices' | 'constants'>(initialMainTab);
   const [constantFormData, setConstantFormData] = useState<ConstantProfilesConfig>(constants);
   const [priceFormData, setPriceFormData] = useState<MaterialPricesConfig>(prices);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [constantActiveTab, setConstantActiveTab] = useState<'sliding' | 'casement' | 'transom' | 'fixed_doors' | 'general'>('sliding');
   const [priceActiveTab, setPriceActiveTab] = useState<'profiles' | 'glass' | 'accessories' | 'labor_rates'>('profiles');
+
+  // Handle Admin OTP Dispatch
+  const handleSendAdminOTP = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+
+    const cleanEmail = adminEmailInput.trim().toLowerCase();
+    if (!cleanEmail) {
+      setAuthError('Please enter your administrator Gmail address.');
+      return;
+    }
+
+    if (cleanEmail !== 'omas7th@gmail.com') {
+      setAuthError('Access Denied. The provided email address does not have administrative privileges.');
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const res = await sendAdminOTP(cleanEmail);
+      setAuthSuccess(res.message || 'A 5-digit verification code has been dispatched to your Gmail.');
+      setAuthStep('enter_otp');
+    } catch (err: any) {
+      setAuthError(err.message || 'Failed to dispatch verification code. Please check server status.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Handle Admin OTP Verification
+  const handleVerifyAdminOTP = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+
+    const cleanEmail = adminEmailInput.trim().toLowerCase();
+    const cleanCode = otpCodeInput.trim();
+
+    if (!cleanCode || cleanCode.length < 5) {
+      setAuthError('Please enter the full 5-digit numeric verification code.');
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const res = await verifyAdminOTP(cleanEmail, cleanCode);
+      sessionStorage.setItem('omas_admin_authenticated', 'true');
+      sessionStorage.setItem('omas_admin_email', cleanEmail);
+      setIsAdminAuthenticated(true);
+      setAuthSuccess(res.message || 'Identity verified successfully.');
+    } catch (err: any) {
+      setAuthError(err.message || 'Invalid or expired verification code. Please check your Gmail and try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Handle Admin Logout
+  const handleAdminLogout = () => {
+    sessionStorage.removeItem('omas_admin_authenticated');
+    sessionStorage.removeItem('omas_admin_email');
+    setIsAdminAuthenticated(false);
+    setAuthStep('input_email');
+    setAdminEmailInput('');
+    setOtpCodeInput('');
+    setAuthError('');
+    setAuthSuccess('');
+  };
 
   // Constant Profile Field Change
   const handleConstantFieldChange = (path: string[], value: any) => {
@@ -120,10 +210,176 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const sym = priceFormData.currencySymbol;
 
+  // Render Authentication Gate if not authenticated
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="omas-admin-auth-wrapper">
+        <div className="omas-admin-auth-card">
+          {/* Header */}
+          <div className="omas-admin-auth-header">
+            <div className="omas-admin-auth-badge">
+              <Lock className="w-3.5 h-3.5" />
+              <span>Admin Security Portal</span>
+            </div>
+            <h2 className="text-xl font-bold text-white tracking-tight">
+              OMAS Administrator Verification
+            </h2>
+            <p className="text-xs text-slate-300 mt-1 max-w-sm mx-auto">
+              System fabrication constants and pricing configurations are restricted. Please authenticate via Gmail 5-Digit OTP.
+            </p>
+          </div>
+
+          {/* Body */}
+          <div className="omas-admin-auth-body">
+            {/* Status alerts */}
+            {authError && (
+              <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <div className="leading-relaxed font-medium">{authError}</div>
+              </div>
+            )}
+
+            {authSuccess && (
+              <div className="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="leading-relaxed font-medium">{authSuccess}</div>
+              </div>
+            )}
+
+            {authStep === 'input_email' ? (
+              <form onSubmit={handleSendAdminOTP} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
+                    Administrator Gmail Address
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="email"
+                      value={adminEmailInput}
+                      onChange={(e) => setAdminEmailInput(e.target.value)}
+                      placeholder="Enter administrator Gmail address..."
+                      required
+                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-sans"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5">
+                    Multi-factor security verification required to modify formulas & pricing.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {authLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Sending 5-Digit Verification Code...</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound className="w-4 h-4" />
+                      <span>Send 5-Digit Verification Code</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={onBackToHome}
+                    className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium flex items-center justify-center gap-1.5 mx-auto"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Return to Home</span>
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyAdminOTP} className="space-y-5">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                      Enter 5-Digit Gmail OTP
+                    </label>
+                    <span className="text-[11px] text-slate-500">
+                      Code dispatched to Gmail
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    maxLength={5}
+                    autoFocus
+                    value={otpCodeInput}
+                    onChange={(e) => setOtpCodeInput(e.target.value.replace(/\D/g, ''))}
+                    placeholder="•••••"
+                    required
+                    className="omas-otp-digit-input w-full"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-1.5 text-center">
+                    Check your Gmail inbox or spam folder for the 5-digit verification code.
+                  </p>
+                </div>
+
+                <div className="space-y-2.5">
+                  <button
+                    type="submit"
+                    disabled={authLoading || otpCodeInput.length < 5}
+                    className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {authLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Verifying Administrator Code...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Verify & Unlock Admin Panel</span>
+                      </>
+                    )}
+                  </button>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <button
+                      type="button"
+                      disabled={authLoading}
+                      onClick={() => handleSendAdminOTP()}
+                      className="text-xs text-indigo-600 hover:text-indigo-800 transition-colors font-semibold flex items-center gap-1 cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Resend Code</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthStep('input_email');
+                        setOtpCodeInput('');
+                        setAuthError('');
+                      }}
+                      className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium"
+                    >
+                      Re-enter Email
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
       {/* Top Breadcrumb & Return to Home Bar */}
-      <div className="flex items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
           <button
             type="button"
@@ -137,14 +393,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           <span className="font-semibold text-slate-800">Admin Control Panel</span>
         </div>
 
-        <button
-          type="button"
-          onClick={onBackToHome}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-colors border border-slate-300"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>&larr; Return to Homepage</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          {/* Admin Verified Badge (without exposing email) */}
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Verified Administrator Session</span>
+          </div>
+
+          {/* Admin Logout Button */}
+          <button
+            type="button"
+            onClick={handleAdminLogout}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 text-slate-700 rounded-lg text-xs font-bold transition-colors border border-slate-300"
+            title="Log out of Admin Session"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Log Out</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onBackToHome}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Return to Homepage</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Admin Section Mode Selector (Prices vs Constants) */}
@@ -311,7 +586,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Top / Bottom Track Profile (5.8m)
+                      Top / Bottom Track / Two Track Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -353,7 +628,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Bottom Sash Roller Rail (5.8m)
+                      Top / Bottom Sash Rail Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -364,33 +639,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         min="0"
                         step="0.5"
                         value={priceFormData.profileBarPrices.bottomSashRail}
-                        onChange={(e) =>
-                          handlePriceFieldChange('profileBarPrices', 'bottomSashRail', parseFloat(e.target.value) || 0)
-                        }
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0;
+                          handlePriceFieldChange('profileBarPrices', 'bottomSashRail', val);
+                          handlePriceFieldChange('profileBarPrices', 'topSashRail', val);
+                        }}
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Top Sash Rail Profile (5.8m)
-                    </label>
-                    <div className="flex items-center">
-                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
-                        {sym}
-                      </span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.topSashRail}
-                        onChange={(e) =>
-                          handlePriceFieldChange('profileBarPrices', 'topSashRail', parseFloat(e.target.value) || 0)
-                        }
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
-                      />
-                    </div>
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">
+                      Single unified extrusion profile used for both top sash and bottom roller rails.
+                    </span>
                   </div>
 
                   <div>
@@ -1329,7 +1588,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="text-xs font-bold text-slate-800 uppercase">Top / Bottom Track Profile</div>
+                  <div className="text-xs font-bold text-slate-800 uppercase">Top / Bottom Track / Two Track Profile</div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
                     <input
@@ -1381,15 +1640,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="text-xs font-bold text-slate-800 uppercase">Bottom Sash Rail (Roller)</div>
+                  <div className="text-xs font-bold text-slate-800 uppercase">Top / Bottom Sash Rail Profile</div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
                     <input
                       type="number"
                       value={constantFormData.bottomSashRail?.faceWidth ?? 50}
-                      onChange={(e) =>
-                        handleConstantFieldChange(['bottomSashRail', 'faceWidth'], parseFloat(e.target.value) || 0)
-                      }
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        handleConstantFieldChange(['bottomSashRail', 'faceWidth'], val);
+                        handleConstantFieldChange(['topSashRail', 'faceWidth'], val);
+                      }}
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
                   </div>
@@ -1398,38 +1659,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <input
                       type="number"
                       value={constantFormData.bottomSashRail?.pocketDepth ?? 15}
-                      onChange={(e) =>
-                        handleConstantFieldChange(['bottomSashRail', 'pocketDepth'], parseFloat(e.target.value) || 0)
-                      }
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        handleConstantFieldChange(['bottomSashRail', 'pocketDepth'], val);
+                        handleConstantFieldChange(['topSashRail', 'pocketDepth'], val);
+                      }}
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
                   </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="text-xs font-bold text-slate-800 uppercase">Top Sash Rail Profile</div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
-                    <input
-                      type="number"
-                      value={constantFormData.topSashRail?.faceWidth ?? 50}
-                      onChange={(e) =>
-                        handleConstantFieldChange(['topSashRail', 'faceWidth'], parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Glass Pocket Rebate (mm)</label>
-                    <input
-                      type="number"
-                      value={constantFormData.topSashRail?.pocketDepth ?? 15}
-                      onChange={(e) =>
-                        handleConstantFieldChange(['topSashRail', 'pocketDepth'], parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
-                    />
-                  </div>
+                  <span className="text-[10px] text-slate-500 block">
+                    Shared extrusion dimensions for both top and bottom sash rails.
+                  </span>
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">

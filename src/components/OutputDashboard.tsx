@@ -23,6 +23,7 @@ import {
   Calendar,
   Sparkles,
 } from 'lucide-react';
+import './OutputDashboard.css';
 
 interface OutputDashboardProps {
   calculation: CombinedProjectCalculation;
@@ -100,12 +101,17 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
 
         {/* Save & Quick Nav */}
         <div className="flex items-center gap-2.5">
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-semibold">
+            <Check className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Auto-Saved to Local Storage</span>
+          </div>
+
           <button
             onClick={handleSaveProject}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold uppercase tracking-wider shadow-sm transition-colors"
           >
-            <Save className="w-4 h-4" />
-            <span>{savedSuccess ? 'Saved to Records!' : 'Save This Job'}</span>
+            <Save className="w-3.5 h-3.5" />
+            <span>{savedSuccess ? 'Saved to Records!' : 'Save / Duplicate'}</span>
           </button>
         </div>
       </div>

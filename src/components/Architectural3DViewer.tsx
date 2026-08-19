@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Grid,
 } from 'lucide-react';
+import './Architectural3DViewer.css';
 
 interface Architectural3DViewerProps {
   itemResult: ItemCalculationResult;

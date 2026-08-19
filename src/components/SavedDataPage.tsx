@@ -16,7 +16,10 @@ import {
   DollarSign,
   Download,
   Upload,
+  CloudUpload,
+  CloudDownload,
 } from 'lucide-react';
+import './SavedDataPage.css';
 
 interface SavedDataPageProps {
   onOpenProject: (

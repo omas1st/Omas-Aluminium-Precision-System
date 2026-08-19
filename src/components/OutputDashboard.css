@@ -1,0 +1,55 @@
+/* OutputDashboard.css - Dedicated styling for fabrication results dashboard */
+
+.omas-dashboard-wrapper {
+  max-width: 80rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.omas-dashboard-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  padding: 0.5rem;
+  border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.omas-dashboard-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  color: #64748b;
+  background-color: transparent;
+}
+
+.omas-dashboard-tab-btn:hover {
+  color: #1e293b;
+  background-color: #f1f5f9;
+}
+
+.omas-dashboard-tab-btn.active {
+  background-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.omas-dashboard-metric-card {
+  background-color: #ffffff;
+  border-radius: 0.875rem;
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}

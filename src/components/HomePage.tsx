@@ -15,6 +15,7 @@ import {
   Boxes,
 } from 'lucide-react';
 import { SavedProject } from '../types';
+import './HomePage.css';
 
 interface HomePageProps {
   onStartCalculation: () => void;

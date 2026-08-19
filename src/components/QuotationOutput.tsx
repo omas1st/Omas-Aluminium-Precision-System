@@ -26,6 +26,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import './QuotationOutput.css';
 
 interface QuotationOutputProps {
   calc: CombinedProjectCalculation;

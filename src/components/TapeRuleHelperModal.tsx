@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Ruler, X, ArrowRight, Check, Info } from 'lucide-react';
+import './TapeRuleHelperModal.css';
 
 interface TapeRuleHelperModalProps {
   isOpen: boolean;

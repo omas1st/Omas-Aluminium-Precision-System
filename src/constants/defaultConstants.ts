@@ -6,7 +6,7 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
 
   // 1. Sliding Outer Frame Profiles
   topBottomTrack: {
-    name: 'Top / Bottom Track Profile',
+    name: 'Top / Bottom Track / Two Track Profile',
     faceWidth: 30, // mm (editable in admin)
     pocketDepth: 26, // mm (rebate depth where side jamb sits)
     stockLength: 5800,
@@ -20,13 +20,13 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
 
   // 2. Sliding Sash Profiles (Operable Panels)
   bottomSashRail: {
-    name: 'Bottom Sash Rail (Roller Extrusion)',
+    name: 'Top / Bottom Sash Rail Profile',
     faceWidth: 50, // mm
     pocketDepth: 15, // mm
     stockLength: 5800,
   },
   topSashRail: {
-    name: 'Top Sash Rail Profile',
+    name: 'Top / Bottom Sash Rail Profile',
     faceWidth: 50, // mm
     pocketDepth: 15, // mm
     stockLength: 5800,

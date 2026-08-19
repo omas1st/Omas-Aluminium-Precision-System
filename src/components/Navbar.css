@@ -1,0 +1,119 @@
+/* Navbar.css - Dedicated styling for navigation header and status bar */
+
+.omas-navbar-header {
+  height: 4rem;
+  flex: none;
+  background-color: #1e293b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  user-select: none;
+}
+
+@media (min-width: 640px) {
+  .omas-navbar-header {
+    padding: 0 2rem;
+  }
+}
+
+.omas-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.omas-nav-brand:hover {
+  opacity: 0.9;
+}
+
+.omas-nav-logo-box {
+  width: 2.25rem;
+  height: 2.25rem;
+  background-color: #3b82f6;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.omas-nav-tabs-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 0.25rem;
+}
+
+.omas-nav-tab-btn {
+  height: 100%;
+  padding: 0 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: transparent;
+  border: none;
+  border-bottom: 4px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .omas-nav-tab-btn {
+    padding: 0 1.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+.omas-nav-tab-btn:hover {
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #ffffff;
+}
+
+.omas-nav-tab-btn.active-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-bottom-color: #93c5fd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.omas-nav-tab-btn.active-slate {
+  background-color: #334155;
+  color: #ffffff;
+  border-bottom-color: #60a5fa;
+}
+
+.omas-nav-restore-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background-color: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 0.5rem;
+}
+
+.omas-nav-restore-btn:hover {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
+}

@@ -133,13 +133,28 @@ export function getStoredConstants(): ConstantProfilesConfig {
       return DEFAULT_FABRICATION_CONSTANTS;
     }
     const parsed = JSON.parse(raw);
+    const loadedTrack = { ...DEFAULT_FABRICATION_CONSTANTS.topBottomTrack, ...(parsed.topBottomTrack || parsed.slidingTopBottomTrack || {}) };
+    if (!loadedTrack.name || loadedTrack.name === 'Top / Bottom Track Profile') {
+      loadedTrack.name = DEFAULT_FABRICATION_CONSTANTS.topBottomTrack.name;
+    }
+
+    const loadedBottomSash = { ...DEFAULT_FABRICATION_CONSTANTS.bottomSashRail, ...(parsed.bottomSashRail || parsed.slidingBottomSashRail || {}) };
+    if (!loadedBottomSash.name || loadedBottomSash.name === 'Bottom Sash Rail (Roller Extrusion)') {
+      loadedBottomSash.name = DEFAULT_FABRICATION_CONSTANTS.bottomSashRail.name;
+    }
+
+    const loadedTopSash = { ...DEFAULT_FABRICATION_CONSTANTS.topSashRail, ...(parsed.topSashRail || parsed.slidingTopSashRail || {}) };
+    if (!loadedTopSash.name || loadedTopSash.name === 'Top Sash Rail Profile') {
+      loadedTopSash.name = DEFAULT_FABRICATION_CONSTANTS.topSashRail.name;
+    }
+
     return {
       ...DEFAULT_FABRICATION_CONSTANTS,
       ...parsed,
-      topBottomTrack: { ...DEFAULT_FABRICATION_CONSTANTS.topBottomTrack, ...(parsed.topBottomTrack || parsed.slidingTopBottomTrack || {}) },
+      topBottomTrack: loadedTrack,
       sideJambs: { ...DEFAULT_FABRICATION_CONSTANTS.sideJambs, ...(parsed.sideJambs || parsed.slidingSideJamb || {}) },
-      bottomSashRail: { ...DEFAULT_FABRICATION_CONSTANTS.bottomSashRail, ...(parsed.bottomSashRail || parsed.slidingBottomSashRail || {}) },
-      topSashRail: { ...DEFAULT_FABRICATION_CONSTANTS.topSashRail, ...(parsed.topSashRail || parsed.slidingTopSashRail || {}) },
+      bottomSashRail: loadedBottomSash,
+      topSashRail: loadedTopSash,
       lockFrameStile: { ...DEFAULT_FABRICATION_CONSTANTS.lockFrameStile, ...(parsed.lockFrameStile || parsed.slidingLockStile || {}) },
       interlockFrameStile: { ...DEFAULT_FABRICATION_CONSTANTS.interlockFrameStile, ...(parsed.interlockFrameStile || parsed.slidingInterlockStile || {}) },
       casementOuterFrame: { ...DEFAULT_FABRICATION_CONSTANTS.casementOuterFrame, ...(parsed.casementOuterFrame || {}) },

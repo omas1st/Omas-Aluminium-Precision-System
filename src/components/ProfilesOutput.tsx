@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   HelpCircle,
 } from 'lucide-react';
+import './ProfilesOutput.css';
 
 interface ProfilesOutputProps {
   calculation: CombinedProjectCalculation;

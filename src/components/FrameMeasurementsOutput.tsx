@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
+import './FrameMeasurementsOutput.css';
 
 interface FrameMeasurementsOutputProps {
   calculation: CombinedProjectCalculation;

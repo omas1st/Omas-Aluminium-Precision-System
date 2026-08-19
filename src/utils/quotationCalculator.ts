@@ -207,17 +207,27 @@ function getProfilePrice(profileName: string, prices: MaterialPricesConfig): num
   const p = prices.profileBarPrices;
   const name = profileName.toLowerCase();
 
-  if (name.includes('top / bottom track') || name.includes('top track') || name.includes('bottom track')) {
+  if (
+    name.includes('top / bottom track') ||
+    name.includes('two track') ||
+    name.includes('two-track') ||
+    name.includes('2 track') ||
+    name.includes('top track') ||
+    name.includes('bottom track')
+  ) {
     return p.topBottomTrack || 42.0;
   }
   if (name.includes('side jamb') || name.includes('double jamb')) {
     return p.sideJambs || 36.0;
   }
-  if (name.includes('bottom sash') || name.includes('roller')) {
-    return p.bottomSashRail || 38.0;
-  }
-  if (name.includes('top sash')) {
-    return p.topSashRail || 38.0;
+  if (
+    name.includes('top / bottom sash rail') ||
+    name.includes('sash rail') ||
+    name.includes('bottom sash') ||
+    name.includes('top sash') ||
+    name.includes('roller')
+  ) {
+    return p.bottomSashRail || p.topSashRail || 38.0;
   }
   if (name.includes('lock frame') || name.includes('handle side')) {
     return p.lockFrameStile || 40.0;

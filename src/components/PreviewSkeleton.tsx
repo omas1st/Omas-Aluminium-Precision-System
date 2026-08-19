@@ -21,6 +21,7 @@ import {
   Columns,
   Sparkles,
 } from 'lucide-react';
+import './PreviewSkeleton.css';
 
 interface PreviewSkeletonProps {
   calculation: CombinedProjectCalculation;
