@@ -15,10 +15,24 @@ export const DEFAULT_MATERIAL_PRICES: MaterialPricesConfig = {
     interlockFrameStile: 32.0,
 
     // Casement Profiles
+    casementOuterWidth: 44.0,
+    casementOuterHeight: 44.0,
     casementOuterFrame: 44.0,
+    casement2Mullion: 48.0,
+    casement3Mullion: 54.0,
     casementMullion: 48.0,
     casementDeCurveSash: 42.0,
     casementGlazingBead: 18.0,
+
+    // Casement Burglary & Net Profiles
+    casementBurglaryTopSideFrame: 38.0,
+    casementBurglaryBottomFrame: 38.0,
+    netFrame1125: 32.0,
+    netFrame1126: 32.0,
+    netFrame1132: 28.0,
+    burglaryIronRod: 18.0,
+    casementIronAngle: 12.0,
+    glazingDivider: 24.0,
 
     // Transom Window Profiles (Separated)
     transomOuterFrame: 45.0,
@@ -54,6 +68,10 @@ export const DEFAULT_MATERIAL_PRICES: MaterialPricesConfig = {
     doorHingePair: 7.5,
     doorMortiseLockset: 24.0,
     flushBoltPiece: 5.0,
+    netRollPrice: 22.0,
+    netRubberRollPrice: 5.0,
+    steelStopperPiece: 3.5,
+    casementHingePiece: 4.0,
   },
 
   // Labor & Fabrication Charges

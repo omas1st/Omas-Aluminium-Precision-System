@@ -45,11 +45,37 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
   },
 
   // 3. Casement Window Profiles
-  casementOuterFrame: {
-    name: 'Casement Outer Frame Profile',
+  casementOuterWidth: {
+    name: 'Casement Outer Width Profile (Top / Bottom)',
     faceWidth: 40, // mm
     edgeOverlap: 10, // mm
     pocketDepth: 15, // mm
+    stockLength: 5800,
+  },
+  casementOuterHeight: {
+    name: 'Casement Outer Height Profile (Side Jambs)',
+    faceWidth: 40, // mm
+    edgeOverlap: 10, // mm
+    pocketDepth: 15, // mm
+    stockLength: 5800,
+  },
+  casementOuterFrame: {
+    name: 'Casement Outer Frame Profile',
+    faceWidth: 40,
+    edgeOverlap: 10,
+    pocketDepth: 15,
+    stockLength: 5800,
+  },
+  casement2Mullion: {
+    name: 'Casement 2-Mullion Profile (Standard T-Bar)',
+    faceWidth: 60, // mm
+    edgeOverlap: 10, // mm
+    stockLength: 5800,
+  },
+  casement3Mullion: {
+    name: 'Casement 3-Mullion Profile (Heavy Hinge-Receiver)',
+    faceWidth: 66, // mm (+6mm extra space over 2-mullion)
+    edgeOverlap: 10, // mm
     stockLength: 5800,
   },
   casementMullion: {
@@ -70,6 +96,59 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
     faceWidth: 15, // mm
     pocketDepth: 12, // mm
     stockLength: 5800,
+  },
+
+  // 3b. Casement Burglary, Net & Hardware Profiles
+  casementBurglaryTopSideFrame: {
+    name: 'Casement Burglary Top & Side Frame Profile',
+    faceWidth: 35, // mm
+    stockLength: 5800,
+  },
+  casementBurglaryBottomFrame: {
+    name: 'Casement Burglary Bottom Frame Profile',
+    faceWidth: 35, // mm
+    stockLength: 5800,
+  },
+  netFrame1125: {
+    name: '11:25 Net Frame Profile (Sides & Bottom)',
+    faceWidth: 25, // mm
+    stockLength: 5800,
+  },
+  netFrame1126: {
+    name: '11:26 Net Frame Profile (Top)',
+    faceWidth: 26, // mm
+    stockLength: 5800,
+  },
+  netFrame1132: {
+    name: '11:32 Net Frame Profile (Net Perimeter)',
+    faceWidth: 32, // mm
+    stockLength: 5800,
+  },
+  burglaryIronRod: {
+    name: 'Burglary Iron Rod / Ballo Straight (5.8m)',
+    stockLength: 5800,
+    spacingMin: 100, // mm
+    spacingMax: 150, // mm
+    extraLength: 100, // 50mm + 50mm pressed end tabs
+  },
+  casementIronAngle: {
+    name: 'Casement Inner Corner Iron Angle Cleat (5.0m Stock)',
+    stockLength: 5000, // 5000mm total stock length
+    cutLength: 35, // 35mm cut piece per connection
+  },
+  glazingDivider: {
+    name: 'Glazing Divider Bar Profile (Georgian/Colonial)',
+    faceWidth: 20, // mm
+    stockLength: 5800,
+  },
+  netRoll: {
+    name: 'Insect / Mosquito Net Mesh Roll',
+    width: 1000, // 1000mm roll width
+    length: 5800, // 5800mm roll length
+  },
+  netRubberRoll: {
+    name: 'Net Rubber Spline Gasket Roll',
+    length: 5000, // 5000mm (5m) roll
   },
 
   // 4. Transom Window Profiles (Separated from Casement)

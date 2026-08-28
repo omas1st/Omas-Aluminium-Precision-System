@@ -27,6 +27,8 @@ import {
   Palette,
   Building2,
   ShieldCheck,
+  Shield,
+  Columns,
   Grid,
 } from 'lucide-react';
 import './Architectural3DViewer.css';
@@ -91,6 +93,9 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
   const effectiveIsDark = bgTheme === 'system' ? systemIsDark : bgTheme === 'dark';
 
   // Dynamic state
+  const { item, cuts, glasses } = itemResult;
+  const { width: W, height: H, kind, tag } = item;
+
   const [profileFinish, setProfileFinish] = useState<ProfileFinish>('charcoal');
   const [glassTint, setGlassTint] = useState<GlassTint>('clear');
   const [openPercentage, setOpenPercentage] = useState<number>(0);
@@ -100,6 +105,10 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
   const [showWireframeOverlay, setShowWireframeOverlay] = useState<boolean>(true);
   const [showDimensions3D, setShowDimensions3D] = useState<boolean>(true);
   const [showEnvironmentGrid, setShowEnvironmentGrid] = useState<boolean>(true);
+  const [showBurglary, setShowBurglary] = useState<boolean>(item.hasBurglary !== false);
+  const [showNet, setShowNet] = useState<boolean>(item.hasNet !== false);
+  const [showDividers, setShowDividers] = useState<boolean>((item.dividerCount ?? 1) > 0);
+  const [showIronCleats, setShowIronCleats] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [activeCameraPreset, setActiveCameraPreset] = useState<CameraPreset>('perspective');
   const [selectedPartInfo, setSelectedPartInfo] = useState<{
@@ -108,9 +117,6 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     dimensions: string;
     material: string;
   } | null>(null);
-
-  const { item, cuts, glasses } = itemResult;
-  const { width: W, height: H, kind, tag } = item;
 
   // Open animation loop
   useEffect(() => {
@@ -296,6 +302,30 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       color: 0x050505,
     });
 
+    // Galvanised Iron Angle Cleat Material (35mm corner connectors)
+    const ironAngleMaterial = new THREE.MeshStandardMaterial({
+      color: 0x94a3b8,
+      roughness: 0.25,
+      metalness: 0.88,
+    });
+
+    // Burglary Proofing Rod & Frame Material (Ballo Straight Rods)
+    const burglaryMaterial = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.35,
+      metalness: 0.85,
+    });
+
+    // Insect / Mosquito Mesh Screen (Translucent fine weave)
+    const netMeshMaterial = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      roughness: 0.9,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.42,
+      side: THREE.DoubleSide,
+    });
+
     const lineWireMaterial = new THREE.LineBasicMaterial({
       color: effectiveIsDark ? 0x38bdf8 : 0x0284c7,
       linewidth: 1.5,
@@ -313,6 +343,9 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       wallSill: wallSillMaterial,
       gasket: gasketMaterial,
       wire: lineWireMaterial,
+      ironAngle: ironAngleMaterial,
+      burglary: burglaryMaterial,
+      netMesh: netMeshMaterial,
     };
   }, [profileFinish, glassTint, effectiveIsDark]);
 
@@ -444,7 +477,11 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       explodedView,
       showWallOpening,
       showWireframeOverlay,
-      showDimensions3D
+      showDimensions3D,
+      showBurglary,
+      showNet,
+      showDividers,
+      showIronCleats
     );
 
     // Raycaster for part inspection on click
@@ -513,6 +550,10 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     showWallOpening,
     showWireframeOverlay,
     showDimensions3D,
+    showBurglary,
+    showNet,
+    showDividers,
+    showIronCleats,
     showEnvironmentGrid,
     effectiveIsDark,
   ]);
@@ -1063,6 +1104,70 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
                 className="rounded border-slate-300 text-blue-600 focus:ring-0"
               />
             </label>
+
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
+                <Box className="w-3 h-3 text-amber-500" /> 35mm Iron Angle Cleats
+              </span>
+              <input
+                type="checkbox"
+                checked={showIronCleats}
+                onChange={(e) => setShowIronCleats(e.target.checked)}
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+              />
+            </label>
+
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
+                <Shield className="w-3 h-3 text-blue-500" /> Burglary Proofing Bars
+              </span>
+              <input
+                type="checkbox"
+                checked={showBurglary}
+                onChange={(e) => setShowBurglary(e.target.checked)}
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+              />
+            </label>
+
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
+                <Layers className="w-3 h-3 text-teal-500" /> Insect / Mosquito Net
+              </span>
+              <input
+                type="checkbox"
+                checked={showNet}
+                onChange={(e) => setShowNet(e.target.checked)}
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+              />
+            </label>
+
+            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
+              <span
+                className={`text-[11px] flex items-center gap-1.5 ${
+                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
+                }`}
+              >
+                <Columns className="w-3 h-3 text-indigo-500" /> Glazing Dividers
+              </span>
+              <input
+                type="checkbox"
+                checked={showDividers}
+                onChange={(e) => setShowDividers(e.target.checked)}
+                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+              />
+            </label>
           </div>
         </div>
 
@@ -1157,7 +1262,11 @@ function buildWindow3DModel(
   explodePct: number,
   showWall: boolean,
   showWireframe: boolean,
-  showDim3D: boolean
+  showDim3D: boolean,
+  showBurglary: boolean,
+  showNet: boolean,
+  showDividers: boolean,
+  showIronCleats: boolean
 ) {
   // Clear any existing children
   while (group.children.length > 0) {
@@ -1167,7 +1276,7 @@ function buildWindow3DModel(
 
   const { width: W, height: H, kind } = item;
   const frameDepth = 65; // Standard 65mm architectural frame depth
-  const sashDepth = 35; // Standard 35mm operable sash thickness
+  const sashDepth = 38; // Standard 38mm operable sash thickness
   const glassThickness = 6; // Standard 6mm architectural glass
   const wallThick = 200; // Standard 200mm masonry wall
 
@@ -1229,73 +1338,90 @@ function buildWindow3DModel(
   outerFrameGroup.position.z = -explodeOffset * 0.5;
   group.add(outerFrameGroup);
 
-  // Top Head Profile
-  createExtrusionBar(
-    outerFrameGroup,
-    W,
-    frameThickness,
-    frameDepth,
-    0,
-    H - frameThickness / 2,
-    0,
-    materials.frame,
-    materials.wire,
-    showWireframe,
-    'Top Head Profile',
-    `Outer Frame Head Extrusion (${W}mm)`,
-    `${W} × ${frameThickness} × ${frameDepth} mm`
-  );
+  const isCasementOrTransom = kind.startsWith('casement_') || kind.startsWith('transom_');
 
-  // Bottom Sill Profile
-  createExtrusionBar(
-    outerFrameGroup,
-    W,
-    frameThickness,
-    frameDepth,
-    0,
-    frameThickness / 2,
-    0,
-    materials.frame,
-    materials.wire,
-    showWireframe,
-    'Bottom Sill Profile',
-    `Outer Frame Sill Track (${W}mm)`,
-    `${W} × ${frameThickness} × ${frameDepth} mm`
-  );
+  if (isCasementOrTransom) {
+    // Casement Outer Frame: 45° Miter Cuts for Top/Bottom (Outer Width) & Sides (Outer Height) + 35mm Iron Angle Cleats
+    createCasementMiterOuterFrame(
+      outerFrameGroup,
+      W,
+      H,
+      frameThickness,
+      frameDepth,
+      materials,
+      showWireframe,
+      showIronCleats
+    );
+  } else {
+    // Standard Square-Cut Sliding Outer Frame
+    // Top Head Profile
+    createExtrusionBar(
+      outerFrameGroup,
+      W,
+      frameThickness,
+      frameDepth,
+      0,
+      H - frameThickness / 2,
+      0,
+      materials.frame,
+      materials.wire,
+      showWireframe,
+      'Top Head Profile (Sliding)',
+      `Outer Frame Head Extrusion (${W}mm)`,
+      `${W} × ${frameThickness} × ${frameDepth} mm`
+    );
 
-  // Left Jamb Profile
-  createExtrusionBar(
-    outerFrameGroup,
-    frameThickness,
-    H - frameThickness * 2,
-    frameDepth,
-    -halfW + frameThickness / 2,
-    H / 2,
-    0,
-    materials.frame,
-    materials.wire,
-    showWireframe,
-    'Left Side Jamb Profile',
-    `Outer Frame Left Jamb (${H}mm)`,
-    `${frameThickness} × ${H - frameThickness * 2} × ${frameDepth} mm`
-  );
+    // Bottom Sill Profile
+    createExtrusionBar(
+      outerFrameGroup,
+      W,
+      frameThickness,
+      frameDepth,
+      0,
+      frameThickness / 2,
+      0,
+      materials.frame,
+      materials.wire,
+      showWireframe,
+      'Bottom Sill Profile (Sliding)',
+      `Outer Frame Sill Track (${W}mm)`,
+      `${W} × ${frameThickness} × ${frameDepth} mm`
+    );
 
-  // Right Jamb Profile
-  createExtrusionBar(
-    outerFrameGroup,
-    frameThickness,
-    H - frameThickness * 2,
-    frameDepth,
-    halfW - frameThickness / 2,
-    H / 2,
-    0,
-    materials.frame,
-    materials.wire,
-    showWireframe,
-    'Right Side Jamb Profile',
-    `Outer Frame Right Jamb (${H}mm)`,
-    `${frameThickness} × ${H - frameThickness * 2} × ${frameDepth} mm`
-  );
+    // Left Jamb Profile
+    createExtrusionBar(
+      outerFrameGroup,
+      frameThickness,
+      H - frameThickness * 2,
+      frameDepth,
+      -halfW + frameThickness / 2,
+      H / 2,
+      0,
+      materials.frame,
+      materials.wire,
+      showWireframe,
+      'Left Side Jamb Profile (Sliding)',
+      `Outer Frame Left Jamb (${H}mm)`,
+      `${frameThickness} × ${H - frameThickness * 2} × ${frameDepth} mm`
+    );
+
+    // Right Jamb Profile
+    createExtrusionBar(
+      outerFrameGroup,
+      frameThickness,
+      H - frameThickness * 2,
+      frameDepth,
+      halfW - frameThickness / 2,
+      H / 2,
+      0,
+      materials.frame,
+      materials.wire,
+      showWireframe,
+      'Right Side Jamb Profile (Sliding)',
+      `Outer Frame Right Jamb (${H}mm)`,
+      `${frameThickness} × ${H - frameThickness * 2} × ${frameDepth} mm`
+    );
+  }
 
   // 3. Type-Specific Interior Profiles, Sashes, Glass, and Hardware
   const sashesGroup = new THREE.Group();
@@ -1420,7 +1546,7 @@ function buildWindow3DModel(
   // B. Casement Window Systems
   else if (kind.startsWith('casement_')) {
     if (kind === 'casement_fixed_window') {
-      // 1-Pane Fixed Casement Picture Window
+      // 1-Pane Fixed Casement Picture Window with Snap-in Bead
       createGlassPane(
         sashesGroup,
         innerW - 15,
@@ -1433,6 +1559,22 @@ function buildWindow3DModel(
         'Casement Fixed Picture Glass',
         `${innerW - 15} × ${innerH - 15} mm`
       );
+
+      // Glazing Dividers if enabled
+      if (showDividers && (item.dividerCount ?? 0) > 0) {
+        createGlazingDividers(
+          sashesGroup,
+          innerW - 15,
+          innerH - 15,
+          0,
+          H / 2,
+          0,
+          item.dividerCount ?? 1,
+          materials.frame,
+          materials.wire,
+          showWireframe
+        );
+      }
     } else if (kind === 'casement_1_fixed_1_open') {
       // 1 Fixed Bay + 1 Openable Casement Sash with Center Mullion
       const mullionW = 30;
@@ -1469,7 +1611,22 @@ function buildWindow3DModel(
         `${bayW - 16} × ${innerH - 16} mm`
       );
 
-      // Bay 2: Right Operable Casement Leaf (Hinged at outer jamb)
+      if (showDividers && (item.dividerCount ?? 0) > 0) {
+        createGlazingDividers(
+          sashesGroup,
+          bayW - 16,
+          innerH - 16,
+          -bayW / 2 - mullionW / 2,
+          H / 2,
+          0,
+          item.dividerCount ?? 1,
+          materials.frame,
+          materials.wire,
+          showWireframe
+        );
+      }
+
+      // Bay 2: Right Operable Casement Leaf (Hinged at outer jamb with 45° miter sash cuts & cleats)
       const sashW = bayW - 8;
       const sashH = innerH - 8;
       const hingeX = halfW - frameThickness;
@@ -1484,7 +1641,7 @@ function buildWindow3DModel(
       leafGroup.position.set(-sashW / 2, 0, 0);
       hingeGroup.add(leafGroup);
 
-      createSashFrameBox(
+      createCasementMiterSashFrame(
         leafGroup,
         sashW,
         sashH,
@@ -1493,10 +1650,27 @@ function buildWindow3DModel(
         materials.sash,
         materials.wire,
         materials.glass,
+        materials.ironAngle,
         showWireframe,
-        'Casement Operable Vent Sash',
+        showIronCleats,
+        'Casement Operable Vent Sash (De-Curve)',
         `${sashW} × ${sashH} mm`
       );
+
+      if (showDividers && (item.dividerCount ?? 0) > 0) {
+        createGlazingDividers(
+          leafGroup,
+          sashW - 110,
+          sashH - 110,
+          0,
+          0,
+          0,
+          item.dividerCount ?? 1,
+          materials.sash,
+          materials.wire,
+          showWireframe
+        );
+      }
 
       // Cockspur / Espag handle
       createHandle(leafGroup, -sashW / 2 + 15, 0, sashDepth / 2 + 4, materials.hardware, 'casement_lever');
@@ -1552,7 +1726,7 @@ function buildWindow3DModel(
         leafGroup.position.set(isRightHinged ? -sashW / 2 : sashW / 2, 0, 0);
         hingeGroup.add(leafGroup);
 
-        createSashFrameBox(
+        createCasementMiterSashFrame(
           leafGroup,
           sashW,
           sashH,
@@ -1561,10 +1735,27 @@ function buildWindow3DModel(
           materials.sash,
           materials.wire,
           materials.glass,
+          materials.ironAngle,
           showWireframe,
-          `Casement Operable Sash #${p + 1}`,
+          showIronCleats,
+          `Casement Operable Sash #${p + 1} (45° Miter)`,
           `${sashW} × ${sashH} mm`
         );
+
+        if (showDividers && (item.dividerCount ?? 0) > 0) {
+          createGlazingDividers(
+            leafGroup,
+            sashW - 110,
+            sashH - 110,
+            0,
+            0,
+            0,
+            item.dividerCount ?? 1,
+            materials.sash,
+            materials.wire,
+            showWireframe
+          );
+        }
 
         // Handle
         const handleX = isRightHinged ? -sashW / 2 + 15 : sashW / 2 - 15;
@@ -1615,7 +1806,7 @@ function buildWindow3DModel(
       leafGroup.position.set(0, -sashH / 2, 0);
       topHingeGroup.add(leafGroup);
 
-      createSashFrameBox(
+      createCasementMiterSashFrame(
         leafGroup,
         sashW,
         sashH,
@@ -1624,8 +1815,10 @@ function buildWindow3DModel(
         materials.sash,
         materials.wire,
         materials.glass,
+        materials.ironAngle,
         showWireframe,
-        `Transom Top-Hung Sash #${p + 1}`,
+        showIronCleats,
+        `Transom Top-Hung Sash #${p + 1} (45° Miter)`,
         `${sashW} × ${sashH} mm`
       );
 
@@ -1651,7 +1844,38 @@ function buildWindow3DModel(
     );
   }
 
-  // 4. 3D Floating Dimension Callouts & Guidelines
+  // 4. Burglary Proofing Bars & Security Frame (Casement & Transom only)
+  const isSlidingWindow = kind.startsWith('sliding_');
+  if (!isSlidingWindow && showBurglary && item.hasBurglary !== false) {
+    createBurglaryBarsAndFrame(
+      group,
+      W,
+      H,
+      innerW,
+      innerH,
+      frameThickness,
+      frameDepth,
+      materials,
+      showWireframe,
+      explodeOffset
+    );
+  }
+
+  // 5. 11:32 Insect / Mosquito Screen Net (Slidable 2-Panel System)
+  if (showNet && item.hasNet !== false) {
+    createInsectNetFrameAndMesh(
+      group,
+      innerW,
+      innerH,
+      H,
+      frameDepth,
+      materials,
+      showWireframe,
+      explodeOffset
+    );
+  }
+
+  // 6. 3D Floating Dimension Callouts & Guidelines
   if (showDim3D) {
     create3DDimensionLines(group, W, H, frameDepth, materials.wire);
   }
@@ -1660,6 +1884,615 @@ function buildWindow3DModel(
 // ==========================================
 // 3D GEOMETRY HELPER UTILITIES
 // ==========================================
+
+function createMiterShapeExtrusion(
+  parent: THREE.Group,
+  points: [number, number][],
+  depth: number,
+  zPos: number,
+  material: THREE.Material,
+  wireMaterial: THREE.Material,
+  showWireframe: boolean,
+  title: string,
+  desc: string,
+  dims: string
+) {
+  const shape = new THREE.Shape();
+  shape.moveTo(points[0][0], points[0][1]);
+  for (let i = 1; i < points.length; i++) {
+    shape.lineTo(points[i][0], points[i][1]);
+  }
+  shape.closePath();
+
+  const extrudeSettings = {
+    depth: depth,
+    bevelEnabled: false,
+  };
+
+  const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.z = zPos;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+
+  mesh.userData = {
+    title,
+    description: desc,
+    dimensions: dims,
+    material: 'Architectural Aluminium Extrusion (6063-T5) - 45° Miter Cut',
+  };
+
+  if (showWireframe) {
+    const edges = new THREE.EdgesGeometry(geo);
+    const line = new THREE.LineSegments(edges, wireMaterial);
+    mesh.add(line);
+  }
+
+  parent.add(mesh);
+  return mesh;
+}
+
+function createCornerIronAngleCleat(
+  parent: THREE.Group,
+  cornerX: number,
+  cornerY: number,
+  cornerZ: number,
+  rotationAngleDeg: number,
+  materials: any,
+  showWireframe: boolean
+) {
+  const cleatGroup = new THREE.Group();
+  cleatGroup.position.set(cornerX, cornerY, cornerZ);
+  cleatGroup.rotation.z = (rotationAngleDeg * Math.PI) / 180;
+
+  const cleatSize = 35; // 35mm standard casement angle cleat
+  const cleatThick = 4;
+  const cleatWidth = 24;
+
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.lineTo(cleatSize, 0);
+  shape.lineTo(cleatSize, cleatThick);
+  shape.lineTo(cleatThick, cleatThick);
+  shape.lineTo(cleatThick, cleatSize);
+  shape.lineTo(0, cleatSize);
+  shape.closePath();
+
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: cleatWidth, bevelEnabled: false });
+  const mesh = new THREE.Mesh(geo, materials.ironAngle);
+  mesh.position.z = -cleatWidth / 2;
+  mesh.castShadow = true;
+
+  mesh.userData = {
+    title: '35mm Corner Iron Angle Cleat',
+    description: 'Internal galvanized iron angle bracket (5.0m stock, 35mm cut) reinforcing 45° miter joint',
+    dimensions: '35 × 35 × 24 mm',
+    material: 'Heavy-Duty Galvanized Iron Cleat (35mm)',
+  };
+
+  if (showWireframe) {
+    const edges = new THREE.EdgesGeometry(geo);
+    const line = new THREE.LineSegments(edges, materials.wire);
+    mesh.add(line);
+  }
+
+  cleatGroup.add(mesh);
+
+  // Fastener screw heads
+  const screwGeo = new THREE.CylinderGeometry(2.5, 2.5, 3, 8);
+  const screw1 = new THREE.Mesh(screwGeo, materials.hardware);
+  screw1.rotation.x = Math.PI / 2;
+  screw1.position.set(cleatSize * 0.6, cleatThick / 2, 0);
+  cleatGroup.add(screw1);
+
+  const screw2 = new THREE.Mesh(screwGeo, materials.hardware);
+  screw2.rotation.y = Math.PI / 2;
+  screw2.position.set(cleatThick / 2, cleatSize * 0.6, 0);
+  cleatGroup.add(screw2);
+
+  parent.add(cleatGroup);
+}
+
+function createCasementMiterOuterFrame(
+  parent: THREE.Group,
+  W: number,
+  H: number,
+  thickness: number,
+  depth: number,
+  materials: any,
+  showWireframe: boolean,
+  showIronCleats: boolean
+) {
+  const halfW = W / 2;
+  const zPos = -depth / 2;
+
+  // 1. Top Head Profile (Casement Outer Width - 45° Miter on both ends)
+  const topPoints: [number, number][] = [
+    [-halfW, H],
+    [halfW, H],
+    [halfW - thickness, H - thickness],
+    [-halfW + thickness, H - thickness],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    topPoints,
+    depth,
+    zPos,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Casement Outer Width Profile (Top Head)',
+    `Horizontal Top Rail with 45° Miter Cut (${W}mm)`,
+    `${W} × ${thickness} × ${depth} mm`
+  );
+
+  // 2. Bottom Sill Profile (Casement Outer Width - 45° Miter on both ends)
+  const bottomPoints: [number, number][] = [
+    [-halfW, 0],
+    [halfW, 0],
+    [halfW - thickness, thickness],
+    [-halfW + thickness, thickness],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    bottomPoints,
+    depth,
+    zPos,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Casement Outer Width Profile (Bottom Sill)',
+    `Horizontal Bottom Rail with 45° Miter Cut (${W}mm)`,
+    `${W} × ${thickness} × ${depth} mm`
+  );
+
+  // 3. Left Side Jamb (Casement Outer Height - 45° Miter on both ends)
+  const leftPoints: [number, number][] = [
+    [-halfW, 0],
+    [-halfW + thickness, thickness],
+    [-halfW + thickness, H - thickness],
+    [-halfW, H],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    leftPoints,
+    depth,
+    zPos,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Casement Outer Height Profile (Left Side Jamb)',
+    `Vertical Side Jamb with 45° Miter Cut (${H}mm)`,
+    `${thickness} × ${H} × ${depth} mm`
+  );
+
+  // 4. Right Side Jamb (Casement Outer Height - 45° Miter on both ends)
+  const rightPoints: [number, number][] = [
+    [halfW, 0],
+    [halfW - thickness, thickness],
+    [halfW - thickness, H - thickness],
+    [halfW, H],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    rightPoints,
+    depth,
+    zPos,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Casement Outer Height Profile (Right Side Jamb)',
+    `Vertical Side Jamb with 45° Miter Cut (${H}mm)`,
+    `${thickness} × ${H} × ${depth} mm`
+  );
+
+  // 5. 35mm Corner Iron Angle Cleats at all 4 miter corners
+  if (showIronCleats) {
+    const cleatInset = 6;
+    // Bottom-Left (Angle 0°)
+    createCornerIronAngleCleat(
+      parent,
+      -halfW + cleatInset,
+      cleatInset,
+      0,
+      0,
+      materials,
+      showWireframe
+    );
+    // Bottom-Right (Angle 90°)
+    createCornerIronAngleCleat(
+      parent,
+      halfW - cleatInset,
+      cleatInset,
+      0,
+      90,
+      materials,
+      showWireframe
+    );
+    // Top-Right (Angle 180°)
+    createCornerIronAngleCleat(
+      parent,
+      halfW - cleatInset,
+      H - cleatInset,
+      0,
+      180,
+      materials,
+      showWireframe
+    );
+    // Top-Left (Angle 270°)
+    createCornerIronAngleCleat(
+      parent,
+      -halfW + cleatInset,
+      H - cleatInset,
+      0,
+      270,
+      materials,
+      showWireframe
+    );
+  }
+}
+
+function createCasementMiterSashFrame(
+  parent: THREE.Group,
+  width: number,
+  height: number,
+  depth: number,
+  borderWidth: number,
+  sashMat: THREE.Material,
+  wireMat: THREE.Material,
+  glassMat: THREE.Material,
+  ironAngleMat: THREE.Material,
+  showWireframe: boolean,
+  showIronCleats: boolean,
+  title: string,
+  dims: string
+) {
+  const halfW = width / 2;
+  const halfH = height / 2;
+  const zPos = -depth / 2;
+
+  // Sash Top Rail (45° Miter)
+  const topPoints: [number, number][] = [
+    [-halfW, halfH],
+    [halfW, halfH],
+    [halfW - borderWidth, halfH - borderWidth],
+    [-halfW + borderWidth, halfH - borderWidth],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    topPoints,
+    depth,
+    zPos,
+    sashMat,
+    wireMat,
+    showWireframe,
+    `${title} - Top Rail`,
+    `Casement De-Curve Sash Top Bar (${width}mm)`,
+    `${width} × ${borderWidth} mm`
+  );
+
+  // Sash Bottom Rail (45° Miter)
+  const bottomPoints: [number, number][] = [
+    [-halfW, -halfH],
+    [halfW, -halfH],
+    [halfW - borderWidth, -halfH + borderWidth],
+    [-halfW + borderWidth, -halfH + borderWidth],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    bottomPoints,
+    depth,
+    zPos,
+    sashMat,
+    wireMat,
+    showWireframe,
+    `${title} - Bottom Rail`,
+    `Casement De-Curve Sash Bottom Bar (${width}mm)`,
+    `${width} × ${borderWidth} mm`
+  );
+
+  // Sash Left Stile (45° Miter)
+  const leftPoints: [number, number][] = [
+    [-halfW, -halfH],
+    [-halfW + borderWidth, -halfH + borderWidth],
+    [-halfW + borderWidth, halfH - borderWidth],
+    [-halfW, halfH],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    leftPoints,
+    depth,
+    zPos,
+    sashMat,
+    wireMat,
+    showWireframe,
+    `${title} - Left Stile`,
+    `Casement De-Curve Sash Left Stile (${height}mm)`,
+    `${borderWidth} × ${height} mm`
+  );
+
+  // Sash Right Stile (45° Miter)
+  const rightPoints: [number, number][] = [
+    [halfW, -halfH],
+    [halfW - borderWidth, -halfH + borderWidth],
+    [halfW - borderWidth, halfH - borderWidth],
+    [halfW, halfH],
+  ];
+  createMiterShapeExtrusion(
+    parent,
+    rightPoints,
+    depth,
+    zPos,
+    sashMat,
+    wireMat,
+    showWireframe,
+    `${title} - Right Stile`,
+    `Casement De-Curve Sash Right Stile (${height}mm)`,
+    `${borderWidth} × ${height} mm`
+  );
+
+  // Infill Glass Pane
+  const glassW = width - borderWidth * 2 + 12;
+  const glassH = height - borderWidth * 2 + 12;
+  createGlassPane(
+    parent,
+    glassW,
+    glassH,
+    6,
+    0,
+    0,
+    0,
+    glassMat,
+    `${title} Glass Pane`,
+    `${glassW} × ${glassH} mm`
+  );
+}
+
+function createBurglaryBarsAndFrame(
+  parent: THREE.Group,
+  W: number,
+  H: number,
+  innerW: number,
+  innerH: number,
+  frameThickness: number,
+  frameDepth: number,
+  materials: any,
+  showWireframe: boolean,
+  explodeOffset: number
+) {
+  const burglaryGroup = new THREE.Group();
+  burglaryGroup.position.z = frameDepth / 2 + 25 + explodeOffset * 0.6;
+  const halfW = W / 2;
+  const bThick = 25; // 25mm burglary framing profile
+
+  // Burglary Top Frame
+  createExtrusionBar(
+    burglaryGroup,
+    W - 10,
+    bThick,
+    20,
+    0,
+    H - frameThickness + bThick / 2 - 5,
+    0,
+    materials.burglary,
+    materials.wire,
+    showWireframe,
+    'Burglary Top Security Frame Profile',
+    `Top Security Channel Profile (${W}mm)`,
+    `${W} × ${bThick} × 20 mm`
+  );
+
+  // Burglary Bottom Frame
+  createExtrusionBar(
+    burglaryGroup,
+    W - 10,
+    bThick,
+    20,
+    0,
+    frameThickness - bThick / 2 + 5,
+    0,
+    materials.burglary,
+    materials.wire,
+    showWireframe,
+    'Burglary Bottom Security Frame Profile',
+    `Bottom Security Channel Profile (${W}mm)`,
+    `${W} × ${bThick} × 20 mm`
+  );
+
+  // Burglary Left Frame
+  createExtrusionBar(
+    burglaryGroup,
+    bThick,
+    H - frameThickness * 2,
+    20,
+    -halfW + frameThickness - bThick / 2 + 5,
+    H / 2,
+    0,
+    materials.burglary,
+    materials.wire,
+    showWireframe,
+    'Burglary Left Side Frame Profile',
+    `Vertical Side Security Channel (${H}mm)`,
+    `${bThick} × ${H} × 20 mm`
+  );
+
+  // Burglary Right Frame
+  createExtrusionBar(
+    burglaryGroup,
+    bThick,
+    H - frameThickness * 2,
+    20,
+    halfW - frameThickness + bThick / 2 - 5,
+    H / 2,
+    0,
+    materials.burglary,
+    materials.wire,
+    showWireframe,
+    'Burglary Right Side Frame Profile',
+    `Vertical Side Security Channel (${H}mm)`,
+    `${bThick} × ${H} × 20 mm`
+  );
+
+  // Ballo Straight Burglary Iron Rods (Horizontal steel rods with 50mm pressed end tabs, spaced 120-140mm)
+  const targetSpacing = 125;
+  const numDivisions = Math.max(2, Math.round(innerH / targetSpacing));
+  const rodSpacing = innerH / numDivisions;
+  const numRods = Math.max(1, numDivisions - 1);
+  const rodLength = W + 40;
+
+  for (let r = 1; r <= numRods; r++) {
+    const rodY = frameThickness + r * rodSpacing;
+    const rodGeo = new THREE.CylinderGeometry(6, 6, rodLength, 12);
+    const rodMesh = new THREE.Mesh(rodGeo, materials.burglary);
+    rodMesh.rotation.z = Math.PI / 2;
+    rodMesh.position.set(0, rodY, 0);
+    rodMesh.castShadow = true;
+
+    rodMesh.userData = {
+      title: `Ballo Straight Iron Rod #${r}`,
+      description: `Solid steel security bar with 50mm pressed end tabs embedded into burglary frame (${rodLength}mm)`,
+      dimensions: `Ø12mm × ${rodLength}mm (50mm end tab)`,
+      material: 'Hardened Solid Iron / Steel Rod (Ballo Straight)',
+    };
+
+    if (showWireframe) {
+      const edges = new THREE.EdgesGeometry(rodGeo);
+      const line = new THREE.LineSegments(edges, materials.wire);
+      rodMesh.add(line);
+    }
+
+    burglaryGroup.add(rodMesh);
+  }
+
+  parent.add(burglaryGroup);
+}
+
+function createInsectNetFrameAndMesh(
+  parent: THREE.Group,
+  innerW: number,
+  innerH: number,
+  H: number,
+  frameDepth: number,
+  materials: any,
+  showWireframe: boolean,
+  explodeOffset: number
+) {
+  const netGroup = new THREE.Group();
+  // Set Y to H / 2 to center the net screen inside the window opening (prevent hanging below the window)
+  netGroup.position.set(0, H / 2, frameDepth / 2 + 12 + explodeOffset * 0.5);
+
+  const netFrameWidth = 20; // 20mm 11:32 face width
+  const netDepth = 12; // 11:32 profile depth
+
+  // Divide normal width by 2 so it separates and is slidable:
+  const panelW = (innerW - 4) / 2;
+  const panelH = innerH - 6;
+
+  // Panel #1 (Left Slidable Screen)
+  const leftPanelGroup = new THREE.Group();
+  leftPanelGroup.position.set(-innerW / 4, 0, -2);
+  netGroup.add(leftPanelGroup);
+
+  createSashFrameBox(
+    leftPanelGroup,
+    panelW,
+    panelH,
+    netDepth,
+    netFrameWidth,
+    materials.frame,
+    materials.wire,
+    materials.netMesh,
+    showWireframe,
+    '11:32 Slidable Net Screen (Left Panel)',
+    `${panelW.toFixed(0)} × ${panelH.toFixed(0)} mm`
+  );
+
+  // Panel #2 (Right Slidable Screen with separate meeting stile and sliding track offset)
+  const rightPanelGroup = new THREE.Group();
+  rightPanelGroup.position.set(innerW / 4, 0, 2);
+  netGroup.add(rightPanelGroup);
+
+  createSashFrameBox(
+    rightPanelGroup,
+    panelW,
+    panelH,
+    netDepth,
+    netFrameWidth,
+    materials.frame,
+    materials.wire,
+    materials.netMesh,
+    showWireframe,
+    '11:32 Slidable Net Screen (Right Panel)',
+    `${panelW.toFixed(0)} × ${panelH.toFixed(0)} mm`
+  );
+
+  parent.add(netGroup);
+}
+
+function createGlazingDividers(
+  parent: THREE.Group,
+  spanW: number,
+  spanH: number,
+  centerX: number,
+  centerY: number,
+  centerZ: number,
+  dividerCount: number,
+  barMaterial: THREE.Material,
+  wireMaterial: THREE.Material,
+  showWireframe: boolean
+) {
+  const dividerGroup = new THREE.Group();
+  dividerGroup.position.set(centerX, centerY, centerZ);
+
+  const barThick = 18; // 18mm Georgian divider bar
+  const barDepth = 8;
+
+  // Vertical dividers
+  const vCols = dividerCount + 1;
+  const colSpacing = spanW / vCols;
+  for (let c = 1; c < vCols; c++) {
+    const x = -spanW / 2 + c * colSpacing;
+    createExtrusionBar(
+      dividerGroup,
+      barThick,
+      spanH,
+      barDepth,
+      x,
+      0,
+      0,
+      barMaterial,
+      wireMaterial,
+      showWireframe,
+      `Vertical Glazing Divider Bar #${c}`,
+      `Colonial/Georgian Architectural Bar (${spanH}mm)`,
+      `${barThick} × ${spanH} mm`
+    );
+  }
+
+  // Horizontal dividers
+  const hRows = Math.max(2, dividerCount + 1);
+  const rowSpacing = spanH / hRows;
+  for (let r = 1; r < hRows; r++) {
+    const y = -spanH / 2 + r * rowSpacing;
+    createExtrusionBar(
+      dividerGroup,
+      spanW,
+      barThick,
+      barDepth,
+      0,
+      y,
+      0,
+      barMaterial,
+      wireMaterial,
+      showWireframe,
+      `Horizontal Glazing Divider Bar #${r}`,
+      `Colonial/Georgian Architectural Bar (${spanW}mm)`,
+      `${spanW} × ${barThick} mm`
+    );
+  }
+
+  parent.add(dividerGroup);
+}
 
 function createExtrusionBar(
   parent: THREE.Group,

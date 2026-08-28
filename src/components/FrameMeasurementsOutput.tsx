@@ -12,6 +12,10 @@ import {
   FileSpreadsheet,
   CheckCircle2,
   Sparkles,
+  Shield,
+  Grid,
+  Columns,
+  Box,
 } from 'lucide-react';
 import './FrameMeasurementsOutput.css';
 
@@ -25,7 +29,9 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
   constants,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterComponent, setFilterComponent] = useState<'all' | 'outer_frame' | 'sash' | 'mullion' | 'bead' | 'door_frame'>('all');
+  const [filterComponent, setFilterComponent] = useState<
+    'all' | 'outer_frame' | 'sash' | 'mullion' | 'bead' | 'door_frame' | 'burglary' | 'net' | 'divider'
+  >('all');
   const [isExporting, setIsExporting] = useState(false);
 
   const handleDownloadPdf = () => {
@@ -45,7 +51,30 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
       c.purpose.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.profileName.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchComponent = filterComponent === 'all' || c.componentType === filterComponent;
+    let matchComponent = filterComponent === 'all';
+    if (filterComponent !== 'all') {
+      if (filterComponent === 'burglary') {
+        matchComponent =
+          c.componentType === 'burglary' ||
+          c.profileName.toLowerCase().includes('burglary') ||
+          c.profileName.toLowerCase().includes('iron rod') ||
+          c.profileName.toLowerCase().includes('ballo');
+      } else if (filterComponent === 'net') {
+        matchComponent =
+          c.componentType === 'net' ||
+          c.profileName.toLowerCase().includes('net') ||
+          c.profileName.toLowerCase().includes('11:25') ||
+          c.profileName.toLowerCase().includes('11:26') ||
+          c.profileName.toLowerCase().includes('11:32');
+      } else if (filterComponent === 'divider') {
+        matchComponent =
+          c.componentType === 'divider' ||
+          c.profileName.toLowerCase().includes('divider') ||
+          c.purpose.toLowerCase().includes('divider');
+      } else {
+        matchComponent = c.componentType === filterComponent;
+      }
+    }
     return matchSearch && matchComponent;
   });
 
@@ -55,6 +84,31 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
       g.paneDescription.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  // Dedicated subsets for overview
+  const burglaryCuts = calculation.allCuts.filter(
+    (c) =>
+      c.componentType === 'burglary' ||
+      c.profileName.toLowerCase().includes('burglary') ||
+      c.profileName.toLowerCase().includes('iron rod') ||
+      c.profileName.toLowerCase().includes('ballo')
+  );
+
+  const netCuts = calculation.allCuts.filter(
+    (c) =>
+      c.componentType === 'net' ||
+      c.profileName.toLowerCase().includes('net') ||
+      c.profileName.toLowerCase().includes('11:25') ||
+      c.profileName.toLowerCase().includes('11:26') ||
+      c.profileName.toLowerCase().includes('11:32')
+  );
+
+  const dividerCuts = calculation.allCuts.filter(
+    (c) =>
+      c.componentType === 'divider' ||
+      c.profileName.toLowerCase().includes('divider') ||
+      c.purpose.toLowerCase().includes('divider')
+  );
 
   return (
     <div className="space-y-6">
@@ -70,7 +124,7 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
             </h3>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Exact cutting sizes (mm), miters (90°/45°), quantities, and 1-pane glass dimensions for{' '}
+            Exact cutting sizes (mm), miters (90°/45°), quantities, burglary proofing, netting, and 1-pane glass dimensions for{' '}
             <strong className="text-slate-700">{calculation.projectName}</strong>
           </p>
         </div>
@@ -86,7 +140,7 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
       </div>
 
       {/* Metric Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3.5">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
           <div className="text-xs text-slate-500 font-medium">Total Frame Cuts</div>
           <div className="text-2xl font-extrabold text-slate-800 mt-1 font-mono">
@@ -104,21 +158,39 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Burglary Cuts</div>
+          <div className="text-2xl font-extrabold text-amber-700 mt-1 font-mono">
+            {burglaryCuts.reduce((s, c) => s + c.quantity, 0)}{' '}
+            <span className="text-xs font-normal text-slate-500">pcs</span>
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Frames & Ballo rods</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">Netting Frame Cuts</div>
+          <div className="text-2xl font-extrabold text-emerald-700 mt-1 font-mono">
+            {netCuts.reduce((s, c) => s + c.quantity, 0)}{' '}
+            <span className="text-xs font-normal text-slate-500">pcs</span>
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5">11:25/26/32 profiles</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+          <div className="text-xs text-slate-500 font-medium">45° Miter Cuts</div>
+          <div className="text-2xl font-extrabold text-indigo-700 mt-1 font-mono">
+            {calculation.allCuts.filter((c) => c.cutAngle === '45°').reduce((s, c) => s + c.quantity, 0)}{' '}
+            <span className="text-xs font-normal text-slate-500">pcs</span>
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Miter joint corners</div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
           <div className="text-xs text-slate-500 font-medium">90° Butt Cuts</div>
           <div className="text-2xl font-extrabold text-slate-700 mt-1 font-mono">
             {calculation.allCuts.filter((c) => c.cutAngle === '90°').reduce((s, c) => s + c.quantity, 0)}{' '}
             <span className="text-xs font-normal text-slate-500">pcs</span>
           </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Straight chopsaw cuts</div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <div className="text-xs text-slate-500 font-medium">45° Miter Cuts</div>
-          <div className="text-2xl font-extrabold text-amber-700 mt-1 font-mono">
-            {calculation.allCuts.filter((c) => c.cutAngle === '45°').reduce((s, c) => s + c.quantity, 0)}{' '}
-            <span className="text-xs font-normal text-slate-500">pcs</span>
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Miter joint corners</div>
+          <div className="text-[11px] text-slate-400 mt-0.5">Chopsaw straight cuts</div>
         </div>
       </div>
 
@@ -142,6 +214,9 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
               { id: 'outer_frame', label: 'Outer Frames' },
               { id: 'sash', label: 'Sashes / Rails' },
               { id: 'mullion', label: 'Mullions' },
+              { id: 'burglary', label: '🛡️ Burglary' },
+              { id: 'net', label: '🦟 Insect Net' },
+              { id: 'divider', label: '🪟 Dividers' },
               { id: 'bead', label: 'Glass Beads' },
             ] as const
           ).map((tab) => (
@@ -166,7 +241,7 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
           <div className="flex items-center gap-2">
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             <h4 className="font-semibold text-slate-800 text-sm">
-              1. Aluminum Frame Profile Cut Schedule ({filteredCuts.length} line items)
+              1. Aluminum Frame & Feature Profile Cut Schedule ({filteredCuts.length} line items)
             </h4>
           </div>
           <span className="text-xs text-slate-500">
@@ -205,6 +280,7 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-800">{c.purpose}</div>
+                      {c.notes && <div className="text-[10px] text-slate-400">{c.notes}</div>}
                     </td>
                     <td className="px-4 py-3 text-slate-600 font-medium">{c.profileName}</td>
                     <td className="px-4 py-3 text-center">

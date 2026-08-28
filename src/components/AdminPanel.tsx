@@ -70,7 +70,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [constantFormData, setConstantFormData] = useState<ConstantProfilesConfig>(constants);
   const [priceFormData, setPriceFormData] = useState<MaterialPricesConfig>(prices);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [constantActiveTab, setConstantActiveTab] = useState<'sliding' | 'casement' | 'transom' | 'fixed_doors' | 'general'>('sliding');
+  const [constantActiveTab, setConstantActiveTab] = useState<'sliding' | 'casement' | 'burglary_net' | 'transom' | 'fixed_doors' | 'general'>('sliding');
   const [priceActiveTab, setPriceActiveTab] = useState<'profiles' | 'glass' | 'accessories' | 'labor_rates'>('profiles');
 
   // Handle Admin OTP Dispatch
@@ -704,7 +704,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Casement Outer Frame (5.8m)
+                      Casement Outer Width Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -714,9 +714,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="number"
                         min="0"
                         step="0.5"
-                        value={priceFormData.profileBarPrices.casementOuterFrame ?? 52}
+                        value={priceFormData.profileBarPrices.casementOuterWidth ?? 44}
                         onChange={(e) =>
-                          handlePriceFieldChange('profileBarPrices', 'casementOuterFrame', parseFloat(e.target.value) || 0)
+                          handlePriceFieldChange('profileBarPrices', 'casementOuterWidth', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
@@ -725,7 +725,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Casement Mullion T-Bar (5.8m)
+                      Casement Outer Height Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -735,9 +735,51 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="number"
                         min="0"
                         step="0.5"
-                        value={priceFormData.profileBarPrices.casementMullion ?? 56}
+                        value={priceFormData.profileBarPrices.casementOuterHeight ?? 44}
                         onChange={(e) =>
-                          handlePriceFieldChange('profileBarPrices', 'casementMullion', parseFloat(e.target.value) || 0)
+                          handlePriceFieldChange('profileBarPrices', 'casementOuterHeight', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Casement 2-Mullion Profile / T-Bar (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.casement2Mullion ?? 48}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'casement2Mullion', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Casement 3-Mullion Heavy Profile (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.casement3Mullion ?? 54}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'casement3Mullion', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
@@ -756,9 +798,51 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="number"
                         min="0"
                         step="0.5"
-                        value={priceFormData.profileBarPrices.casementDeCurveSash ?? 48}
+                        value={priceFormData.profileBarPrices.casementDeCurveSash ?? 42}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementDeCurveSash', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Glazing Divider Bar Profile (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.glazingDivider ?? 24}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'glazingDivider', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Casement Inner Corner Iron Angle (5.0m Stock)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.casementIronAngle ?? 12}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'casementIronAngle', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
@@ -780,6 +864,140 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         value={priceFormData.profileBarPrices.casementGlazingBead ?? 18}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementGlazingBead', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Casement Burglary & Netting Profiles */}
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                    <span>Burglary & Net Profiles (5.8m)</span>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Burglary Top & Side Frame (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.casementBurglaryTopSideFrame ?? 38}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'casementBurglaryTopSideFrame', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Burglary Bottom Frame (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.casementBurglaryBottomFrame ?? 38}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'casementBurglaryBottomFrame', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      11:25 Net Frame Profile - Sides/Bottom (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.netFrame1125 ?? 32}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'netFrame1125', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      11:26 Net Frame Profile - Top (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.netFrame1126 ?? 32}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'netFrame1126', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      11:32 Net Frame Profile - Net Perimeter (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.netFrame1132 ?? 28}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'netFrame1132', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Burglary Iron Rod / Ballo Straight (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.burglaryIronRod ?? 18}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'burglaryIronRod', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
@@ -1313,6 +1531,94 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <span className="ml-1.5 text-[10px] text-slate-500">/pair</span>
                   </div>
                 </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Stainless Steel Window Stopper Restrictor
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                      {sym}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.2"
+                      value={priceFormData.accessoryPrices.steelStopperPiece ?? 3.5}
+                      onChange={(e) =>
+                        handlePriceFieldChange('accessoryPrices', 'steelStopperPiece', parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                    />
+                    <span className="ml-1.5 text-[10px] text-slate-500">/pc</span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Casement Heavy Butt / Friction Hinge
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                      {sym}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.2"
+                      value={priceFormData.accessoryPrices.casementHingePiece ?? 4.0}
+                      onChange={(e) =>
+                        handlePriceFieldChange('accessoryPrices', 'casementHingePiece', parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                    />
+                    <span className="ml-1.5 text-[10px] text-slate-500">/pc</span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Insect Net Mesh Roll (1m × 5.8m)
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                      {sym}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.5"
+                      value={priceFormData.accessoryPrices.netRollPrice ?? 22.0}
+                      onChange={(e) =>
+                        handlePriceFieldChange('accessoryPrices', 'netRollPrice', parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                    />
+                    <span className="ml-1.5 text-[10px] text-slate-500">/roll</span>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Net Rubber Spline Gasket Roll (5m)
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                      {sym}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.2"
+                      value={priceFormData.accessoryPrices.netRubberRollPrice ?? 5.0}
+                      onChange={(e) =>
+                        handlePriceFieldChange('accessoryPrices', 'netRubberRollPrice', parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                    />
+                    <span className="ml-1.5 text-[10px] text-slate-500">/roll</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1547,6 +1853,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </button>
 
             <button
+              onClick={() => setConstantActiveTab('burglary_net')}
+              className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${
+                constantActiveTab === 'burglary_net'
+                  ? 'bg-white text-indigo-700 shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:bg-white/50'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Burglary & Netting</span>
+            </button>
+
+            <button
               onClick={() => setConstantActiveTab('transom')}
               className={`flex-1 min-w-[130px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg text-xs font-bold transition-all ${
                 constantActiveTab === 'transom'
@@ -1730,16 +2048,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           {/* Casement Tab */}
           {constantActiveTab === 'casement' && (
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  Casement Window Profiles & Engineering Tolerances
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure separate outer frame width & height materials, mullions, de-curve sashes, glazing dividers, and 35mm miter iron angle corner cleats.
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="text-xs font-bold text-slate-800 uppercase">Casement Outer Frame</div>
+                  <div className="text-xs font-bold text-slate-800 uppercase">Casement Outer Width Profile</div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementOuterFrame?.faceWidth ?? 45}
+                      value={constantFormData.casementOuterWidth?.faceWidth ?? 45}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementOuterFrame', 'faceWidth'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementOuterWidth', 'faceWidth'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -1748,9 +2075,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Edge Overlap (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementOuterFrame?.edgeOverlap ?? 8}
+                      value={constantFormData.casementOuterWidth?.edgeOverlap ?? 8}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementOuterFrame', 'edgeOverlap'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementOuterWidth', 'edgeOverlap'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -1758,14 +2085,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                  <div className="text-xs font-bold text-slate-800 uppercase">Casement Mullion (T-Bar)</div>
+                  <div className="text-xs font-bold text-slate-800 uppercase">Casement Outer Height Profile</div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementMullion?.faceWidth ?? 45}
+                      value={constantFormData.casementOuterHeight?.faceWidth ?? 45}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementMullion', 'faceWidth'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementOuterHeight', 'faceWidth'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -1774,9 +2101,61 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Edge Overlap (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementMullion?.edgeOverlap ?? 8}
+                      value={constantFormData.casementOuterHeight?.edgeOverlap ?? 8}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementMullion', 'edgeOverlap'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementOuterHeight', 'edgeOverlap'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Casement 2-Mullion (T-Bar)</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casement2Mullion?.faceWidth ?? 45}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casement2Mullion', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Edge Overlap (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casement2Mullion?.edgeOverlap ?? 8}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casement2Mullion', 'edgeOverlap'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Casement 3-Mullion (Heavy)</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casement3Mullion?.faceWidth ?? 51}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casement3Mullion', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Edge Overlap (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casement3Mullion?.edgeOverlap ?? 8}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casement3Mullion', 'edgeOverlap'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -1810,6 +2189,58 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Glazing Divider Bar</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.glazingDivider?.faceWidth ?? 20}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['glazingDivider', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Deduction / Depth (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.glazingDivider?.pocketDepth ?? 10}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['glazingDivider', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Corner Iron Angle (5000mm Stock)</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Cut Length per Joint (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casementIronAngle?.cutLengthPerJoint ?? 35}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casementIronAngle', 'cutLengthPerJoint'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Stock Bar Length (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casementIronAngle?.stockLength ?? 5000}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casementIronAngle', 'stockLength'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="text-xs font-bold text-slate-800 uppercase">Casement Glazing Bead</div>
                   <div>
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
@@ -1829,6 +2260,156 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       value={constantFormData.casementGlazingBead?.pocketDepth ?? 10}
                       onChange={(e) =>
                         handleConstantFieldChange(['casementGlazingBead', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Burglary & Netting Tab */}
+          {constantActiveTab === 'burglary_net' && (
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  Casement Burglary & Insect Netting Engineering
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Configure burglary frames, ballo rod pitch spacing (100–150mm), and net profile deduction allowances (11:25, 11:26, 11:32).
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Burglary Top & Side Frame</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casementBurglaryTopSideFrame?.faceWidth ?? 35}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casementBurglaryTopSideFrame', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Pocket Depth (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casementBurglaryTopSideFrame?.pocketDepth ?? 15}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casementBurglaryTopSideFrame', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Burglary Bottom Frame</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casementBurglaryBottomFrame?.faceWidth ?? 35}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casementBurglaryBottomFrame', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Pocket Depth (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.casementBurglaryBottomFrame?.pocketDepth ?? 15}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['casementBurglaryBottomFrame', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">Burglary Iron Rod / Ballo Spacing</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Min Pitch Spacing (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.burglaryIronRod?.minSpacing ?? 100}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['burglaryIronRod', 'minSpacing'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Max Pitch Spacing (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.burglaryIronRod?.maxSpacing ?? 150}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['burglaryIronRod', 'maxSpacing'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Extra Embedded End Length (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.burglaryIronRod?.extraLength ?? 100}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['burglaryIronRod', 'extraLength'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">11:25 Net Frame (Sides & Bottom)</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.netFrame1125?.faceWidth ?? 25}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['netFrame1125', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">11:26 Net Frame (Top)</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.netFrame1126?.faceWidth ?? 26}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['netFrame1126', 'faceWidth'], parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="text-xs font-bold text-slate-800 uppercase">11:32 Net Frame (Net Perimeter)</div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Face Width (mm)</label>
+                    <input
+                      type="number"
+                      value={constantFormData.netFrame1132?.faceWidth ?? 32}
+                      onChange={(e) =>
+                        handleConstantFieldChange(['netFrame1132', 'faceWidth'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />

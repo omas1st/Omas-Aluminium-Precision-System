@@ -22,6 +22,11 @@ import {
   Edit2,
   FolderOpen,
   X,
+  Shield,
+  Grid,
+  Columns,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 import './MeasurementInput.css';
 
@@ -56,6 +61,11 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
   const [inputTag, setInputTag] = useState<string>('W1');
   const [inputNotes, setInputNotes] = useState<string>('');
 
+  // Feature Options: Burglary Proofing, Net Screen, Glazing Dividers
+  const [inputHasBurglary, setInputHasBurglary] = useState<boolean>(true);
+  const [inputHasNet, setInputHasNet] = useState<boolean>(true);
+  const [inputDividerCount, setInputDividerCount] = useState<number>(1);
+
   // Editing state for previously added item
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
@@ -64,6 +74,8 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
 
   // Helper text for kind
   const activeKind: FabricationKind = fabType === 'window' ? windowSubtype : doorSubtype;
+
+  const isCasementType = activeKind.startsWith('casement_');
 
   const getReadableKindName = (k: FabricationKind) => {
     switch (k) {
@@ -137,6 +149,9 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                 quantity: Math.max(1, inputQuantity),
                 tag: inputTag || `Unit #${item.id.slice(-3)}`,
                 notes: inputNotes,
+                hasBurglary: inputHasBurglary,
+                hasNet: inputHasNet,
+                dividerCount: inputDividerCount,
               }
             : item
         )
@@ -153,6 +168,9 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
         quantity: Math.max(1, inputQuantity),
         tag: inputTag || `Unit #${itemsList.length + 1}`,
         notes: inputNotes,
+        hasBurglary: inputHasBurglary,
+        hasNet: inputHasNet,
+        dividerCount: inputDividerCount,
       };
       setItemsList((prev) => [...prev, newItem]);
     }
@@ -176,6 +194,9 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
     setInputQuantity(item.quantity);
     setInputTag(item.tag);
     setInputNotes(item.notes || '');
+    setInputHasBurglary(item.hasBurglary !== undefined ? item.hasBurglary : true);
+    setInputHasNet(item.hasNet !== undefined ? item.hasNet : true);
+    setInputDividerCount(item.dividerCount !== undefined ? item.dividerCount : 1);
   };
 
   const handleDeleteItem = (id: string) => {
@@ -201,6 +222,9 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
           quantity: Math.max(1, inputQuantity),
           tag: inputTag || 'Unit #1',
           notes: inputNotes,
+          hasBurglary: inputHasBurglary,
+          hasNet: inputHasNet,
+          dividerCount: inputDividerCount,
         });
       } else {
         alert('Please enter at least one valid measurement and click "Add More".');
@@ -278,6 +302,27 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                         (Qty: {it.quantity})
                       </span>
                     </p>
+                    {/* Feature Badges */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      {it.hasBurglary !== false && (
+                        <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                          <Shield className="w-2.5 h-2.5 text-amber-600" />
+                          Burglary
+                        </span>
+                      )}
+                      {it.hasNet !== false && (
+                        <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                          <Grid className="w-2.5 h-2.5 text-emerald-600" />
+                          Insect Net
+                        </span>
+                      )}
+                      {it.dividerCount !== undefined && it.dividerCount > 0 && (
+                        <span className="text-[10px] bg-purple-50 text-purple-800 border border-purple-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                          <Columns className="w-2.5 h-2.5 text-purple-600" />
+                          Dividers: {it.dividerCount}/pane
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -439,6 +484,87 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                       </optgroup>
                     </select>
                   )}
+                </div>
+
+                {/* Casement & Window Advanced Features: Burglary, Insect Netting, Glazing Dividers */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                      Window Features & Add-ons
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">Automatic cut sizes</span>
+                  </div>
+
+                  {/* Burglary Proofing Toggle */}
+                  <label className="flex items-start gap-2.5 p-2 rounded-lg border border-slate-200 bg-white hover:border-blue-300 cursor-pointer transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={inputHasBurglary}
+                      onChange={(e) => setInputHasBurglary(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300"
+                    />
+                    <div className="flex-1 text-xs">
+                      <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                        <Shield className="w-3.5 h-3.5 text-amber-600" />
+                        Burglary Proofing (Ballo Straight Rods & Frames)
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
+                        Calculates top/side & bottom burglary frames and 100-150mm spaced iron rods with 50mm end tabs.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Insect Netting Toggle */}
+                  <label className="flex items-start gap-2.5 p-2 rounded-lg border border-slate-200 bg-white hover:border-blue-300 cursor-pointer transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={inputHasNet}
+                      onChange={(e) => setInputHasNet(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300"
+                    />
+                    <div className="flex-1 text-xs">
+                      <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                        <Grid className="w-3.5 h-3.5 text-emerald-600" />
+                        Insect / Mosquito Net Screen (11:25 / 11:26 / 11:32)
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
+                        Calculates netting frame perimeter cuts, spline gasket length, and mesh roll area.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Glazing Dividers Count */}
+                  <div className="p-2 rounded-lg border border-slate-200 bg-white flex items-center justify-between gap-3">
+                    <div className="flex-1 text-xs">
+                      <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                        <Columns className="w-3.5 h-3.5 text-purple-600" />
+                        Glazing Divider Bars (Colonial / Georgian)
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5 leading-tight">
+                        Bars per glass panel (0 = None, 1 = Default 1 per pane, 2, 3...)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setInputDividerCount((c) => Math.max(0, c - 1))}
+                        className="w-7 h-7 rounded border border-slate-300 hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-xs"
+                      >
+                        -
+                      </button>
+                      <span className="w-6 text-center font-mono font-bold text-xs text-slate-900">
+                        {inputDividerCount}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setInputDividerCount((c) => Math.min(6, c + 1))}
+                        className="w-7 h-7 rounded border border-slate-300 hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-xs"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 

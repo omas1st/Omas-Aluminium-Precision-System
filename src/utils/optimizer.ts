@@ -17,8 +17,19 @@ export function optimizeProfileCuts(
   allCuts: CutPiece[],
   constants: ConstantProfilesConfig
 ): ProfileOptimizationResult[] {
-  const stockLength = constants.stockProfileLength || 5800;
+  const defaultStockLength = constants.stockProfileLength || 5800;
   const kerf = constants.bladeKerf || 4;
+
+  // Function to resolve stock length for a profile
+  function getStockLengthForProfile(profileName: string): number {
+    if (constants.casementIronAngle && profileName.includes(constants.casementIronAngle.name)) {
+      return constants.casementIronAngle.stockLength || 5000;
+    }
+    if (profileName.toLowerCase().includes('iron angle') || profileName.toLowerCase().includes('cleat angle')) {
+      return 5000;
+    }
+    return defaultStockLength;
+  }
 
   // Group cuts by profile name
   const cutsByProfile = new Map<string, IndividualCut[]>();
@@ -41,6 +52,7 @@ export function optimizeProfileCuts(
   const results: ProfileOptimizationResult[] = [];
 
   cutsByProfile.forEach((cutsList, profileName) => {
+    const stockLength = getStockLengthForProfile(profileName);
     // 1. Sort cuts in descending order (Largest first - First Fit Decreasing as requested)
     const sortedCuts = [...cutsList].sort((a, b) => b.length - a.length);
 

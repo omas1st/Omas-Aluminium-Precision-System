@@ -148,6 +148,11 @@ export function getStoredConstants(): ConstantProfilesConfig {
       loadedTopSash.name = DEFAULT_FABRICATION_CONSTANTS.topSashRail.name;
     }
 
+    const loadedOuterWidth = { ...DEFAULT_FABRICATION_CONSTANTS.casementOuterWidth, ...(parsed.casementOuterWidth || parsed.casementOuterFrame || {}) };
+    const loadedOuterHeight = { ...DEFAULT_FABRICATION_CONSTANTS.casementOuterHeight, ...(parsed.casementOuterHeight || parsed.casementOuterFrame || {}) };
+    const loaded2Mullion = { ...DEFAULT_FABRICATION_CONSTANTS.casement2Mullion, ...(parsed.casement2Mullion || parsed.casementMullion || {}) };
+    const loaded3Mullion = { ...DEFAULT_FABRICATION_CONSTANTS.casement3Mullion, ...(parsed.casement3Mullion || {}) };
+
     return {
       ...DEFAULT_FABRICATION_CONSTANTS,
       ...parsed,
@@ -157,10 +162,24 @@ export function getStoredConstants(): ConstantProfilesConfig {
       topSashRail: loadedTopSash,
       lockFrameStile: { ...DEFAULT_FABRICATION_CONSTANTS.lockFrameStile, ...(parsed.lockFrameStile || parsed.slidingLockStile || {}) },
       interlockFrameStile: { ...DEFAULT_FABRICATION_CONSTANTS.interlockFrameStile, ...(parsed.interlockFrameStile || parsed.slidingInterlockStile || {}) },
+      casementOuterWidth: loadedOuterWidth,
+      casementOuterHeight: loadedOuterHeight,
       casementOuterFrame: { ...DEFAULT_FABRICATION_CONSTANTS.casementOuterFrame, ...(parsed.casementOuterFrame || {}) },
+      casement2Mullion: loaded2Mullion,
+      casement3Mullion: loaded3Mullion,
       casementMullion: { ...DEFAULT_FABRICATION_CONSTANTS.casementMullion, ...(parsed.casementMullion || {}) },
       casementDeCurveSash: { ...DEFAULT_FABRICATION_CONSTANTS.casementDeCurveSash, ...(parsed.casementDeCurveSash || {}) },
       casementGlazingBead: { ...DEFAULT_FABRICATION_CONSTANTS.casementGlazingBead, ...(parsed.casementGlazingBead || {}) },
+      casementBurglaryTopSideFrame: { ...DEFAULT_FABRICATION_CONSTANTS.casementBurglaryTopSideFrame, ...(parsed.casementBurglaryTopSideFrame || {}) },
+      casementBurglaryBottomFrame: { ...DEFAULT_FABRICATION_CONSTANTS.casementBurglaryBottomFrame, ...(parsed.casementBurglaryBottomFrame || {}) },
+      netFrame1125: { ...DEFAULT_FABRICATION_CONSTANTS.netFrame1125, ...(parsed.netFrame1125 || {}) },
+      netFrame1126: { ...DEFAULT_FABRICATION_CONSTANTS.netFrame1126, ...(parsed.netFrame1126 || {}) },
+      netFrame1132: { ...DEFAULT_FABRICATION_CONSTANTS.netFrame1132, ...(parsed.netFrame1132 || {}) },
+      burglaryIronRod: { ...DEFAULT_FABRICATION_CONSTANTS.burglaryIronRod, ...(parsed.burglaryIronRod || {}) },
+      casementIronAngle: { ...DEFAULT_FABRICATION_CONSTANTS.casementIronAngle, ...(parsed.casementIronAngle || {}) },
+      glazingDivider: { ...DEFAULT_FABRICATION_CONSTANTS.glazingDivider, ...(parsed.glazingDivider || {}) },
+      netRoll: { ...DEFAULT_FABRICATION_CONSTANTS.netRoll, ...(parsed.netRoll || {}) },
+      netRubberRoll: { ...DEFAULT_FABRICATION_CONSTANTS.netRubberRoll, ...(parsed.netRubberRoll || {}) },
       transomOuterFrame: { ...DEFAULT_FABRICATION_CONSTANTS.transomOuterFrame, ...(parsed.transomOuterFrame || {}) },
       transomMullion: { ...DEFAULT_FABRICATION_CONSTANTS.transomMullion, ...(parsed.transomMullion || {}) },
       transomTopHungSash: { ...DEFAULT_FABRICATION_CONSTANTS.transomTopHungSash, ...(parsed.transomTopHungSash || {}) },

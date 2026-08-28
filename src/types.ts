@@ -70,18 +70,44 @@ export interface ConstantProfilesConfig {
   };
 
   // 3. Casement Window Profiles
-  casementOuterFrame: {
+  casementOuterWidth: {
     name: string;
     faceWidth: number; // default 40mm
     edgeOverlap: number; // default 10mm
     pocketDepth: number; // default 15mm
     stockLength: number; // 5800mm
   };
-  casementMullion: {
+  casementOuterHeight: {
+    name: string;
+    faceWidth: number; // default 40mm
+    edgeOverlap: number; // default 10mm
+    pocketDepth: number; // default 15mm
+    stockLength: number; // 5800mm
+  };
+  casementOuterFrame?: {
+    name: string;
+    faceWidth: number;
+    edgeOverlap: number;
+    pocketDepth: number;
+    stockLength: number;
+  };
+  casement2Mullion: {
     name: string;
     faceWidth: number; // default 60mm
     edgeOverlap: number; // default 10mm
     stockLength: number; // 5800mm
+  };
+  casement3Mullion: {
+    name: string;
+    faceWidth: number; // default 66mm (+6mm extra space)
+    edgeOverlap: number; // default 10mm
+    stockLength: number; // 5800mm
+  };
+  casementMullion?: {
+    name: string;
+    faceWidth: number;
+    edgeOverlap: number;
+    stockLength: number;
   };
   casementDeCurveSash: {
     name: string;
@@ -95,6 +121,59 @@ export interface ConstantProfilesConfig {
     faceWidth: number; // default 15mm
     pocketDepth: number; // default 12mm
     stockLength: number; // 5800mm
+  };
+
+  // 3b. Casement Burglary & Net Profiles
+  casementBurglaryTopSideFrame: {
+    name: string;
+    faceWidth: number; // default 35mm
+    stockLength: number; // 5800mm
+  };
+  casementBurglaryBottomFrame: {
+    name: string;
+    faceWidth: number; // default 35mm
+    stockLength: number; // 5800mm
+  };
+  netFrame1125: {
+    name: string; // 11:25 Net Frame (Sides & Bottom)
+    faceWidth: number; // default 25mm
+    stockLength: number; // 5800mm
+  };
+  netFrame1126: {
+    name: string; // 11:26 Net Frame (Top)
+    faceWidth: number; // default 26mm
+    stockLength: number; // 5800mm
+  };
+  netFrame1132: {
+    name: string; // 11:32 Net Frame (Net Perimeter)
+    faceWidth: number; // default 32mm
+    stockLength: number; // 5800mm
+  };
+  burglaryIronRod: {
+    name: string; // Burglary Iron Rod / Ballo Straight
+    stockLength: number; // 5800mm
+    spacingMin: number; // 100mm
+    spacingMax: number; // 150mm
+    extraLength: number; // 100mm (50mm + 50mm at ends)
+  };
+  casementIronAngle: {
+    name: string; // Casement Inner Iron Angle
+    stockLength: number; // 5000mm
+    cutLength: number; // 35mm per corner
+  };
+  glazingDivider: {
+    name: string; // Glazing Divider Bar (Georgian/Colonial)
+    faceWidth: number; // 20mm
+    stockLength: number; // 5800mm
+  };
+  netRoll: {
+    name: string;
+    width: number; // 1000mm
+    length: number; // 5800mm
+  };
+  netRubberRoll: {
+    name: string;
+    length: number; // 5000mm
   };
 
   // 4. Transom Window Profiles (Separated from Casement)
@@ -173,6 +252,9 @@ export interface FabricationItemInput {
   width: number; // in mm
   height: number; // in mm
   quantity: number; // number of identical units
+  hasBurglary?: boolean; // Burglary proofing (Ballo straight iron rods & burglary frame)
+  hasNet?: boolean; // Insect / Mosquito net screen
+  dividerCount?: number; // Glazing dividers per panel (0, 1 default, 2, 3, 4, 5)
   notes?: string;
 }
 
@@ -186,7 +268,7 @@ export interface CutPiece {
   quantity: number;
   cutAngle: '90°' | '45°' | '90° / 45°';
   purpose: string; // e.g. "Top Track", "Bottom Track", "Side Jamb (Left/Right)", "Lock Stile", "Top Sash Rail"
-  componentType: 'outer_frame' | 'sash' | 'mullion' | 'bead' | 'door_frame';
+  componentType: 'outer_frame' | 'sash' | 'mullion' | 'bead' | 'door_frame' | 'burglary' | 'net' | 'divider';
 }
 
 export interface GlassCutSize {
@@ -279,10 +361,24 @@ export interface MaterialPricesConfig {
     interlockFrameStile: number;
 
     // Casement Profiles
-    casementOuterFrame: number;
-    casementMullion: number;
+    casementOuterWidth: number;
+    casementOuterHeight: number;
+    casementOuterFrame?: number;
+    casement2Mullion: number;
+    casement3Mullion: number;
+    casementMullion?: number;
     casementDeCurveSash: number;
     casementGlazingBead: number;
+
+    // Casement Burglary & Net Profiles
+    casementBurglaryTopSideFrame: number;
+    casementBurglaryBottomFrame: number;
+    netFrame1125: number;
+    netFrame1126: number;
+    netFrame1132: number;
+    burglaryIronRod: number;
+    casementIronAngle: number;
+    glazingDivider: number;
 
     // Transom Profiles (Separated from Casement)
     transomOuterFrame: number;

@@ -974,7 +974,6 @@ function renderSkeletonLayout(
       <g>
         {/* Casement Outer Frame (Mitered 45°) */}
         <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
-        {/* Snap-in Glazing Bead Frame */}
         <rect
           x={x + frameThickness}
           y={y + frameThickness}
@@ -984,14 +983,59 @@ function renderSkeletonLayout(
           stroke="#475569"
           strokeWidth="2"
         />
+
+        {/* 45° Miter Corner Lines */}
+        <line x1={x} y1={y} x2={x + frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y} x2={x + w - frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x} y1={y + h} x2={x + frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y + h} x2={x + w - frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+
+        {/* 35mm Corner Iron Angle Cleats */}
+        <path d={`M ${x + 6} ${y + 26} L ${x + 6} ${y + 6} L ${x + 26} ${y + 6}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + w - 26} ${y + 6} L ${x + w - 6} ${y + 6} L ${x + w - 6} ${y + 26}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + 6} ${y + h - 26} L ${x + 6} ${y + h - 6} L ${x + 26} ${y + h - 6}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + w - 26} ${y + h - 6} L ${x + w - 6} ${y + h - 6} L ${x + w - 6} ${y + h - 26}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+
         {/* Fixed Glass Infill */}
         <rect x={glassX} y={glassY} width={glassW} height={glassH} fill="url(#glassGrad)" stroke="#38bdf8" strokeWidth="2" />
         <line x1={glassX + 20} y1={glassY + 20} x2={glassX + glassW - 20} y2={glassY + glassH - 20} stroke="#ffffff" strokeWidth="1" strokeOpacity="0.2" />
 
+        {/* Glazing Dividers if enabled */}
+        {(item.dividerCount ?? 0) > 0 && (
+          <g className="glazing-dividers">
+            {Array.from({ length: item.dividerCount ?? 1 }).map((_, dIdx) => {
+              const dx = glassX + ((dIdx + 1) * glassW) / ((item.dividerCount ?? 1) + 1);
+              return (
+                <line key={`v-div-${dIdx}`} x1={dx} y1={glassY} x2={dx} y2={glassY + glassH} stroke="#60a5fa" strokeWidth="3" />
+              );
+            })}
+            <line x1={glassX} y1={glassY + glassH / 2} x2={glassX + glassW} y2={glassY + glassH / 2} stroke="#60a5fa" strokeWidth="3" />
+          </g>
+        )}
+
+        {/* Burglary Security Bars if enabled */}
+        {item.hasBurglary !== false && (
+          <g className="burglary-overlay" opacity="0.6">
+            {Array.from({ length: Math.max(2, Math.floor(glassH / 125)) }).map((_, bIdx, arr) => {
+              const by = glassY + ((bIdx + 1) * glassH) / (arr.length + 1);
+              return (
+                <g key={`burg-${bIdx}`}>
+                  <line x1={x + 10} y1={by} x2={x + w - 10} y2={by} stroke="#f59e0b" strokeWidth="2.5" />
+                  <circle cx={x + 14} cy={by} r="2.5" fill="#f59e0b" />
+                  <circle cx={x + w - 14} cy={by} r="2.5" fill="#f59e0b" />
+                </g>
+              );
+            })}
+          </g>
+        )}
+
         {showLabels && (
           <g>
             <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
-              Casement Outer Frame (Fixed Picture)
+              Casement Outer Width (Top Head) [45° Miter]
+            </text>
+            <text x={x + w / 2} y={y + h - 11} fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
+              Casement Outer Width (Bottom Sill) [45° Miter]
             </text>
             {glassItem && (
               <g transform={`translate(${glassX + glassW / 2}, ${glassY + glassH / 2})`}>
@@ -1039,6 +1083,27 @@ function renderSkeletonLayout(
       <g>
         {/* Outer Frame */}
         <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
+        <rect
+          x={x + frameThickness}
+          y={y + frameThickness}
+          width={w - frameThickness * 2}
+          height={h - frameThickness * 2}
+          fill="#0f172a"
+          stroke="#475569"
+          strokeWidth="2"
+        />
+
+        {/* 45° Miter Corner Lines for Outer Frame */}
+        <line x1={x} y1={y} x2={x + frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y} x2={x + w - frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x} y1={y + h} x2={x + frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y + h} x2={x + w - frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+
+        {/* 35mm Corner Iron Angle Cleats */}
+        <path d={`M ${x + 6} ${y + 26} L ${x + 6} ${y + 6} L ${x + 26} ${y + 6}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + w - 26} ${y + 6} L ${x + w - 6} ${y + 6} L ${x + w - 6} ${y + 26}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + 6} ${y + h - 26} L ${x + 6} ${y + h - 6} L ${x + 26} ${y + h - 6}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + w - 26} ${y + h - 6} L ${x + w - 6} ${y + h - 6} L ${x + w - 6} ${y + h - 26}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
 
         {/* Central Dividing Mullion T-Bar */}
         <rect x={mx} y={y + frameThickness} width={mullionWidth} height={bayH} fill="#334155" stroke="#94a3b8" strokeWidth="1.5" />
@@ -1053,8 +1118,14 @@ function renderSkeletonLayout(
           </text>
         </g>
 
-        {/* Bay 2: Openable De-Curve Sash */}
+        {/* Bay 2: Openable De-Curve Sash (45° Miter Corners) */}
         <rect x={sx} y={sy} width={sw} height={sh} fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+        {/* 45° Miter lines on Sash Frame */}
+        <line x1={sx} y1={sy} x2={sx + sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+        <line x1={sx + sw} y1={sy} x2={sx + sw - sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+        <line x1={sx} y1={sy + sh} x2={sx + sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+        <line x1={sx + sw} y1={sy + sh} x2={sx + sw - sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+
         <rect x={opGlassX} y={opGlassY} width={opGlassW} height={opGlassH} fill="url(#glassGrad)" stroke="#0284c7" strokeWidth="1.5" />
 
         {/* Casement Swing Lines */}
@@ -1062,6 +1133,14 @@ function renderSkeletonLayout(
         <line x1={opGlassX} y1={opGlassY + opGlassH} x2={opGlassX + opGlassW} y2={opGlassY + opGlassH / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
         {/* Handle */}
         <circle cx={opGlassX + opGlassW - 8} cy={opGlassY + opGlassH / 2} r="4" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+
+        {/* Dividers if enabled */}
+        {(item.dividerCount ?? 0) > 0 && (
+          <g className="glazing-dividers">
+            <line x1={fixedGlassX + fixedGlassW / 2} y1={fixedGlassY} x2={fixedGlassX + fixedGlassW / 2} y2={fixedGlassY + fixedGlassH} stroke="#60a5fa" strokeWidth="2.5" />
+            <line x1={opGlassX + opGlassW / 2} y1={opGlassY} x2={opGlassX + opGlassW / 2} y2={opGlassY + opGlassH} stroke="#60a5fa" strokeWidth="2.5" />
+          </g>
+        )}
 
         {showLabels && (
           <g>
@@ -1092,7 +1171,6 @@ function renderSkeletonLayout(
 
   if (kind === 'transom_2_panel') {
     const panels = 2;
-    const mullionsCount = 1;
     const mullionWidth = 20;
     const bayW = (w - frameThickness * 2 - mullionWidth) / 2;
     const bayH = h - frameThickness * 2;
@@ -1104,6 +1182,21 @@ function renderSkeletonLayout(
       <g>
         {/* Outer Frame (Mitered) */}
         <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
+        <rect
+          x={x + frameThickness}
+          y={y + frameThickness}
+          width={w - frameThickness * 2}
+          height={h - frameThickness * 2}
+          fill="#0f172a"
+          stroke="#475569"
+          strokeWidth="2"
+        />
+
+        {/* 45° Miter Corner Lines for Outer Frame */}
+        <line x1={x} y1={y} x2={x + frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y} x2={x + w - frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x} y1={y + h} x2={x + frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y + h} x2={x + w - frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
 
         {/* Central Dividing Mullion T-Bar */}
         <rect
@@ -1134,6 +1227,12 @@ function renderSkeletonLayout(
             <g key={pIdx}>
               {/* De Curve Sash Frame */}
               <rect x={sx} y={sy} width={sw} height={sh} fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+              {/* 45° Miter lines on Sash Frame */}
+              <line x1={sx} y1={sy} x2={sx + sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+              <line x1={sx + sw} y1={sy} x2={sx + sw - sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+              <line x1={sx} y1={sy + sh} x2={sx + sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+              <line x1={sx + sw} y1={sy + sh} x2={sx + sw - sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+
               {/* Glass Infill */}
               <rect x={gx} y={gy} width={gw} height={gh} fill="url(#glassGrad)" stroke="#0284c7" strokeWidth="1.5" />
 
@@ -1160,7 +1259,7 @@ function renderSkeletonLayout(
         {showLabels && (
           <g>
             <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
-              Transom Outer Frame (Head)
+              Transom Outer Head [45° Miter]
             </text>
             <text x={mx + mullionWidth / 2} y={y + h - 12} fill="#fbbf24" fontSize="8.5" fontWeight="bold" textAnchor="middle">
               Center Mullion
@@ -1187,6 +1286,27 @@ function renderSkeletonLayout(
       <g>
         {/* Casement Outer Frame (Mitered) */}
         <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
+        <rect
+          x={x + frameThickness}
+          y={y + frameThickness}
+          width={w - frameThickness * 2}
+          height={h - frameThickness * 2}
+          fill="#0f172a"
+          stroke="#475569"
+          strokeWidth="2"
+        />
+
+        {/* 45° Miter Corner Lines for Outer Frame */}
+        <line x1={x} y1={y} x2={x + frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y} x2={x + w - frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x} y1={y + h} x2={x + frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        <line x1={x + w} y1={y + h} x2={x + w - frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+
+        {/* 35mm Corner Iron Angle Cleats */}
+        <path d={`M ${x + 6} ${y + 26} L ${x + 6} ${y + 6} L ${x + 26} ${y + 6}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + w - 26} ${y + 6} L ${x + w - 6} ${y + 6} L ${x + w - 6} ${y + 26}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + 6} ${y + h - 26} L ${x + 6} ${y + h - 6} L ${x + 26} ${y + h - 6}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
+        <path d={`M ${x + w - 26} ${y + h - 6} L ${x + w - 6} ${y + h - 6} L ${x + w - 6} ${y + h - 26}`} fill="none" stroke="#94a3b8" strokeWidth="4" />
 
         {/* Mullions */}
         {Array.from({ length: mullionsCount }).map((_, mIdx) => {
@@ -1223,6 +1343,12 @@ function renderSkeletonLayout(
             <g key={pIdx}>
               {/* De Curve Sash Frame */}
               <rect x={sx} y={sy} width={sw} height={sh} fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
+              {/* 45° Miter lines on Sash Frame */}
+              <line x1={sx} y1={sy} x2={sx + sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+              <line x1={sx + sw} y1={sy} x2={sx + sw - sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+              <line x1={sx} y1={sy + sh} x2={sx + sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+              <line x1={sx + sw} y1={sy + sh} x2={sx + sw - sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
+
               {/* Glass Infill */}
               <rect x={gx} y={gy} width={gw} height={gh} fill="url(#glassGrad)" stroke="#0284c7" strokeWidth="1.5" />
 
@@ -1232,6 +1358,11 @@ function renderSkeletonLayout(
 
               {/* Handle Marker */}
               <circle cx={gx + gw - 8} cy={gy + gh / 2} r="4" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+
+              {/* Dividers if enabled */}
+              {(item.dividerCount ?? 0) > 0 && (
+                <line x1={gx + gw / 2} y1={gy} x2={gx + gw / 2} y2={gy + gh} stroke="#60a5fa" strokeWidth="2.5" />
+              )}
 
               {showLabels && glassItem && (
                 <g transform={`translate(${gx + gw / 2}, ${gy + gh - 24})`}>

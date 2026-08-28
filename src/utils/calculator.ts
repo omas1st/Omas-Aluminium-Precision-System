@@ -283,6 +283,9 @@ function calculateSlidingItem(
     unit: 'tubes (300ml)',
     description: 'Perimeter waterproofing and perimeter framing joint seal',
   });
+
+  // Sliding Features & Add-ons: 11:32 Slidable Mosquito Net Screen & Glazing Dividers (No burglary)
+  addSlidingAddons(item, constants, cuts, accessories, panelsCount, glassW);
 }
 
 function calculateSlidingFixedItem(
@@ -381,6 +384,9 @@ function calculateSlidingFixedItem(
     unit: 'tubes (300ml)',
     description: 'Perimeter waterproofing and perimeter framing joint seal',
   });
+
+  // Sliding Features & Add-ons
+  addSlidingAddons(item, constants, cuts, accessories, 1, glassW);
 }
 
 function calculateSlidingOneFixedOneSlidingItem(
@@ -586,6 +592,347 @@ function calculateSlidingOneFixedOneSlidingItem(
     unit: 'tubes (300ml)',
     description: 'Perimeter waterproofing and perimeter framing joint seal',
   });
+
+  // Sliding Features & Add-ons: 11:32 Slidable Mosquito Net Screen & Glazing Dividers (No burglary)
+  addSlidingAddons(item, constants, cuts, accessories, 2, sashGlassW);
+}
+
+/**
+ * Sliding Window & Door Add-ons:
+ * Exclusively provides:
+ * 1. 11:32 Slidable Mosquito Net Screen (2 Slidable Panels: normal width divided by 2 with 4 Rails & 4 Stiles)
+ * 2. Glazing Divider Bars (Colonial / Georgian)
+ * NOTE: Burglary proofing is strictly removed for sliding systems (burglary is for casement & transom).
+ */
+function addSlidingAddons(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  accessories: AccessoryRequirement[],
+  panelsCount: number,
+  glassW: number
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId, hasNet, dividerCount } = item;
+
+  // 1. 11:32 Slidable Window Mosquito Net Screen (2 Slidable Panels)
+  if (hasNet !== false) {
+    const net1132 = constants.netFrame1132 || { name: '11:32 Mosquito Net Frame Profile (5.8m)', faceWidth: 32 };
+    // Divide normal width by 2 so it separates and is slidable:
+    const net1132W = Math.round(Math.max(50, (W - 20) / 2));
+    const net1132H = Math.round(Math.max(100, H - 20));
+
+    // 4 Horizontal Rails (2 Top rails + 2 Bottom rails across the 2 slidable panels)
+    cuts.push({
+      id: `${itemId}-net-1132-slidable-rails`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1132',
+      profileName: net1132.name,
+      length: net1132W,
+      quantity: 4 * qty,
+      cutAngle: '45°',
+      purpose: '11:32 Slidable Net Frame Top & Bottom Rails (2 Sliding Panels - 4 pcs)',
+      componentType: 'net',
+    });
+
+    // 4 Vertical Stiles (2 Left/Right outer stiles + 2 new 11:32 height stiles at the separation meeting sides)
+    cuts.push({
+      id: `${itemId}-net-1132-slidable-stiles`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1132',
+      profileName: net1132.name,
+      length: net1132H,
+      quantity: 4 * qty,
+      cutAngle: '45°',
+      purpose: '11:32 Slidable Net Frame Side Stiles (2 Sliding Panels - 4 pcs, includes 2 separation meeting stiles)',
+      componentType: 'net',
+    });
+
+    // Net Fabric & Spline Rubber for 2 Slidable Panels:
+    const netMeshW = net1132W + 60;
+    const netMeshH = net1132H + 60;
+    const netMeshAreaM2 = ((netMeshW * netMeshH * 2) / 1000000) * qty;
+
+    accessories.push({
+      name: `Fiberglass Insect / Mosquito Net Mesh (2 Slidable Panels: ${netMeshW}mm x ${netMeshH}mm cut)`,
+      category: 'seal',
+      quantity: Number(netMeshAreaM2.toFixed(2)),
+      unit: 'm²',
+      description: 'Insect proofing screen mesh insert for 2 slidable 11:32 panels',
+    });
+
+    const netRubberMeters = Math.ceil(((net1132W * 4 + net1132H * 4) * qty) / 1000);
+    accessories.push({
+      name: '11:32 Net Rubber Spline Gasket (Spline Cord)',
+      category: 'seal',
+      quantity: netRubberMeters,
+      unit: 'meters',
+      description: 'Spline cord to secure mesh tightly into 11:32 slidable frame channels',
+    });
+
+    accessories.push({
+      name: '11:32 Slidable Net Screen Bottom Rollers / Guide Sliders',
+      category: 'hardware',
+      quantity: 4 * qty,
+      unit: 'pcs',
+      description: 'Smooth-gliding net screen roller runners (2 per slidable panel)',
+    });
+  }
+
+  // 2. Glazing Divider Bars (Colonial / Georgian)
+  const effDividers = dividerCount !== undefined ? dividerCount : 0;
+  if (effDividers > 0 && constants.glazingDivider) {
+    cuts.push({
+      id: `${itemId}-glazing-dividers`,
+      itemId,
+      itemTag: tag,
+      profileType: 'glazing_divider',
+      profileName: constants.glazingDivider.name,
+      length: Math.round(glassW),
+      quantity: panelsCount * effDividers * qty,
+      cutAngle: '90°',
+      purpose: `Glazing Divider Bar Profile (${effDividers} bar${effDividers > 1 ? 's' : ''} per panel across ${panelsCount} sliding panels)`,
+      componentType: 'divider',
+    });
+  }
+}
+
+function addBurglaryAndNetCuts(
+  item: FabricationItemInput,
+  constants: ConstantProfilesConfig,
+  cuts: CutPiece[],
+  accessories: AccessoryRequirement[]
+) {
+  const { width: W, height: H, quantity: qty, tag, id: itemId, hasBurglary, hasNet } = item;
+
+  if (hasBurglary) {
+    // 1. Burglary Frame (for Casement & Transom)
+    // Top & Sides use casementBurglaryTopSideFrame, Bottom uses casementBurglaryBottomFrame
+    const topSideFrame = constants.casementBurglaryTopSideFrame;
+    const bottomFrame = constants.casementBurglaryBottomFrame;
+
+    // Top frame (1 pc per unit, length W, 45° miter)
+    cuts.push({
+      id: `${itemId}-burglary-top-frame`,
+      itemId,
+      itemTag: tag,
+      profileType: 'burglary_frame',
+      profileName: topSideFrame.name,
+      length: Math.round(W),
+      quantity: 1 * qty,
+      cutAngle: '45°',
+      purpose: 'Burglary Proofing Top Frame Profile',
+      componentType: 'burglary',
+    });
+
+    // Bottom frame (1 pc per unit, length W, 45° miter)
+    cuts.push({
+      id: `${itemId}-burglary-bottom-frame`,
+      itemId,
+      itemTag: tag,
+      profileType: 'burglary_frame',
+      profileName: bottomFrame.name,
+      length: Math.round(W),
+      quantity: 1 * qty,
+      cutAngle: '45°',
+      purpose: 'Burglary Proofing Bottom Frame Profile',
+      componentType: 'burglary',
+    });
+
+    // Side frames (2 pcs per unit, length H, 45° miter)
+    cuts.push({
+      id: `${itemId}-burglary-side-frames`,
+      itemId,
+      itemTag: tag,
+      profileType: 'burglary_frame',
+      profileName: topSideFrame.name,
+      length: Math.round(H),
+      quantity: 2 * qty,
+      cutAngle: '45°',
+      purpose: 'Burglary Proofing Left & Right Side Frame Profiles',
+      componentType: 'burglary',
+    });
+
+    // 2. Burglary Iron Rod / Ballo Straight (Length = W + 100mm, with 50mm pressed end tabs)
+    // Distance between iron pipes strictly in the range of 100mm - 150mm:
+    const rodConfig = constants.burglaryIronRod || {
+      name: 'Burglary Iron Rod / Ballo Straight (5.8m)',
+      stockLength: 5800,
+      spacingMin: 100,
+      spacingMax: 150,
+      extraLength: 100,
+    };
+    const targetSpacing = 125; // 100mm-150mm range center
+    const numDivisions = Math.max(2, Math.round(H / targetSpacing));
+    const rodSpacing = Math.round(H / numDivisions);
+    const numRods = Math.max(1, numDivisions - 1);
+    const rodLength = Math.round(W + (rodConfig.extraLength || 100));
+
+    cuts.push({
+      id: `${itemId}-burglary-iron-rods`,
+      itemId,
+      itemTag: tag,
+      profileType: 'burglary_rod',
+      profileName: rodConfig.name,
+      length: rodLength,
+      quantity: numRods * qty,
+      cutAngle: '90°',
+      purpose: `Burglary Iron Rod / Ballo Straight (${numRods} rods @ ~${rodSpacing}mm c/c with 50mm end tabs)`,
+      componentType: 'burglary',
+    });
+
+    // 3. 11:32 Slidable Net Frame (Width divided by 2 for slidable panels, with 4 rails and 4 stiles)
+    const net1132 = constants.netFrame1132;
+    const net1132W = Math.round(Math.max(50, (W - 20) / 2));
+    const net1132H = Math.round(Math.max(100, H - 20));
+
+    cuts.push({
+      id: `${itemId}-net-1132-slidable-rails`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1132',
+      profileName: net1132.name,
+      length: net1132W,
+      quantity: 4 * qty,
+      cutAngle: '45°',
+      purpose: '11:32 Slidable Net Frame Top & Bottom Rails (2 Sliding Panels - 4 pcs)',
+      componentType: 'net',
+    });
+
+    cuts.push({
+      id: `${itemId}-net-1132-slidable-stiles`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1132',
+      profileName: net1132.name,
+      length: net1132H,
+      quantity: 4 * qty,
+      cutAngle: '45°',
+      purpose: '11:32 Slidable Net Frame Side Stiles (2 Sliding Panels - 4 pcs, includes 2 separation meeting stiles)',
+      componentType: 'net',
+    });
+
+    // 4. Net Fabric & Spline Rubber
+    const netMeshW = net1132W + 60;
+    const netMeshH = net1132H + 60;
+    const netMeshAreaM2 = ((netMeshW * netMeshH * 2) / 1000000) * qty;
+
+    accessories.push({
+      name: `Fiberglass Insect / Mosquito Net Mesh (2 Slidable Panels: ${netMeshW}mm x ${netMeshH}mm cut)`,
+      category: 'seal',
+      quantity: Number(netMeshAreaM2.toFixed(2)),
+      unit: 'm²',
+      description: 'Insect proofing screen mesh insert for 2 slidable 11:32 panels',
+    });
+
+    const netRubberMeters = Math.ceil(((net1132W * 4 + net1132H * 4) * qty) / 1000);
+    accessories.push({
+      name: '11:32 Net Rubber Spline Gasket (Spline Cord)',
+      category: 'seal',
+      quantity: netRubberMeters,
+      unit: 'meters',
+      description: 'Spline cord to secure mesh tightly into 11:32 channels',
+    });
+
+  } else if (hasNet) {
+    // Ordinary Casement Net (when no burglary proofing)
+    // 11:26 Top Frame (1 pc length W)
+    const net1126 = constants.netFrame1126;
+    cuts.push({
+      id: `${itemId}-net-1126-top`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1126',
+      profileName: net1126.name,
+      length: Math.round(W),
+      quantity: 1 * qty,
+      cutAngle: '90° / 45°',
+      purpose: '11:26 Casement Net Guide Frame (Top Rail)',
+      componentType: 'net',
+    });
+
+    // 11:25 Sides & Bottom Frame (2 pcs length H, 1 pc length W)
+    const net1125 = constants.netFrame1125;
+    cuts.push({
+      id: `${itemId}-net-1125-bottom`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1125',
+      profileName: net1125.name,
+      length: Math.round(W),
+      quantity: 1 * qty,
+      cutAngle: '90° / 45°',
+      purpose: '11:25 Casement Net Guide Frame (Bottom Sill)',
+      componentType: 'net',
+    });
+
+    cuts.push({
+      id: `${itemId}-net-1125-sides`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1125',
+      profileName: net1125.name,
+      length: Math.round(H),
+      quantity: 2 * qty,
+      cutAngle: '90° / 45°',
+      purpose: '11:25 Casement Net Guide Frame (Side Jambs)',
+      componentType: 'net',
+    });
+
+    // 11:32 Slidable Net Frame (2 Panels: width divided by 2, 4 rails, 4 stiles)
+    const net1132 = constants.netFrame1132;
+    const net1132W = Math.round(Math.max(50, (W - 20) / 2));
+    const net1132H = Math.round(Math.max(100, H - 20));
+
+    cuts.push({
+      id: `${itemId}-net-1132-slidable-rails`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1132',
+      profileName: net1132.name,
+      length: net1132W,
+      quantity: 4 * qty,
+      cutAngle: '45°',
+      purpose: '11:32 Slidable Net Frame Screen Top & Bottom Rails (2 Panels)',
+      componentType: 'net',
+    });
+
+    cuts.push({
+      id: `${itemId}-net-1132-slidable-stiles`,
+      itemId,
+      itemTag: tag,
+      profileType: 'net_frame_1132',
+      profileName: net1132.name,
+      length: net1132H,
+      quantity: 4 * qty,
+      cutAngle: '45°',
+      purpose: '11:32 Slidable Net Frame Screen Side Stiles (2 Panels, includes separation meeting stiles)',
+      componentType: 'net',
+    });
+
+    // Net Fabric & Spline Rubber
+    const netMeshW = net1132W + 60;
+    const netMeshH = net1132H + 60;
+    const netMeshAreaM2 = ((netMeshW * netMeshH * 2) / 1000000) * qty;
+
+    accessories.push({
+      name: `Fiberglass Insect / Mosquito Net Mesh (2 Slidable Panels: ${netMeshW}mm x ${netMeshH}mm cut)`,
+      category: 'seal',
+      quantity: Number(netMeshAreaM2.toFixed(2)),
+      unit: 'm²',
+      description: 'Insect proofing screen mesh insert for 2 slidable 11:32 panels',
+    });
+
+    const netRubberMeters = Math.ceil(((net1132W * 4 + net1132H * 4) * qty) / 1000);
+    accessories.push({
+      name: '11:32 Net Rubber Spline Gasket (Spline Cord)',
+      category: 'seal',
+      quantity: netRubberMeters,
+      unit: 'meters',
+      description: 'Spline cord to secure mesh tightly into 11:32 channels',
+    });
+  }
 }
 
 function calculateCasementFixedItem(
@@ -596,39 +943,56 @@ function calculateCasementFixedItem(
   accessories: AccessoryRequirement[]
 ) {
   const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
-  const outer = constants.casementOuterFrame;
+  const outerWidthProfile = constants.casementOuterWidth || constants.casementOuterFrame;
+  const outerHeightProfile = constants.casementOuterHeight || constants.casementOuterFrame;
   const bead = constants.casementGlazingBead || { name: 'Casement Glazing Snap-in Bead', faceWidth: 15, pocketDepth: 12 };
+  const ironAngle = constants.casementIronAngle || { name: 'Casement Inner Corner Iron Angle Cleat (5.0m Stock)', stockLength: 5000, cutLength: 35 };
 
-  // Outer frame cuts (45° miter cuts on all corners)
+  // 1. Separate Casement Outer Width (Top & Bottom rails) - 45° miter cuts
   cuts.push({
-    id: `${itemId}-casement-fixed-top-bottom`,
+    id: `${itemId}-casement-outer-width`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_outer',
-    profileName: outer.name,
+    profileType: 'casement_outer_width',
+    profileName: outerWidthProfile.name,
     length: Math.round(W),
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Casement Fixed Frame Top & Bottom Rails',
+    purpose: 'Casement Outer Width Profile (Top & Bottom Rails)',
     componentType: 'outer_frame',
   });
 
+  // 2. Separate Casement Outer Height (Side jambs) - 45° miter cuts
   cuts.push({
-    id: `${itemId}-casement-fixed-sides`,
+    id: `${itemId}-casement-outer-height`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_outer',
-    profileName: outer.name,
+    profileType: 'casement_outer_height',
+    profileName: outerHeightProfile.name,
     length: Math.round(H),
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Casement Fixed Frame Side Jambs',
+    purpose: 'Casement Outer Height Profile (Side Jambs)',
+    componentType: 'outer_frame',
+  });
+
+  // 3. Inner Corner Iron Angle Cleats (35mm cut per connector, 4 corners)
+  cuts.push({
+    id: `${itemId}-casement-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_iron_angle',
+    profileName: ironAngle.name,
+    length: ironAngle.cutLength || 35,
+    quantity: 4 * qty,
+    cutAngle: '90°',
+    purpose: 'Casement Inner Corner Iron Angle Joint Cleats (35mm)',
     componentType: 'outer_frame',
   });
 
   // Glazing Beads (45° miter cuts):
-  const beadW = Math.round(W - 2 * outer.faceWidth);
-  const beadH = Math.round(H - 2 * outer.faceWidth);
+  const beadW = Math.round(W - 2 * outerWidthProfile.faceWidth);
+  const beadH = Math.round(H - 2 * outerHeightProfile.faceWidth);
 
   cuts.push({
     id: `${itemId}-casement-fixed-bead-w`,
@@ -656,9 +1020,27 @@ function calculateCasementFixedItem(
     componentType: 'bead',
   });
 
+  // Glazing Dividers (Default: 1 per panel, or user selected 0-5)
+  const dividerCount = item.dividerCount !== undefined ? item.dividerCount : 1;
+  const glassW = Math.round(W - 2 * (outerWidthProfile.faceWidth - outerWidthProfile.pocketDepth) - constants.glassClearance);
+  const glassH = Math.round(H - 2 * (outerHeightProfile.faceWidth - outerHeightProfile.pocketDepth) - constants.glassClearance);
+
+  if (dividerCount > 0 && constants.glazingDivider) {
+    cuts.push({
+      id: `${itemId}-glazing-dividers`,
+      itemId,
+      itemTag: tag,
+      profileType: 'glazing_divider',
+      profileName: constants.glazingDivider.name,
+      length: glassW,
+      quantity: dividerCount * qty,
+      cutAngle: '90°',
+      purpose: `Glazing Divider Bar Profile (${dividerCount} bar${dividerCount > 1 ? 's' : ''} per panel)`,
+      componentType: 'divider',
+    });
+  }
+
   // Glass Size for Casement Fixed Light:
-  const glassW = Math.round(W - 2 * (outer.faceWidth - outer.pocketDepth) - constants.glassClearance);
-  const glassH = Math.round(H - 2 * (outer.faceWidth - outer.pocketDepth) - constants.glassClearance);
   const paneAreaM2 = (glassW * glassH) / 1000000;
 
   glasses.push({
@@ -682,11 +1064,11 @@ function calculateCasementFixedItem(
   });
 
   accessories.push({
-    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    name: 'Casement Corner Iron Angle Cleats (35mm Cut)',
     category: 'fastener',
     quantity: 4 * qty,
     unit: 'pcs',
-    description: 'Mechanical locking corner cleats for outer frame 45° miters',
+    description: 'Inner 35mm iron angle structural corner reinforcement',
   });
 
   const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 8000));
@@ -697,6 +1079,9 @@ function calculateCasementFixedItem(
     unit: 'tubes (300ml)',
     description: 'Perimeter waterproofing and perimeter framing joint seal',
   });
+
+  // Burglary Proofing & Net Options
+  addBurglaryAndNetCuts(item, constants, cuts, accessories);
 }
 
 function calculateCasementOneFixedOneOpenItem(
@@ -707,57 +1092,74 @@ function calculateCasementOneFixedOneOpenItem(
   accessories: AccessoryRequirement[]
 ) {
   const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
-  const outer = constants.casementOuterFrame;
-  const mullion = constants.casementMullion;
+  const outerWidthProfile = constants.casementOuterWidth || constants.casementOuterFrame;
+  const outerHeightProfile = constants.casementOuterHeight || constants.casementOuterFrame;
+  const mullion = constants.casement2Mullion || constants.casementMullion;
   const deCurve = constants.casementDeCurveSash;
   const bead = constants.casementGlazingBead || { name: 'Casement Glazing Snap-in Bead', faceWidth: 15, pocketDepth: 12 };
+  const ironAngle = constants.casementIronAngle || { name: 'Casement Inner Corner Iron Angle Cleat (5.0m Stock)', stockLength: 5000, cutLength: 35 };
 
-  // Outer frame cuts (45° miter cuts)
+  // 1. Separate Casement Outer Width (Top & Bottom)
   cuts.push({
-    id: `${itemId}-casement-outer-top-bottom`,
+    id: `${itemId}-casement-outer-width`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_outer',
-    profileName: outer.name,
+    profileType: 'casement_outer_width',
+    profileName: outerWidthProfile.name,
     length: Math.round(W),
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Outer Frame Top & Bottom Rails',
+    purpose: 'Casement Outer Width Profile (Top & Bottom Rails)',
     componentType: 'outer_frame',
   });
 
+  // 2. Separate Casement Outer Height (Side Jambs)
   cuts.push({
-    id: `${itemId}-casement-outer-sides`,
+    id: `${itemId}-casement-outer-height`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_outer',
-    profileName: outer.name,
+    profileType: 'casement_outer_height',
+    profileName: outerHeightProfile.name,
     length: Math.round(H),
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Outer Frame Side Jambs',
+    purpose: 'Casement Outer Height Profile (Side Jambs)',
     componentType: 'outer_frame',
   });
 
-  // Center Vertical Mullion T-Bar
-  const mullionLength = Math.round(H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  // 3. Inner Corner Iron Angle Cleats (4 for outer frame + 4 for operable sash)
+  cuts.push({
+    id: `${itemId}-casement-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_iron_angle',
+    profileName: ironAngle.name,
+    length: ironAngle.cutLength || 35,
+    quantity: (4 + 4) * qty,
+    cutAngle: '90°',
+    purpose: 'Casement Inner Corner Iron Angle Joint Cleats (35mm - Frame & Sash)',
+    componentType: 'outer_frame',
+  });
+
+  // Center Vertical Mullion T-Bar (2-Mullion Profile)
+  const mullionLength = Math.round(H - 2 * (outerHeightProfile.faceWidth - outerHeightProfile.edgeOverlap));
   cuts.push({
     id: `${itemId}-casement-mullion`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_mullion',
+    profileType: 'casement_2_mullion',
     profileName: mullion.name,
     length: mullionLength,
     quantity: 1 * qty,
     cutAngle: '90°',
-    purpose: 'Center Vertical Dividing Mullion (T-Bar)',
+    purpose: 'Casement 2-Mullion Profile (Center Dividing T-Bar)',
     componentType: 'mullion',
   });
 
   // Bay dimensions:
-  const innerOpeningWidth = W - 2 * (outer.faceWidth - outer.edgeOverlap) - (mullion.faceWidth - 2 * mullion.edgeOverlap);
+  const innerOpeningWidth = W - 2 * (outerWidthProfile.faceWidth - outerWidthProfile.edgeOverlap) - (mullion.faceWidth - 2 * mullion.edgeOverlap);
   const bayWidth = Math.max(150, innerOpeningWidth / 2);
-  const bayHeight = Math.max(150, H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  const bayHeight = Math.max(150, H - 2 * (outerHeightProfile.faceWidth - outerHeightProfile.edgeOverlap));
 
   // 1 Operable Sash (De-Curve):
   const sashW = Math.round(bayWidth + 2 * deCurve.edgeOverlap - 4);
@@ -820,13 +1222,42 @@ function calculateCasementOneFixedOneOpenItem(
   });
 
   // Glass: 1 Fixed Glass Pane + 1 Operable Sash Glass Pane
-  const fixedGlassW = Math.round(bayWidth + 2 * outer.pocketDepth - constants.glassClearance);
-  const fixedGlassH = Math.round(bayHeight + 2 * outer.pocketDepth - constants.glassClearance);
+  const fixedGlassW = Math.round(bayWidth + 2 * outerWidthProfile.pocketDepth - constants.glassClearance);
+  const fixedGlassH = Math.round(bayHeight + 2 * outerHeightProfile.pocketDepth - constants.glassClearance);
   const fixedPaneAreaM2 = (fixedGlassW * fixedGlassH) / 1000000;
 
   const openGlassW = Math.round(sashW - 2 * (deCurve.faceWidth - deCurve.pocketDepth) - constants.glassClearance);
   const openGlassH = Math.round(sashH - 2 * (deCurve.faceWidth - deCurve.pocketDepth) - constants.glassClearance);
   const openPaneAreaM2 = (openGlassW * openGlassH) / 1000000;
+
+  // Glazing Dividers (Default 1 per panel, 2 panels total)
+  const dividerCount = item.dividerCount !== undefined ? item.dividerCount : 1;
+  if (dividerCount > 0 && constants.glazingDivider) {
+    cuts.push({
+      id: `${itemId}-glazing-dividers-fixed`,
+      itemId,
+      itemTag: tag,
+      profileType: 'glazing_divider',
+      profileName: constants.glazingDivider.name,
+      length: fixedGlassW,
+      quantity: dividerCount * qty,
+      cutAngle: '90°',
+      purpose: `Glazing Divider Bar Profile for Fixed Bay (${dividerCount} bar${dividerCount > 1 ? 's' : ''})`,
+      componentType: 'divider',
+    });
+    cuts.push({
+      id: `${itemId}-glazing-dividers-open`,
+      itemId,
+      itemTag: tag,
+      profileType: 'glazing_divider',
+      profileName: constants.glazingDivider.name,
+      length: openGlassW,
+      quantity: dividerCount * qty,
+      cutAngle: '90°',
+      purpose: `Glazing Divider Bar Profile for Operable Sash (${dividerCount} bar${dividerCount > 1 ? 's' : ''})`,
+      componentType: 'divider',
+    });
+  }
 
   glasses.push({
     itemId,
@@ -850,13 +1281,21 @@ function calculateCasementOneFixedOneOpenItem(
     paneDescription: 'Operable Casement Sash Glass (Pane #2)',
   });
 
-  // Accessories: 1 pair friction stays, 1 handle, seals, cleats, screws
+  // Hardware: Steel Stopper (1 pc), Hinges (2 pcs), Cockspur Handle (1 pc)
   accessories.push({
-    name: 'Heavy Duty Stainless Steel Friction Stays',
+    name: 'Stainless Steel Window Stopper Restrictor',
     category: 'hardware',
     quantity: 1 * qty,
-    unit: 'pairs',
-    description: 'Friction hinges for 1 operable side-hung sash',
+    unit: 'pcs',
+    description: 'Wind-resistant steel stopper for operable sash',
+  });
+
+  accessories.push({
+    name: 'Heavy Duty Stainless Steel Butt / Friction Hinges',
+    category: 'hardware',
+    quantity: 2 * qty,
+    unit: 'pcs',
+    description: '2 hinges for operable casement side-hung sash',
   });
 
   accessories.push({
@@ -877,11 +1316,11 @@ function calculateCasementOneFixedOneOpenItem(
   });
 
   accessories.push({
-    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    name: 'Casement Corner Iron Angle Cleats (35mm Cut)',
     category: 'fastener',
-    quantity: (4 + 4) * qty, // 4 for outer frame + 4 for sash
+    quantity: (4 + 4) * qty,
     unit: 'pcs',
-    description: 'Mechanical locking cleats for 45° corner joints',
+    description: 'Inner 35mm iron angle structural corner reinforcement for frame & sash',
   });
 
   accessories.push({
@@ -900,6 +1339,9 @@ function calculateCasementOneFixedOneOpenItem(
     unit: 'tubes (300ml)',
     description: 'Perimeter waterproofing and perimeter framing joint seal',
   });
+
+  // Burglary Proofing & Net Options
+  addBurglaryAndNetCuts(item, constants, cuts, accessories);
 }
 
 function calculateTransomSinglePanelItem(
@@ -1056,69 +1498,87 @@ function calculateCasementItem(
   accessories: AccessoryRequirement[]
 ) {
   const { width: W, height: H, quantity: qty, tag, id: itemId, kind } = item;
-  const outer = constants.casementOuterFrame;
-  const mullion = constants.casementMullion;
+  const outerWidthProfile = constants.casementOuterWidth || constants.casementOuterFrame;
+  const outerHeightProfile = constants.casementOuterHeight || constants.casementOuterFrame;
   const deCurve = constants.casementDeCurveSash;
+  const ironAngle = constants.casementIronAngle || { name: 'Casement Inner Corner Iron Angle Cleat (5.0m Stock)', stockLength: 5000, cutLength: 35 };
 
   let panelsCount = 1;
   if (kind === 'casement_2_panel' || kind === 'casement_door_double') panelsCount = 2;
   if (kind === 'casement_3_panel') panelsCount = 3;
   if (kind === 'casement_4_panel') panelsCount = 4;
 
-  // Outer frame cuts (45° miter cuts on all corners)
+  // 1. Separate Casement Outer Width (Top & Bottom Rails) - 45° miter cuts
   cuts.push({
-    id: `${itemId}-outer-top-bottom`,
+    id: `${itemId}-casement-outer-width`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_outer',
-    profileName: outer.name,
+    profileType: 'casement_outer_width',
+    profileName: outerWidthProfile.name,
     length: Math.round(W),
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Outer Frame Top & Bottom Rails',
+    purpose: 'Casement Outer Width Profile (Top & Bottom Rails)',
     componentType: 'outer_frame',
   });
 
+  // 2. Separate Casement Outer Height (Side Jambs) - 45° miter cuts
   cuts.push({
-    id: `${itemId}-outer-sides`,
+    id: `${itemId}-casement-outer-height`,
     itemId,
     itemTag: tag,
-    profileType: 'casement_outer',
-    profileName: outer.name,
+    profileType: 'casement_outer_height',
+    profileName: outerHeightProfile.name,
     length: Math.round(H),
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Outer Frame Side Jambs',
+    purpose: 'Casement Outer Height Profile (Side Jambs)',
     componentType: 'outer_frame',
   });
 
-  // Mullions if > 1 panel
+  // 3. Inner Corner Iron Angle Cleats (35mm cut per connector: 4 for outer frame + 4 per operable sash)
+  const totalIronAnglesCount = (4 + panelsCount * 4) * qty;
+  cuts.push({
+    id: `${itemId}-casement-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'casement_iron_angle',
+    profileName: ironAngle.name,
+    length: ironAngle.cutLength || 35,
+    quantity: totalIronAnglesCount,
+    cutAngle: '90°',
+    purpose: `Casement Inner Corner Iron Angle Joint Cleats (35mm - Frame & ${panelsCount} Sashes)`,
+    componentType: 'outer_frame',
+  });
+
+  // 4. Mullions if > 1 panel
+  // 3-panel operable casement requires 3-mullion profile (+6mm space used); 2-panel/4-panel uses 2-mullion profile
   const mullionsCount = panelsCount - 1;
-  const mullionLength = Math.round(H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  const is3PanelWindow = panelsCount === 3 || kind === 'casement_3_panel';
+  const mullionProfile = is3PanelWindow ? (constants.casement3Mullion || constants.casementMullion) : (constants.casement2Mullion || constants.casementMullion);
+  const mullionLength = Math.round(H - 2 * (outerHeightProfile.faceWidth - outerHeightProfile.edgeOverlap));
 
   if (mullionsCount > 0) {
     cuts.push({
       id: `${itemId}-mullions`,
       itemId,
       itemTag: tag,
-      profileType: 'casement_mullion',
-      profileName: mullion.name,
+      profileType: is3PanelWindow ? 'casement_3_mullion' : 'casement_2_mullion',
+      profileName: mullionProfile.name,
       length: mullionLength,
       quantity: mullionsCount * qty,
       cutAngle: '90°',
-      purpose: `Center Vertical Mullion T-Bars (${mullionsCount} pcs)`,
+      purpose: `${is3PanelWindow ? '3-Mullion Heavy Hinge-Receiver Profile' : '2-Mullion Standard Profile'} (${mullionsCount} Center T-Bar${mullionsCount > 1 ? 's' : ''})`,
       componentType: 'mullion',
     });
   }
 
   // Inner sash (De Curve) for each panel:
-  // Bay width = (W - 2 * outer.faceWidth - mullionsCount * mullion.faceWidth) / panelsCount
-  const innerOpeningWidth = (W - 2 * (outer.faceWidth - outer.edgeOverlap) - mullionsCount * (mullion.faceWidth - 2 * mullion.edgeOverlap));
+  const innerOpeningWidth = (W - 2 * (outerWidthProfile.faceWidth - outerWidthProfile.edgeOverlap) - mullionsCount * (mullionProfile.faceWidth - 2 * mullionProfile.edgeOverlap));
   const bayWidth = Math.max(150, innerOpeningWidth / panelsCount);
-  const bayHeight = Math.max(150, H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  const bayHeight = Math.max(150, H - 2 * (outerHeightProfile.faceWidth - outerHeightProfile.edgeOverlap));
 
   // De Curve sash cut sizes (45° miter):
-  // Sash outer dimensions overlap the outer frame/mullion by edgeOverlap (10mm)
   const sashW = Math.round(bayWidth + 2 * deCurve.edgeOverlap - 4);
   const sashH = Math.round(bayHeight + 2 * deCurve.edgeOverlap - 4);
 
@@ -1153,6 +1613,23 @@ function calculateCasementItem(
   const glassH = Math.round(sashH - 2 * (deCurve.faceWidth - deCurve.pocketDepth) - constants.glassClearance);
   const paneAreaM2 = (glassW * glassH) / 1000000;
 
+  // Glazing Dividers (Default: 1 per panel, user selectable 0 to 5)
+  const dividerCount = item.dividerCount !== undefined ? item.dividerCount : 1;
+  if (dividerCount > 0 && constants.glazingDivider) {
+    cuts.push({
+      id: `${itemId}-glazing-dividers`,
+      itemId,
+      itemTag: tag,
+      profileType: 'glazing_divider',
+      profileName: constants.glazingDivider.name,
+      length: glassW,
+      quantity: panelsCount * dividerCount * qty,
+      cutAngle: '90°',
+      purpose: `Glazing Divider Bar Profile (${dividerCount} bar${dividerCount > 1 ? 's' : ''} per panel across ${panelsCount} panels)`,
+      componentType: 'divider',
+    });
+  }
+
   for (let p = 1; p <= panelsCount; p++) {
     glasses.push({
       itemId,
@@ -1167,14 +1644,25 @@ function calculateCasementItem(
   }
 
   // Accessories:
+  // 1 Steel Stopper per panel
   accessories.push({
-    name: 'Heavy Duty Stainless Steel 304 Friction Stays (Hinges)',
+    name: 'Stainless Steel Window Stopper Restrictor',
     category: 'hardware',
-    quantity: panelsCount * 2 * qty,
-    unit: 'pcs (pairs)',
-    description: 'Top & bottom or side hinges for projected sash opening',
+    quantity: panelsCount * qty,
+    unit: 'pcs',
+    description: '1 steel stopper per operable panel to restrict wind opening',
   });
 
+  // 2 Hinges per panel
+  accessories.push({
+    name: 'Heavy Duty Stainless Steel Butt / Friction Hinges',
+    category: 'hardware',
+    quantity: panelsCount * 2 * qty,
+    unit: 'pcs',
+    description: '2 hinges per operable panel for structural sash support',
+  });
+
+  // 1 Cockspur handle per panel
   accessories.push({
     name: 'Casement Cockspur / Espagnolette Multipoint Handle',
     category: 'hardware',
@@ -1192,14 +1680,16 @@ function calculateCasementItem(
     description: 'Acoustic and airtight dual rebate seal',
   });
 
-  const cornerCleats = panelsCount * 4 * qty;
   accessories.push({
-    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    name: 'Casement Corner Iron Angle Cleats (35mm Cut)',
     category: 'fastener',
-    quantity: cornerCleats + 4 * qty,
+    quantity: totalIronAnglesCount,
     unit: 'pcs',
-    description: 'Mechanical locking joints for 45-degree miter cuts',
+    description: 'Inner 35mm iron angle structural corner reinforcement for frame & sashes',
   });
+
+  // Burglary Proofing & Net Options
+  addBurglaryAndNetCuts(item, constants, cuts, accessories);
 }
 
 function calculateFixedItem(
