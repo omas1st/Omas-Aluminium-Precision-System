@@ -30,6 +30,7 @@ import {
   Shield,
   Columns,
   Grid,
+  MousePointerClick,
 } from 'lucide-react';
 import './Architectural3DViewer.css';
 
@@ -604,393 +605,390 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     link.click();
   };
 
+  const isSliding = kind.startsWith('sliding_');
+
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden shadow-2xl transition-colors duration-300 ${
-        effectiveIsDark
-          ? 'bg-slate-950 border border-slate-800 text-white'
-          : 'bg-slate-50 border border-slate-200 text-slate-900'
-      } ${isFullscreen ? 'fixed inset-0 z-50 rounded-none w-screen h-screen' : 'w-full rounded-2xl'}`}
+      className={`w-full flex flex-col gap-4 ${
+        isFullscreen ? 'fixed inset-0 z-50 bg-slate-950 p-3 sm:p-5 overflow-y-auto' : ''
+      }`}
     >
-      {/* Top Floating Control Bar */}
+      {/* ========================================================================= */}
+      {/* SECTION 1: 3D ARCHITECTURAL STUDIO CANVAS (100% VISIBLE & UNOBSTRUCTED)   */}
+      {/* ========================================================================= */}
       <div
-        className={`absolute top-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-xs backdrop-blur-md transition-colors ${
+        className={`relative w-full rounded-2xl overflow-hidden shadow-lg border transition-colors duration-300 flex flex-col ${
           effectiveIsDark
-            ? 'bg-slate-900/85 border-slate-800 text-white shadow-xl'
-            : 'bg-white/90 border-slate-200 text-slate-800 shadow-md'
+            ? 'bg-slate-950 border-slate-800 text-white'
+            : 'bg-white border-slate-200 text-slate-900'
         }`}
       >
-        {/* Left Unit Title & Type Badge */}
-        <div className="flex items-center gap-2.5">
-          <div
-            className={`p-1.5 rounded-lg border ${
-              effectiveIsDark
-                ? 'bg-blue-600/30 border-blue-500/40 text-blue-400'
-                : 'bg-blue-50 border-blue-200 text-blue-700'
-            }`}
-          >
-            <Box className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold tracking-wide">{tag}</span>
-              <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${
-                  effectiveIsDark
-                    ? 'bg-blue-500/20 text-blue-300 border-blue-400/20'
-                    : 'bg-blue-100 text-blue-800 border-blue-200'
-                }`}
-              >
-                {kind.replace(/_/g, ' ')}
-              </span>
-            </div>
-            <div
-              className={`text-[11px] font-mono ${
-                effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
-              }`}
-            >
-              {W} × {H} mm &bull; Extrusion Depth: 65mm &bull; Qty: {item.quantity}
-            </div>
-          </div>
-        </div>
-
-        {/* Center: Camera Views Quick Selector & Background Theme Selector */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Background Theme Selector: White, Dark, System */}
-          <div
-            className={`flex items-center p-1 rounded-lg border gap-0.5 ${
-              effectiveIsDark
-                ? 'bg-slate-950/80 border-slate-800'
-                : 'bg-slate-100 border-slate-200'
-            }`}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 text-slate-400 hidden sm:inline">
-              Canvas:
-            </span>
-
-            <button
-              type="button"
-              onClick={() => handleBgThemeChange('white')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                bgTheme === 'white'
-                  ? 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="White Architectural Studio Canvas"
-            >
-              <Sun className="w-3.5 h-3.5 text-amber-500" />
-              <span>White</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleBgThemeChange('dark')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                bgTheme === 'dark'
-                  ? effectiveIsDark
-                    ? 'bg-blue-600 text-white font-bold shadow-xs'
-                    : 'bg-slate-800 text-white font-bold shadow-xs'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Dark Blueprint Night Studio Canvas"
-            >
-              <Moon className="w-3.5 h-3.5 text-sky-400" />
-              <span>Dark</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleBgThemeChange('system')}
-              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                bgTheme === 'system'
-                  ? effectiveIsDark
-                    ? 'bg-blue-600 text-white font-bold shadow-xs'
-                    : 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="System (Auto Match Device / Browser Theme)"
-            >
-              <Monitor className="w-3.5 h-3.5 text-slate-400" />
-              <span>System</span>
-              {bgTheme === 'system' && (
-                <span className="text-[9px] font-mono opacity-80">
-                  ({systemIsDark ? 'Dark' : 'White'})
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Camera Views Quick Selector */}
-          <div
-            className={`flex items-center p-1 rounded-lg border gap-1 ${
-              effectiveIsDark
-                ? 'bg-slate-950/80 border-slate-800'
-                : 'bg-slate-100 border-slate-200'
-            }`}
-          >
-            <button
-              onClick={() => setCameraPreset('perspective')}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                activeCameraPreset === 'perspective'
-                  ? 'bg-blue-600 text-white font-bold shadow-xs'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="3D Perspective Orbit View"
-            >
-              3D Orbit
-            </button>
-            <button
-              onClick={() => setCameraPreset('front')}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                activeCameraPreset === 'front'
-                  ? 'bg-blue-600 text-white font-bold shadow-xs'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Front Elevation"
-            >
-              Front
-            </button>
-            <button
-              onClick={() => setCameraPreset('top')}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                activeCameraPreset === 'top'
-                  ? 'bg-blue-600 text-white font-bold shadow-xs'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Plan View (Top-Down)"
-            >
-              Plan (Top)
-            </button>
-            <button
-              onClick={() => setCameraPreset('side')}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                activeCameraPreset === 'side'
-                  ? 'bg-blue-600 text-white font-bold shadow-xs'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Side Section"
-            >
-              Side
-            </button>
-            <button
-              onClick={() => setCameraPreset('isometric')}
-              className={`px-2.5 py-1 rounded text-[11px] font-medium transition-all ${
-                activeCameraPreset === 'isometric'
-                  ? 'bg-blue-600 text-white font-bold shadow-xs'
-                  : effectiveIsDark
-                  ? 'text-slate-400 hover:text-white'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-              title="Isometric Projection"
-            >
-              ISO
-            </button>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={handleResetCamera}
-            className={`p-1.5 rounded-lg border transition-colors ${
-              effectiveIsDark
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
-                : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200 shadow-xs'
-            }`}
-            title="Reset Camera Target"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            onClick={handleCaptureSnapshot}
-            className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-[11px] font-semibold transition-colors ${
-              effectiveIsDark
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
-                : 'bg-white hover:bg-slate-100 text-slate-800 hover:text-blue-700 border-slate-200 shadow-xs'
-            }`}
-            title="Download 3D Architectural Snapshot"
-          >
-            <Camera className="w-3.5 h-3.5 text-sky-500" />
-            <span>Render PNG</span>
-          </button>
-
-          <button
-            onClick={toggleFullscreen}
-            className={`p-1.5 rounded-lg border transition-colors ${
-              effectiveIsDark
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
-                : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200 shadow-xs'
-            }`}
-            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen 3D Studio'}
-          >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* 3D WebGL Canvas Viewport */}
-      <div
-        ref={mountRef}
-        className="w-full min-h-[500px] sm:min-h-[560px] cursor-grab active:cursor-grabbing"
-      />
-
-      {/* Left Floating Material / Architectural Finish Control Palette */}
-      <div className="absolute top-18 left-3 z-20 space-y-2 max-w-[240px] pointer-events-auto">
-        {/* Powder Coat Finish Selector */}
+        {/* Top Header & Camera Control Toolbar */}
         <div
-          className={`p-3 rounded-xl border shadow-xl space-y-2 backdrop-blur-md ${
+          className={`px-3 sm:px-5 py-3 border-b flex flex-wrap items-center justify-between gap-3 ${
             effectiveIsDark
-              ? 'bg-slate-900/90 border-slate-800/90 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-900'
+              ? 'bg-slate-900/95 border-slate-800 text-white'
+              : 'bg-slate-50 border-slate-200 text-slate-800'
           }`}
         >
-          <div
-            className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-              effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
-            }`}
-          >
-            <Palette className="w-3 h-3 text-blue-500" />
-            <span>Aluminium Finish</span>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {[
-              { id: 'charcoal', label: 'Charcoal', color: '#2b303a' },
-              { id: 'black', label: 'Matte Black', color: '#111317' },
-              { id: 'white', label: 'Pure White', color: '#f0f2f5' },
-              { id: 'bronze', label: 'Bronze', color: '#3d2b1f' },
-              { id: 'silver', label: 'Silver Anod.', color: '#c5cdd6' },
-              { id: 'woodgrain', label: 'Woodgrain', color: '#7c4928' },
-            ].map((fin) => (
-              <button
-                key={fin.id}
-                onClick={() => setProfileFinish(fin.id as ProfileFinish)}
-                className={`group flex flex-col items-center p-1.5 rounded-lg border text-[9.5px] transition-all ${
-                  profileFinish === fin.id
-                    ? effectiveIsDark
-                      ? 'border-blue-500 bg-blue-500/15 text-white font-bold ring-1 ring-blue-500'
-                      : 'border-blue-600 bg-blue-50 text-blue-900 font-bold ring-1 ring-blue-500 shadow-xs'
-                    : effectiveIsDark
-                    ? 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                }`}
-              >
+          {/* Left: Unit Tag & Type Badge */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className={`p-2 rounded-xl border shrink-0 ${
+                effectiveIsDark
+                  ? 'bg-blue-600/20 border-blue-500/30 text-blue-400'
+                  : 'bg-blue-50 border-blue-200 text-blue-700'
+              }`}
+            >
+              <Box className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-sm sm:text-base tracking-tight truncate">{tag}</span>
                 <span
-                  className="w-4 h-4 rounded-full border border-black/10 mb-1 shadow-xs"
-                  style={{ backgroundColor: fin.color }}
-                />
-                <span className="truncate w-full text-center">{fin.label}</span>
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wider ${
+                    effectiveIsDark
+                      ? 'bg-blue-500/20 text-blue-300 border-blue-400/30'
+                      : 'bg-blue-100 text-blue-800 border-blue-200'
+                  }`}
+                >
+                  {kind.replace(/_/g, ' ')}
+                </span>
+              </div>
+              <div
+                className={`text-xs font-mono mt-0.5 ${
+                  effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
+                }`}
+              >
+                {W} × {H} mm &bull; Extrusion Depth: 65mm &bull; Qty: {item.quantity}
+              </div>
+            </div>
+          </div>
+
+          {/* Center/Right: View Presets, Canvas Themes, and Actions */}
+          <div className="flex items-center flex-wrap gap-2">
+            {/* Background Theme Selector: White, Dark, System */}
+            <div
+              className={`flex items-center p-0.5 sm:p-1 rounded-xl border gap-0.5 ${
+                effectiveIsDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => handleBgThemeChange('white')}
+                className={`inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  bgTheme === 'white'
+                    ? 'bg-amber-50 text-amber-950 font-bold border border-amber-200 shadow-xs'
+                    : effectiveIsDark
+                    ? 'text-slate-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="White Architectural Canvas"
+              >
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
+                <span className="hidden sm:inline">White</span>
               </button>
-            ))}
+
+              <button
+                type="button"
+                onClick={() => handleBgThemeChange('dark')}
+                className={`inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  bgTheme === 'dark'
+                    ? effectiveIsDark
+                      ? 'bg-blue-600 text-white font-bold shadow-xs'
+                      : 'bg-slate-800 text-white font-bold shadow-xs'
+                    : effectiveIsDark
+                    ? 'text-slate-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Dark Blueprint Night Canvas"
+              >
+                <Moon className="w-3.5 h-3.5 text-sky-400" />
+                <span className="hidden sm:inline">Dark</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleBgThemeChange('system')}
+                className={`inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  bgTheme === 'system'
+                    ? effectiveIsDark
+                      ? 'bg-blue-600 text-white font-bold shadow-xs'
+                      : 'bg-slate-100 text-slate-900 font-bold border border-slate-300'
+                    : effectiveIsDark
+                    ? 'text-slate-400 hover:text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="System Theme (Auto Device Match)"
+              >
+                <Monitor className="w-3.5 h-3.5 text-slate-400" />
+                <span className="hidden sm:inline">System</span>
+              </button>
+            </div>
+
+            {/* Camera View Quick Presets */}
+            <div
+              className={`flex items-center p-0.5 sm:p-1 rounded-xl border gap-0.5 overflow-x-auto ${
+                effectiveIsDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+              }`}
+            >
+              {[
+                { id: 'perspective', label: '3D Orbit', title: '3D Perspective Orbit' },
+                { id: 'front', label: 'Front', title: 'Front Elevation' },
+                { id: 'top', label: 'Plan', title: 'Plan View (Top-Down)' },
+                { id: 'side', label: 'Side', title: 'Side Section' },
+                { id: 'isometric', label: 'ISO', title: 'Isometric Projection' },
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setCameraPreset(p.id as CameraPreset)}
+                  className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    activeCameraPreset === p.id
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : effectiveIsDark
+                      ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                  title={p.title}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Action Buttons: Reset, Render PNG, Fullscreen */}
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleResetCamera}
+                className={`p-1.5 rounded-lg border transition-colors ${
+                  effectiveIsDark
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200 shadow-xs'
+                }`}
+                title="Reset Camera Target"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCaptureSnapshot}
+                className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors ${
+                  effectiveIsDark
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border-slate-700'
+                    : 'bg-white hover:bg-slate-100 text-slate-800 hover:text-blue-700 border-slate-200 shadow-xs'
+                }`}
+                title="Download 3D Architectural Snapshot"
+              >
+                <Camera className="w-4 h-4 text-sky-500" />
+                <span className="hidden sm:inline">Render PNG</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className={`p-1.5 rounded-lg border transition-colors ${
+                  effectiveIsDark
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border-slate-700'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border-slate-200 shadow-xs'
+                }`}
+                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen 3D Studio'}
+              >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Glass Tint Selector */}
-        <div
-          className={`p-3 rounded-xl border shadow-xl space-y-2 backdrop-blur-md ${
-            effectiveIsDark
-              ? 'bg-slate-900/90 border-slate-800/90 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-900'
-          }`}
-        >
+        {/* 3D WebGL Canvas Viewport (100% UNCLUTTERED) */}
+        <div className="relative w-full">
           <div
-            className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-              effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
-            }`}
+            ref={mountRef}
+            className="w-full h-[360px] sm:h-[460px] md:h-[520px] lg:h-[580px] cursor-grab active:cursor-grabbing"
+          />
+
+          {/* Bottom Gestures and Tech Spec HUD */}
+          <div
+            className={`absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-xs`}
           >
-            <Sparkles className="w-3 h-3 text-sky-500" />
-            <span>Glass Infill Tint</span>
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {[
-              { id: 'clear', label: 'Clear 6mm', dot: '#dcf4fc' },
-              { id: 'blue_reflective', label: 'Blue Solar', dot: '#38bdf8' },
-              { id: 'bronze_tint', label: 'Bronze Tint', dot: '#a3714b' },
-              { id: 'green_lowe', label: 'Green Low-E', dot: '#5eead4' },
-              { id: 'frosted', label: 'Frosted Sat.', dot: '#cbd5e1' },
-            ].map((gt) => (
-              <button
-                key={gt.id}
-                onClick={() => setGlassTint(gt.id as GlassTint)}
-                className={`px-2 py-1 rounded-md text-[10px] border flex items-center gap-1.5 transition-all ${
-                  glassTint === gt.id
-                    ? effectiveIsDark
-                      ? 'border-sky-400 bg-sky-500/20 text-white font-bold ring-1 ring-sky-400'
-                      : 'border-sky-500 bg-sky-50 text-sky-900 font-bold ring-1 ring-sky-400 shadow-xs'
-                    : effectiveIsDark
-                    ? 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full border border-black/10" style={{ backgroundColor: gt.dot }}></span>
-                <span>{gt.label}</span>
-              </button>
-            ))}
+            <div
+              className={`px-3 py-1.5 rounded-xl border flex items-center gap-2 backdrop-blur-md shadow-sm ${
+                effectiveIsDark
+                  ? 'bg-slate-900/90 border-slate-800 text-slate-300'
+                  : 'bg-white/95 border-slate-200 text-slate-700'
+              }`}
+            >
+              <span className="flex items-center gap-1 font-semibold text-[11px]">
+                <Compass className="w-3.5 h-3.5 text-blue-500" />
+                <span>Left Drag: Orbit 3D</span>
+              </span>
+              <span className="text-slate-400 hidden sm:inline">•</span>
+              <span className="text-[11px] hidden sm:inline">Right Drag: Pan</span>
+              <span className="text-slate-400 hidden sm:inline">•</span>
+              <span className="text-[11px] hidden sm:inline">Scroll: Zoom</span>
+              <span className="text-slate-400 hidden xs:inline">•</span>
+              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">Click Part to Inspect</span>
+            </div>
+
+            <div
+              className={`px-2.5 py-1 rounded-xl border font-mono text-[10px] backdrop-blur-md shadow-sm ${
+                effectiveIsDark
+                  ? 'bg-slate-900/90 border-slate-800 text-slate-400'
+                  : 'bg-white/95 border-slate-200 text-slate-500'
+              }`}
+            >
+              WebGL Architectural Studio &bull; 60 FPS
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Right Floating Architectural Simulation & View Layers */}
-      <div className="absolute top-18 right-3 z-20 space-y-2 max-w-[250px] pointer-events-auto">
-        {/* Sash Open / Close Slider & Interactive Animation */}
+      {/* ========================================================================= */}
+      {/* SECTION 2: ARCHITECTURAL FEATURES, FINISHES & SIMULATION CONTROLS GRID   */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+        {/* ------------------------------------------------------------- */}
+        {/* CARD 1: Aluminium Powder Coat & Glass Infill Finishes        */}
+        {/* ------------------------------------------------------------- */}
         <div
-          className={`p-3.5 rounded-xl border shadow-xl space-y-2.5 backdrop-blur-md ${
+          className={`p-4 rounded-2xl border shadow-sm space-y-4 transition-colors ${
             effectiveIsDark
-              ? 'bg-slate-900/90 border-slate-800/90 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-900'
+              ? 'bg-slate-900 border-slate-800 text-white'
+              : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <div className="flex items-center justify-between">
-            <span
-              className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                effectiveIsDark ? 'text-slate-300' : 'text-slate-600'
-              }`}
-            >
-              <Sliders className="w-3 h-3 text-blue-500" />
-              <span>Sash Operability</span>
-            </span>
-            <button
-              onClick={() => setIsAutoAnimating(!isAutoAnimating)}
-              className={`p-1 rounded text-[10px] font-semibold flex items-center gap-1 transition-colors ${
-                isAutoAnimating
-                  ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
-                  : effectiveIsDark
-                  ? 'bg-slate-800 text-slate-300 hover:text-white'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-              title="Auto Animate Open/Close"
-            >
-              {isAutoAnimating ? <Pause className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
-              <span>{isAutoAnimating ? 'Pause' : 'Play'}</span>
-            </button>
+          {/* Powder Coat Finish */}
+          <div>
+            <div className="flex items-center gap-2 mb-2.5">
+              <Palette className="w-4 h-4 text-blue-500" />
+              <h4 className="font-bold text-xs uppercase tracking-wider">
+                Aluminium Finish
+              </h4>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: 'charcoal', label: 'Charcoal', color: '#2b303a' },
+                { id: 'black', label: 'Matte Black', color: '#111317' },
+                { id: 'white', label: 'Pure White', color: '#f0f2f5' },
+                { id: 'bronze', label: 'Bronze', color: '#3d2b1f' },
+                { id: 'silver', label: 'Silver Anod.', color: '#c5cdd6' },
+                { id: 'woodgrain', label: 'Woodgrain', color: '#7c4928' },
+              ].map((fin) => (
+                <button
+                  key={fin.id}
+                  type="button"
+                  onClick={() => setProfileFinish(fin.id as ProfileFinish)}
+                  className={`flex flex-col items-center justify-center p-2 rounded-xl border text-[10px] font-medium transition-all ${
+                    profileFinish === fin.id
+                      ? effectiveIsDark
+                        ? 'border-blue-500 bg-blue-600/20 text-white font-bold ring-2 ring-blue-500/40'
+                        : 'border-blue-600 bg-blue-50 text-blue-900 font-bold ring-2 ring-blue-500/30 shadow-xs'
+                      : effectiveIsDark
+                      ? 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                  }`}
+                >
+                  <span
+                    className="w-5 h-5 rounded-full border border-black/20 mb-1.5 shadow-xs shrink-0"
+                    style={{ backgroundColor: fin.color }}
+                  />
+                  <span className="truncate w-full text-center leading-tight">{fin.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
+          {/* Glass Infill Tint */}
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-4 h-4 text-sky-500" />
+              <h4 className="font-bold text-xs uppercase tracking-wider">
+                Glass Infill Tint
+              </h4>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: 'clear', label: 'Clear 6mm', dot: '#dcf4fc' },
+                { id: 'blue_reflective', label: 'Blue Solar', dot: '#38bdf8' },
+                { id: 'bronze_tint', label: 'Bronze Tint', dot: '#a3714b' },
+                { id: 'green_lowe', label: 'Green Low-E', dot: '#5eead4' },
+                { id: 'frosted', label: 'Frosted Sat.', dot: '#cbd5e1' },
+              ].map((gt) => (
+                <button
+                  key={gt.id}
+                  type="button"
+                  onClick={() => setGlassTint(gt.id as GlassTint)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs border flex items-center gap-1.5 transition-all ${
+                    glassTint === gt.id
+                      ? effectiveIsDark
+                        ? 'border-sky-400 bg-sky-500/20 text-white font-bold ring-1 ring-sky-400'
+                        : 'border-sky-500 bg-sky-50 text-sky-900 font-bold ring-1 ring-sky-400 shadow-xs'
+                      : effectiveIsDark
+                      ? 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
+                    style={{ backgroundColor: gt.dot }}
+                  />
+                  <span>{gt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ------------------------------------------------------------- */}
+        {/* CARD 2: Sash Operability & Exploded Assembly View            */}
+        {/* ------------------------------------------------------------- */}
+        <div
+          className={`p-4 rounded-2xl border shadow-sm space-y-4 transition-colors ${
+            effectiveIsDark
+              ? 'bg-slate-900 border-slate-800 text-white'
+              : 'bg-white border-slate-200 text-slate-900'
+          }`}
+        >
+          {/* Sash Operability Slider */}
           <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-blue-500" />
+                <h4 className="font-bold text-xs uppercase tracking-wider">
+                  Sash Operability
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAutoAnimating(!isAutoAnimating)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                  isAutoAnimating
+                    ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40 animate-pulse'
+                    : effectiveIsDark
+                    ? 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                }`}
+                title="Auto-animate open and close cycle"
+              >
+                {isAutoAnimating ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                <span>{isAutoAnimating ? 'Pause' : 'Auto Play'}</span>
+              </button>
+            </div>
+
             <div
-              className={`flex justify-between text-[11px] font-mono mb-1 ${
+              className={`flex justify-between text-xs font-mono mb-1.5 ${
                 effectiveIsDark ? 'text-slate-400' : 'text-slate-600'
               }`}
             >
               <span>Position:</span>
               <span className="text-blue-600 dark:text-blue-400 font-bold">
-                {openPercentage === 0 ? 'Fully Closed (0%)' : `${openPercentage}% Open`}
+                {openPercentage === 0 ? 'Fully Closed (0°)' : `${openPercentage}° Open (${Math.round((openPercentage / 90) * 100)}%)`}
               </span>
             </div>
+
             <input
               type="range"
               min="0"
@@ -1000,250 +998,247 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
                 setIsAutoAnimating(false);
                 setOpenPercentage(Number(e.target.value));
               }}
-              className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
+
             <div
-              className={`flex justify-between text-[9px] mt-1 ${
+              className={`flex justify-between text-[10px] mt-1 ${
                 effectiveIsDark ? 'text-slate-500' : 'text-slate-400'
               }`}
             >
-              <span>0° / Closed</span>
+              <span>0° Closed</span>
               <span>Slide / Swing Angle</span>
-              <span>90° / Full</span>
+              <span>90° Full Open</span>
             </div>
           </div>
 
           {/* Exploded View Assembly Slider */}
-          <div
-            className={`pt-2 border-t ${
-              effectiveIsDark ? 'border-slate-800/80' : 'border-slate-200'
-            }`}
-          >
-            <div
-              className={`flex justify-between text-[10px] font-bold uppercase mb-1 ${
-                effectiveIsDark ? 'text-slate-300' : 'text-slate-600'
-              }`}
-            >
-              <span className="flex items-center gap-1">
-                <Layers className="w-3 h-3 text-emerald-500" />
-                <span>Exploded Assembly</span>
+          <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-emerald-500" />
+                <h4 className="font-bold text-xs uppercase tracking-wider">
+                  Exploded Assembly
+                </h4>
+              </div>
+              <span className="text-emerald-600 dark:text-emerald-400 font-mono font-bold text-xs">
+                {explodedView}%
               </span>
-              <span className="text-emerald-600 dark:text-emerald-400 font-mono">{explodedView}%</span>
             </div>
+
             <input
               type="range"
               min="0"
               max="100"
               value={explodedView}
               onChange={(e) => setExplodedView(Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
             />
+
+            <div
+              className={`flex justify-between text-[10px] mt-1 ${
+                effectiveIsDark ? 'text-slate-500' : 'text-slate-400'
+              }`}
+            >
+              <span>0% Assembled</span>
+              <span>Component Spacing</span>
+              <span>100% Exploded</span>
+            </div>
           </div>
         </div>
 
-        {/* View Layer Toggles */}
+        {/* ------------------------------------------------------------- */}
+        {/* CARD 3: Architectural Simulation Layers                      */}
+        {/* ------------------------------------------------------------- */}
         <div
-          className={`p-3 rounded-xl border shadow-xl space-y-2 backdrop-blur-md ${
+          className={`p-4 rounded-2xl border shadow-sm space-y-2.5 transition-colors ${
             effectiveIsDark
-              ? 'bg-slate-900/90 border-slate-800/90 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-900'
+              ? 'bg-slate-900 border-slate-800 text-white'
+              : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <div
-            className={`text-[10px] font-bold uppercase tracking-wider ${
-              effectiveIsDark ? 'text-slate-400' : 'text-slate-500'
-            }`}
-          >
-            Architectural Layers
+          <div className="flex items-center gap-2 mb-2">
+            <Layers className="w-4 h-4 text-indigo-500" />
+            <h4 className="font-bold text-xs uppercase tracking-wider">
+              Architectural Layers
+            </h4>
           </div>
-          <div className="space-y-1.5 text-xs">
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Building2 className="w-3 h-3 text-slate-400" /> Wall Aperture Opening
+
+          <div className="space-y-2 text-xs">
+            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+              <span className="flex items-center gap-2 font-medium">
+                <Building2 className="w-4 h-4 text-slate-400" />
+                <span>Wall Aperture Opening</span>
               </span>
               <input
                 type="checkbox"
                 checked={showWallOpening}
                 onChange={(e) => setShowWallOpening(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Grid className="w-3 h-3 text-slate-400" /> Technical Wireframe Edges
+            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+              <span className="flex items-center gap-2 font-medium">
+                <Grid className="w-4 h-4 text-slate-400" />
+                <span>Technical Wireframe Edges</span>
               </span>
               <input
                 type="checkbox"
                 checked={showWireframeOverlay}
                 onChange={(e) => setShowWireframeOverlay(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Eye className="w-3 h-3 text-slate-400" /> 3D Floating Dimensions
+            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+              <span className="flex items-center gap-2 font-medium">
+                <Eye className="w-4 h-4 text-slate-400" />
+                <span>3D Floating Dimensions</span>
               </span>
               <input
                 type="checkbox"
                 checked={showDimensions3D}
                 onChange={(e) => setShowDimensions3D(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Box className="w-3 h-3 text-amber-500" /> 35mm Iron Angle Cleats
+            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+              <span className="flex items-center gap-2 font-medium">
+                <Box className="w-4 h-4 text-amber-500" />
+                <span>35mm Iron Angle Cleats</span>
               </span>
               <input
                 type="checkbox"
                 checked={showIronCleats}
                 onChange={(e) => setShowIronCleats(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Shield className="w-3 h-3 text-blue-500" /> Burglary Proofing Bars
-              </span>
-              <input
-                type="checkbox"
-                checked={showBurglary}
-                onChange={(e) => setShowBurglary(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
-              />
-            </label>
+            {!isSliding && (
+              <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+                <span className="flex items-center gap-2 font-medium">
+                  <Shield className="w-4 h-4 text-blue-500" />
+                  <span>Burglary Proofing Bars</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={showBurglary}
+                  onChange={(e) => setShowBurglary(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
+                />
+              </label>
+            )}
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Layers className="w-3 h-3 text-teal-500" /> Insect / Mosquito Net
+            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+              <span className="flex items-center gap-2 font-medium">
+                <Layers className="w-4 h-4 text-teal-500" />
+                <span>Insect / Mosquito Net Screen</span>
               </span>
               <input
                 type="checkbox"
                 checked={showNet}
                 onChange={(e) => setShowNet(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
 
-            <label className="flex items-center justify-between cursor-pointer py-0.5 hover:text-blue-500">
-              <span
-                className={`text-[11px] flex items-center gap-1.5 ${
-                  effectiveIsDark ? 'text-slate-300' : 'text-slate-700'
-                }`}
-              >
-                <Columns className="w-3 h-3 text-indigo-500" /> Glazing Dividers
+            <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+              <span className="flex items-center gap-2 font-medium">
+                <Columns className="w-4 h-4 text-indigo-500" />
+                <span>Glazing Dividers (Colonial Grid)</span>
               </span>
               <input
                 type="checkbox"
                 checked={showDividers}
                 onChange={(e) => setShowDividers(e.target.checked)}
-                className="rounded border-slate-300 text-blue-600 focus:ring-0"
+                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
           </div>
         </div>
 
-        {/* Selected Part HUD Inspector if clicked */}
-        {selectedPartInfo && (
+        {/* ------------------------------------------------------------- */}
+        {/* CARD 4: Live 3D Part Inspector & Diagnostics                 */}
+        {/* ------------------------------------------------------------- */}
+        <div
+          className={`p-4 rounded-2xl border shadow-sm flex flex-col justify-between transition-colors ${
+            selectedPartInfo
+              ? effectiveIsDark
+                ? 'bg-blue-950/40 border-blue-600/70 text-white'
+                : 'bg-blue-50/70 border-blue-300 text-slate-900 shadow-sm'
+              : effectiveIsDark
+              ? 'bg-slate-900 border-slate-800 text-white'
+              : 'bg-white border-slate-200 text-slate-900'
+          }`}
+        >
+          <div>
+            <div className="flex items-center justify-between mb-2.5">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-blue-500" />
+                <h4 className="font-bold text-xs uppercase tracking-wider">
+                  Live Part Inspector
+                </h4>
+              </div>
+              {selectedPartInfo && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedPartInfo(null)}
+                  className="text-xs text-slate-400 hover:text-slate-700 dark:hover:text-white font-mono px-1 py-0.5 rounded"
+                  title="Clear inspector selection"
+                >
+                  ✕ Clear
+                </button>
+              )}
+            </div>
+
+            {selectedPartInfo ? (
+              <div className="space-y-2.5 animate-inspector">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    Component Title
+                  </span>
+                  <div className="font-bold text-sm text-slate-900 dark:text-white">
+                    {selectedPartInfo.title}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    Description & Role
+                  </span>
+                  <div className="text-xs text-slate-700 dark:text-slate-300">
+                    {selectedPartInfo.description}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <span className="text-[11px] font-mono text-slate-500">Cut Size:</span>
+                  <span className="font-mono font-bold text-sm text-blue-600 dark:text-blue-400">
+                    {selectedPartInfo.dimensions}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="py-6 px-3 text-center space-y-2">
+                <MousePointerClick className="w-7 h-7 text-blue-500 mx-auto opacity-70" />
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Click on any aluminium extrusion, sash bar, glass pane, or fastener directly on the 3D model above to inspect its fabrication cut length.
+                </p>
+              </div>
+            )}
+          </div>
+
           <div
-            className={`p-3.5 rounded-xl border shadow-2xl space-y-1.5 animate-in fade-in duration-200 backdrop-blur-md ${
-              effectiveIsDark
-                ? 'bg-blue-950/90 border-blue-600/70 text-white'
-                : 'bg-blue-50/95 border-blue-300 text-slate-900'
+            className={`mt-4 pt-2.5 border-t text-[10px] font-mono flex items-center justify-between ${
+              effectiveIsDark ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-500'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-300 flex items-center gap-1">
-                <Info className="w-3 h-3" /> Part Inspector
-              </span>
-              <button
-                onClick={() => setSelectedPartInfo(null)}
-                className="text-slate-400 hover:text-slate-700 dark:hover:text-white text-xs font-mono"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="font-bold text-xs">{selectedPartInfo.title}</div>
-            <div className="text-[11px] text-blue-700 dark:text-blue-200">{selectedPartInfo.description}</div>
-            <div
-              className={`text-[10px] font-mono pt-1 border-t flex justify-between ${
-                effectiveIsDark ? 'border-blue-800/80 text-slate-300' : 'border-blue-200 text-slate-600'
-              }`}
-            >
-              <span>Cut / Size:</span>
-              <span className="font-bold text-slate-900 dark:text-white">{selectedPartInfo.dimensions}</span>
-            </div>
+            <span>Interactive Raycaster</span>
+            <span className="font-bold text-emerald-600 dark:text-emerald-400">Active</span>
           </div>
-        )}
-      </div>
-
-      {/* Bottom Floating Tips and HUD */}
-      <div
-        className={`absolute bottom-3 left-3 right-3 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-none text-[11px] ${
-          effectiveIsDark ? 'text-slate-400' : 'text-slate-600'
-        }`}
-      >
-        <div
-          className={`px-3 py-1.5 rounded-lg border flex items-center gap-3 backdrop-blur-md shadow-md ${
-            effectiveIsDark
-              ? 'bg-slate-900/85 border-slate-800/90 text-slate-300'
-              : 'bg-white/90 border-slate-200 text-slate-700'
-          }`}
-        >
-          <span className="flex items-center gap-1 font-medium">
-            <Compass className="w-3 h-3 text-blue-500" />
-            <strong>Left Drag:</strong> Orbit 3D
-          </span>
-          <span>•</span>
-          <span>
-            <strong>Right Drag:</strong> Pan
-          </span>
-          <span>•</span>
-          <span>
-            <strong>Scroll:</strong> Zoom
-          </span>
-          <span>•</span>
-          <span>
-            <strong>Click Part:</strong> Inspect Cut Dimensions
-          </span>
-        </div>
-
-        <div
-          className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] backdrop-blur-md shadow-md ${
-            effectiveIsDark
-              ? 'bg-slate-900/85 border-slate-800/90 text-slate-400'
-              : 'bg-white/90 border-slate-200 text-slate-500'
-          }`}
-        >
-          WebGL Architectural Core &bull; 60 FPS
         </div>
       </div>
     </div>
