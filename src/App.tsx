@@ -235,24 +235,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
-      {/* Top Navbar */}
+      {/* Top Navbar with integrated Mobile Dropdown Menu & Cloud Sync/Backup/Restore */}
       <Navbar
         currentView={currentView}
         onNavigate={navigateTo}
         hasActiveCalculation={!!activeCalculation}
         onOpenRestoreModal={() => setIsRestoreModalOpen(true)}
+        onSyncComplete={() => {
+          setSavedProjectsList(getSavedProjects());
+        }}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Global Fast Local Storage + Daily MongoDB Cloud Backup Banner */}
-        <CloudSyncBanner
-          onOpenRestoreModal={() => setIsRestoreModalOpen(true)}
-          onSyncComplete={() => {
-            setSavedProjectsList(getSavedProjects());
-          }}
-        />
-
+      <main className="flex-1 py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full overflow-x-hidden">
         {currentView === 'home' && (
           <HomePage
             onStartCalculation={handleStartNewCalculation}
