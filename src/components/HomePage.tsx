@@ -15,6 +15,7 @@ import {
   Boxes,
 } from 'lucide-react';
 import { SavedProject } from '../types';
+import { PWAInstallButton } from './PWAInstallButton';
 import './HomePage.css';
 
 interface HomePageProps {
@@ -52,6 +53,9 @@ export const HomePage: React.FC<HomePageProps> = ({
           </p>
         </div>
       </div>
+
+      {/* PWA Standalone App Install Banner */}
+      <PWAInstallButton variant="card" />
 
       {/* THE 3 PRIMARY HOMEPAGE BUTTONS (AS REQUIRED BY PROMPT) */}
       <div>

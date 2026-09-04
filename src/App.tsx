@@ -23,6 +23,7 @@ import { SavedDataPage } from './components/SavedDataPage';
 import { AdminPanel } from './components/AdminPanel';
 import { RestoreDataModal } from './components/RestoreDataModal';
 import { CloudSyncBanner } from './components/CloudSyncBanner';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 export default function App() {
   const [constants, setConstants] = useState<ConstantProfilesConfig>(getStoredConstants());
@@ -34,35 +35,7 @@ export default function App() {
   // Active Project Data
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [activeProjectName, setActiveProjectName] = useState<string>('Villa Windows & Doors Project');
-  const [activeItems, setActiveItems] = useState<FabricationItemInput[]>([
-    {
-      id: 'init-1',
-      tag: 'W1 - Living Room Slider',
-      type: 'window',
-      kind: 'sliding_2_panel',
-      width: 1200,
-      height: 1500,
-      quantity: 2,
-    },
-    {
-      id: 'init-2',
-      tag: 'W2 - Bedroom Slider',
-      type: 'window',
-      kind: 'sliding_2_panel',
-      width: 1000,
-      height: 1200,
-      quantity: 1,
-    },
-    {
-      id: 'init-3',
-      tag: 'W3 - Kitchen Fixed Glass',
-      type: 'window',
-      kind: 'fixed_window',
-      width: 800,
-      height: 600,
-      quantity: 1,
-    },
-  ]);
+  const [activeItems, setActiveItems] = useState<FabricationItemInput[]>([]);
 
   const [activeCalculation, setActiveCalculation] = useState<CombinedProjectCalculation | null>(null);
   const [savedProjectsList, setSavedProjectsList] = useState<SavedProject[]>(getSavedProjects());
@@ -335,6 +308,9 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Offline Status Toast / Banner */}
+      <OfflineIndicator />
     </div>
   );
 }

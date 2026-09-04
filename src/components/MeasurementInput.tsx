@@ -55,10 +55,10 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
   const [windowSubtype, setWindowSubtype] = useState<WindowType>('sliding_2_panel');
   const [doorSubtype, setDoorSubtype] = useState<DoorType>('sliding_door_2_panel');
 
-  const [inputWidth, setInputWidth] = useState<string>('1200');
-  const [inputHeight, setInputHeight] = useState<string>('1500');
+  const [inputWidth, setInputWidth] = useState<string>('');
+  const [inputHeight, setInputHeight] = useState<string>('');
   const [inputQuantity, setInputQuantity] = useState<number>(1);
-  const [inputTag, setInputTag] = useState<string>('W1');
+  const [inputTag, setInputTag] = useState<string>('');
   const [inputNotes, setInputNotes] = useState<string>('');
 
   // Feature Options: Burglary Proofing, Net Screen, Glazing Dividers
@@ -255,120 +255,10 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
         }}
       />
 
-      {/* Professional Split Layout: Left Summary Sidebar & Right Input Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT COLUMN: Input Summary Schedule List */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-blue-600" />
-              <h2 className="font-bold text-xs uppercase tracking-widest text-slate-500">
-                Input Summary Schedule
-              </h2>
-            </div>
-            <span className="bg-blue-100 text-blue-700 text-xs px-2.5 py-0.5 rounded-full font-bold font-mono">
-              {itemsList.length} Item{itemsList.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-
-          <div className="p-4 space-y-3 max-h-[460px] overflow-y-auto bg-[#F8FAFC]">
-            {itemsList.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-lg border border-dashed border-slate-300">
-                <p className="text-xs text-slate-400 font-medium">No items queued yet.</p>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Fill the measurement details on the right and click <b>"+ Add More Measurements"</b>.
-                </p>
-              </div>
-            ) : (
-              itemsList.map((it, idx) => (
-                <div
-                  key={it.id}
-                  className="p-3.5 border rounded-lg bg-white shadow-xs flex justify-between items-center border-l-4 border-l-blue-500 hover:border-slate-300 transition-colors"
-                >
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-slate-400">
-                        #{String(idx + 1).padStart(2, '0')}
-                      </span>
-                      {it.tag && (
-                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-semibold">
-                          {it.tag}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm font-semibold text-slate-800 line-clamp-1">
-                      {getReadableKindName(it.kind)}
-                    </p>
-                    <p className="text-xs font-mono font-bold text-blue-600">
-                      {it.width} × {it.height} mm
-                      <span className="text-slate-500 font-normal ml-1.5 font-sans">
-                        (Qty: {it.quantity})
-                      </span>
-                    </p>
-                    {/* Feature Badges */}
-                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      {it.hasBurglary !== false && (
-                        <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
-                          <Shield className="w-2.5 h-2.5 text-amber-600" />
-                          Burglary
-                        </span>
-                      )}
-                      {it.hasNet !== false && (
-                        <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
-                          <Grid className="w-2.5 h-2.5 text-emerald-600" />
-                          Insect Net
-                        </span>
-                      )}
-                      {it.dividerCount !== undefined && it.dividerCount > 0 && (
-                        <span className="text-[10px] bg-purple-50 text-purple-800 border border-purple-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
-                          <Columns className="w-2.5 h-2.5 text-purple-600" />
-                          Dividers: {it.dividerCount}/pane
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleEditItem(it)}
-                      className="p-1.5 text-slate-400 hover:text-blue-600 rounded transition-colors"
-                      title="Edit Item"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteItem(it.id)}
-                      className="p-1.5 text-slate-400 hover:text-red-600 rounded transition-colors"
-                      title="Delete Item"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="p-4 border-t border-slate-200 bg-slate-50 space-y-2">
-            <button
-              type="button"
-              onClick={handleContinueClick}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md uppercase text-xs tracking-wider transition-colors flex items-center justify-center gap-2"
-            >
-              <span>Continue to Calculation</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-700 font-medium pt-0.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Auto-saves job to local storage on continue</span>
-            </div>
-          </div>
-        </div>
-
+      {/* Single Vertical Flow: Input Workspace First, Summary Schedule Below */}
+      <div className="flex flex-col gap-8">
         {/* RIGHT COLUMN: New Measurement Input Form */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="space-y-6">
           <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-slate-200 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
@@ -658,15 +548,33 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                   </p>
                 </div>
 
-                {/* Add More Measurements Button */}
-                <button
-                  type="button"
-                  onClick={handleAddMore}
-                  className="w-full py-3.5 border-2 border-dashed border-blue-400 text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition-colors uppercase tracking-widest text-xs flex items-center justify-center gap-1.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{editingItemId ? 'Update This Item' : '+ Add More Measurements'}</span>
-                </button>
+                {/* Action Buttons: Add More & Instant Calculate */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {/* Professional Add More Measurement Button */}
+                  <button
+                    type="button"
+                    onClick={handleAddMore}
+                    className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2 border border-slate-800 active:scale-[0.99]"
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                      <Plus className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-xs uppercase tracking-wider">
+                      {editingItemId ? 'Update Measurement Item' : '+ Add More Measurement'}
+                    </span>
+                  </button>
+
+                  {/* Instant Calculate Button Right Under Inputs */}
+                  <button
+                    type="button"
+                    onClick={handleContinueClick}
+                    className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-[0.99]"
+                  >
+                    <Calculator className="w-4 h-4" />
+                    <span className="text-xs uppercase tracking-wider">Calculate Now</span>
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -683,6 +591,117 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
             </div>
           </div>
         </div>
+
+        {/* LEFT COLUMN: Input Summary Schedule List */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-blue-600" />
+              <h2 className="font-bold text-xs uppercase tracking-widest text-slate-500">
+                Input Summary Schedule
+              </h2>
+            </div>
+            <span className="bg-blue-100 text-blue-700 text-xs px-2.5 py-0.5 rounded-full font-bold font-mono">
+              {itemsList.length} Item{itemsList.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <div className="p-4 space-y-3 max-h-[460px] overflow-y-auto bg-[#F8FAFC]">
+            {itemsList.length === 0 ? (
+              <div className="p-8 text-center bg-white rounded-lg border border-dashed border-slate-300">
+                <p className="text-xs text-slate-400 font-medium">No items queued yet.</p>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Fill the measurement details on the right and click <b>"+ Add More Measurements"</b>.
+                </p>
+              </div>
+            ) : (
+              itemsList.map((it, idx) => (
+                <div
+                  key={it.id}
+                  className="p-3.5 border rounded-lg bg-white shadow-xs flex justify-between items-center border-l-4 border-l-blue-500 hover:border-slate-300 transition-colors"
+                >
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-slate-400">
+                        #{String(idx + 1).padStart(2, '0')}
+                      </span>
+                      {it.tag && (
+                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-semibold">
+                          {it.tag}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-semibold text-slate-800 line-clamp-1">
+                      {getReadableKindName(it.kind)}
+                    </p>
+                    <p className="text-xs font-mono font-bold text-blue-600">
+                      {it.width} × {it.height} mm
+                      <span className="text-slate-500 font-normal ml-1.5 font-sans">
+                        (Qty: {it.quantity})
+                      </span>
+                    </p>
+                    {/* Feature Badges */}
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      {it.hasBurglary !== false && (
+                        <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                          <Shield className="w-2.5 h-2.5 text-amber-600" />
+                          Burglary
+                        </span>
+                      )}
+                      {it.hasNet !== false && (
+                        <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                          <Grid className="w-2.5 h-2.5 text-emerald-600" />
+                          Insect Net
+                        </span>
+                      )}
+                      {it.dividerCount !== undefined && it.dividerCount > 0 && (
+                        <span className="text-[10px] bg-purple-50 text-purple-800 border border-purple-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+                          <Columns className="w-2.5 h-2.5 text-purple-600" />
+                          Dividers: {it.dividerCount}/pane
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleEditItem(it)}
+                      className="p-1.5 text-slate-400 hover:text-blue-600 rounded transition-colors"
+                      title="Edit Item"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteItem(it.id)}
+                      className="p-1.5 text-slate-400 hover:text-red-600 rounded transition-colors"
+                      title="Delete Item"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="p-4 border-t border-slate-200 bg-slate-50 space-y-2">
+            <button
+              type="button"
+              onClick={handleContinueClick}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold shadow-md uppercase text-xs tracking-wider transition-colors flex items-center justify-center gap-2"
+            >
+              <span>Continue to Calculation</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-700 font-medium pt-0.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Auto-saves job to local storage on continue</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

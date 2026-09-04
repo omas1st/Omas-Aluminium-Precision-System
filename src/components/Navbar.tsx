@@ -26,6 +26,7 @@ import {
   syncLocalDataToCloud,
   checkAndRunDailyBackgroundSync,
 } from '../utils/cloudSync';
+import { PWAInstallButton } from './PWAInstallButton';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -345,10 +346,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
           </div>
+
+          {/* Desktop PWA Install Button */}
+          <PWAInstallButton variant="header" className="ml-2" />
         </div>
 
         {/* Mobile Hamburger / Menu Toggle Button */}
         <div className="flex md:hidden items-center gap-2">
+          {/* Mobile Install Button */}
+          <PWAInstallButton variant="compact" />
+
           {/* Subtle Live Sync Pulse Indicator */}
           <div className="flex items-center gap-1 px-2 py-1 bg-slate-800/80 rounded-md border border-slate-700 text-[10px] text-emerald-400 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -586,6 +593,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>{syncStatus.message}</span>
                 </div>
               )}
+            </div>
+
+            {/* Offline PWA Install Prompt in Mobile Drawer */}
+            <div className="mt-2.5">
+              <PWAInstallButton variant="card" />
             </div>
           </div>
         </div>

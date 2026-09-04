@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="frameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Card -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)" stroke="#334155" stroke-width="8"/>
+  
+  <!-- Outer Aluminium Master Frame -->
+  <rect x="80" y="80" width="352" height="352" rx="16" fill="#090d16" stroke="url(#frameGrad)" stroke-width="24"/>
+  
+  <!-- Glass Panes -->
+  <rect x="104" y="104" width="144" height="144" rx="4" fill="url(#glassGrad)"/>
+  <rect x="264" y="104" width="144" height="144" rx="4" fill="url(#glassGrad)"/>
+  <rect x="104" y="264" width="144" height="144" rx="4" fill="url(#glassGrad)"/>
+  <rect x="264" y="264" width="144" height="144" rx="4" fill="url(#glassGrad)"/>
+  
+  <!-- Mullion & Transom (Vertical & Horizontal Dividers) -->
+  <line x1="256" y1="92" x2="256" y2="420" stroke="url(#frameGrad)" stroke-width="20"/>
+  <line x1="92" y1="256" x2="420" y2="256" stroke="url(#frameGrad)" stroke-width="20"/>
+  
+  <!-- Glass Glare Lines -->
+  <line x1="120" y1="130" x2="220" y2="230" stroke="#ffffff" stroke-opacity="0.3" stroke-width="6" stroke-linecap="round"/>
+  <line x1="280" y1="130" x2="380" y2="230" stroke="#ffffff" stroke-opacity="0.3" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- OMAS Brand Badge at Bottom -->
+  <rect x="160" y="442" width="192" height="36" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+  <text x="256" y="466" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="900" letter-spacing="4" text-anchor="middle">OMAS 3D</text>
+</svg>
