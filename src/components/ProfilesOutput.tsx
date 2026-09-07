@@ -5,6 +5,7 @@ import {
   ProfileOptimizationResult,
 } from '../types';
 import { downloadProfilesMaterialsPdf } from '../utils/pdfGenerator';
+import { getMaterialDisplayName } from '../utils/materialNamesStorage';
 import {
   PackageCheck,
   Download,
@@ -146,7 +147,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
                 <tr key={idx} className="hover:bg-slate-50/75 transition-colors">
                   <td className="px-4 py-3 font-mono text-slate-400">{idx + 1}</td>
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-slate-800">{p.profileName}</div>
+                    <div className="font-semibold text-slate-800">{getMaterialDisplayName(p.profileName)}</div>
                   </td>
                   <td className="px-4 py-3 text-center font-mono font-medium text-slate-700">
                     {p.totalPieces} pcs
@@ -197,7 +198,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
             <div key={pIdx} className="space-y-3 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
               <div className="flex items-center justify-between">
                 <div className="font-bold text-slate-800 text-xs flex items-center gap-2">
-                  <span>{profOpt.profileName}</span>
+                  <span>{getMaterialDisplayName(profOpt.profileName)}</span>
                   <span className="text-[11px] font-normal text-slate-500 font-mono">
                     ({profOpt.barsNeeded} bars, {profOpt.totalPieces} cuts)
                   </span>

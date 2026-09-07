@@ -4,6 +4,7 @@ import {
   QuotationBreakdown,
   QuotationLineItem,
 } from '../types';
+import { getMaterialDisplayName } from './materialNamesStorage';
 
 export function calculateQuotationBreakdown(
   calc: CombinedProjectCalculation,
@@ -30,7 +31,7 @@ export function calculateQuotationBreakdown(
     profileLines.push({
       id: `prof-quote-${idx}`,
       category: 'profile',
-      name: prof.profileName,
+      name: getMaterialDisplayName(prof.profileName),
       description: `Optimized cut from 5.8m bars (${prof.totalPieces} pcs, ${(prof.totalLengthRequired / 1000).toFixed(2)}m net required)`,
       quantity: prof.barsNeeded,
       unit: 'bars (5.8m)',
@@ -49,7 +50,7 @@ export function calculateQuotationBreakdown(
   glassLines.push({
     id: 'glass-quote-main',
     category: 'glass',
-    name: prices.glassTypeName || '5mm Clear / Tinted Float Glass',
+    name: getMaterialDisplayName(prices.glassTypeName || '5mm Clear / Tinted Float Glass'),
     description: `Total glazed surface area across ${calc.allGlasses.length} individual glass cut panes`,
     quantity: Number(totalGlassArea.toFixed(3)),
     unit: 'm²',
@@ -67,7 +68,7 @@ export function calculateQuotationBreakdown(
     accessoryLines.push({
       id: `acc-quote-${idx}`,
       category: 'accessory',
-      name: acc.name,
+      name: getMaterialDisplayName(acc.name),
       description: acc.description,
       quantity: acc.quantity,
       unit: acc.unit,

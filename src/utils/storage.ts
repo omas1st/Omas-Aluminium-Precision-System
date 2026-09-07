@@ -9,96 +9,26 @@ const STORAGE_KEYS = {
   ACTIVE_DRAFT: 'alu_fab_active_draft_v1',
 };
 
-const SAMPLE_PROJECTS: SavedProject[] = [
-  {
-    id: 'sample-project-1',
-    name: 'Luxury Residential Villa - Ground Floor',
-    dateCreated: new Date(Date.now() - 86400000 * 2).toISOString(),
-    dateUpdated: new Date(Date.now() - 86400000 * 2).toISOString(),
-    items: [
-      {
-        id: 'item-1',
-        tag: 'W1 - Living Room Main Slider',
-        type: 'window',
-        kind: 'sliding_2_panel',
-        width: 1800,
-        height: 1500,
-        quantity: 2,
-        notes: 'Bronze anodized frame with 5mm tinted glass',
-      },
-      {
-        id: 'item-2',
-        tag: 'W2 - Master Bedroom Slider',
-        type: 'window',
-        kind: 'sliding_2_panel',
-        width: 1500,
-        height: 1200,
-        quantity: 3,
-        notes: 'White powder coated',
-      },
-      {
-        id: 'item-3',
-        tag: 'W3 - Dining Casement',
-        type: 'window',
-        kind: 'casement_2_panel',
-        width: 1200,
-        height: 1400,
-        quantity: 1,
-        notes: 'Projected top hung with friction stays',
-      },
-      {
-        id: 'item-4',
-        tag: 'W4 - Kitchen Fixed Highlight',
-        type: 'window',
-        kind: 'fixed_window',
-        width: 1200,
-        height: 600,
-        quantity: 2,
-        notes: 'Clear laminated glass',
-      },
-    ],
-  },
-  {
-    id: 'sample-project-2',
-    name: 'Commercial Office Partition & Windows',
-    dateCreated: new Date(Date.now() - 86400000 * 5).toISOString(),
-    dateUpdated: new Date(Date.now() - 86400000 * 5).toISOString(),
-    items: [
-      {
-        id: 'item-201',
-        tag: 'D1 - Main Entrance Sliding Door',
-        type: 'door',
-        kind: 'sliding_door_2_panel',
-        width: 2000,
-        height: 2200,
-        quantity: 1,
-        notes: 'Heavy duty bottom track and hook lock',
-      },
-      {
-        id: 'item-202',
-        tag: 'W10 - Executive Office 3-Panel Slider',
-        type: 'window',
-        kind: 'sliding_3_panel',
-        width: 2400,
-        height: 1500,
-        quantity: 2,
-        notes: '3-track smooth running profile',
-      },
-    ],
-  },
-];
+const SAMPLE_PROJECTS: SavedProject[] = [];
 
 export function getSavedProjects(): SavedProject[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.PROJECTS);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(SAMPLE_PROJECTS));
-      return SAMPLE_PROJECTS;
+      return [];
     }
-    return JSON.parse(raw);
+    const list: SavedProject[] = JSON.parse(raw);
+    // Filter out any default sample projects
+    const filtered = list.filter(
+      (p) => p.id !== 'sample-project-1' && p.id !== 'sample-project-2' && !p.id.startsWith('sample-project-')
+    );
+    if (filtered.length !== list.length) {
+      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(filtered));
+    }
+    return filtered;
   } catch (e) {
     console.error('Failed to load saved projects:', e);
-    return SAMPLE_PROJECTS;
+    return [];
   }
 }
 

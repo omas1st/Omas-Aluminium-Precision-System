@@ -291,7 +291,9 @@ export const RestoreDataModal: React.FC<RestoreDataModalProps> = ({
                   {otpDigits.map((digit, idx) => (
                     <input
                       key={idx}
-                      ref={(el) => (digitInputRefs.current[idx] = el)}
+                      ref={(el) => {
+                        digitInputRefs.current[idx] = el;
+                      }}
                       type="text"
                       inputMode="numeric"
                       maxLength={1}

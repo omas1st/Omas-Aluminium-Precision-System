@@ -21,14 +21,16 @@ import { MeasurementInput } from './components/MeasurementInput';
 import { OutputDashboard } from './components/OutputDashboard';
 import { SavedDataPage } from './components/SavedDataPage';
 import { AdminPanel } from './components/AdminPanel';
+import { SettingsPage } from './components/SettingsPage';
 import { RestoreDataModal } from './components/RestoreDataModal';
 import { CloudSyncBanner } from './components/CloudSyncBanner';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 export default function App() {
   const [constants, setConstants] = useState<ConstantProfilesConfig>(getStoredConstants());
   const [prices, setPrices] = useState<MaterialPricesConfig>(getStoredPrices());
-  const [currentView, setCurrentView] = useState<'home' | 'input' | 'output' | 'saved' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'input' | 'output' | 'saved' | 'admin' | 'settings'>('home');
   const [outputInitialTab, setOutputInitialTab] = useState<'preview' | 'profiles' | 'frames' | 'quotation'>('preview');
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState<boolean>(false);
 
@@ -72,10 +74,12 @@ export default function App() {
     };
   }, [activeItems, activeProjectName]);
 
-  const navigateTo = (view: 'home' | 'input' | 'output' | 'saved' | 'admin') => {
+  const navigateTo = (view: 'home' | 'input' | 'output' | 'saved' | 'admin' | 'settings') => {
     try {
       if (view === 'admin') {
         window.location.hash = '/admin';
+      } else if (view === 'settings') {
+        window.location.hash = '/settings';
       } else if (view === 'saved') {
         window.location.hash = '/saved';
       } else if (view === 'input') {
@@ -100,6 +104,8 @@ export default function App() {
         const hash = window.location.hash.toLowerCase();
         if (path === '/admin' || hash === '#admin' || hash === '#/admin') {
           setCurrentView('admin');
+        } else if (path === '/settings' || hash === '#settings' || hash === '#/settings') {
+          setCurrentView('settings');
         } else if (path === '/saved' || hash === '#saved' || hash === '#/saved') {
           setCurrentView('saved');
         } else if (path === '/input' || hash === '#input' || hash === '#/input') {
@@ -221,60 +227,72 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 py-4 sm:py-6 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full overflow-x-hidden">
-        {currentView === 'home' && (
-          <HomePage
-            onStartCalculation={handleStartNewCalculation}
-            onOpenSavedData={() => navigateTo('saved')}
-            onOpenAdmin={() => navigateTo('admin')}
-            savedProjectsCount={savedProjectsList.length}
-            recentProjects={savedProjectsList}
-            onOpenProject={(proj) => handleOpenSavedProject(proj, 'preview')}
-          />
-        )}
+        <ErrorBoundary fallbackTitle="An error occurred displaying this view">
+          {currentView === 'home' && (
+            <HomePage
+              onStartCalculation={handleStartNewCalculation}
+              onOpenSavedData={() => navigateTo('saved')}
+              onOpenAdmin={() => navigateTo('admin')}
+              savedProjectsCount={savedProjectsList.length}
+              recentProjects={savedProjectsList}
+              onOpenProject={(proj) => handleOpenSavedProject(proj, 'preview')}
+            />
+          )}
 
-        {currentView === 'input' && (
-          <MeasurementInput
-            initialProjectName={activeProjectName}
-            initialItems={activeItems}
-            constants={constants}
-            onContinue={handleContinueFromInput}
-            onBackToHome={() => navigateTo('home')}
-          />
-        )}
+          {currentView === 'input' && (
+            <MeasurementInput
+              initialProjectName={activeProjectName}
+              initialItems={activeItems}
+              constants={constants}
+              onContinue={handleContinueFromInput}
+              onBackToHome={() => navigateTo('home')}
+            />
+          )}
 
-        {currentView === 'output' && activeCalculation && (
-          <OutputDashboard
-            calculation={activeCalculation}
-            constants={constants}
-            prices={prices}
-            initialTab={outputInitialTab}
-            rawItems={activeItems}
-            onBackToEdit={() => navigateTo('input')}
-            onGoToSaved={() => {
-              setSavedProjectsList(getSavedProjects());
-              navigateTo('saved');
-            }}
-            onOpenAdminPrices={() => navigateTo('admin')}
-          />
-        )}
+          {currentView === 'output' && activeCalculation && (
+            <OutputDashboard
+              key={`output-${activeProjectId || activeProjectName}-${outputInitialTab}`}
+              calculation={activeCalculation}
+              constants={constants}
+              prices={prices}
+              initialTab={outputInitialTab}
+              rawItems={activeItems}
+              onBackToEdit={() => navigateTo('input')}
+              onGoToSaved={() => {
+                setSavedProjectsList(getSavedProjects());
+                navigateTo('saved');
+              }}
+              onOpenAdminPrices={() => navigateTo('admin')}
+            />
+          )}
 
-        {currentView === 'saved' && (
-          <SavedDataPage
-            onOpenProject={handleOpenSavedProject}
-            onEditProjectItems={handleEditSavedProject}
-            onNewCalculation={handleStartNewCalculation}
-          />
-        )}
+          {currentView === 'saved' && (
+            <SavedDataPage
+              onOpenProject={handleOpenSavedProject}
+              onEditProjectItems={handleEditSavedProject}
+              onNewCalculation={handleStartNewCalculation}
+            />
+          )}
 
-        {currentView === 'admin' && (
-          <AdminPanel
-            constants={constants}
-            prices={prices}
-            onUpdateConstants={handleUpdateConstants}
-            onUpdatePrices={handleUpdatePrices}
-            onBackToHome={() => navigateTo('home')}
-          />
-        )}
+          {currentView === 'admin' && (
+            <AdminPanel
+              constants={constants}
+              prices={prices}
+              onUpdateConstants={handleUpdateConstants}
+              onUpdatePrices={handleUpdatePrices}
+              onBackToHome={() => navigateTo('home')}
+            />
+          )}
+
+          {currentView === 'settings' && (
+            <SettingsPage
+              onBack={() => navigateTo('home')}
+              onProfileUpdated={() => {
+                setPrices(getStoredPrices());
+              }}
+            />
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* 5-Digit Gmail OTP Data Restore Modal */}

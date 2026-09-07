@@ -6,8 +6,10 @@ import {
   saveStoredPrices,
   resetStoredPrices,
 } from '../utils/storage';
+import { saveAdminBaseline } from '../utils/systemRestoreManager';
 import { POPULAR_CURRENCIES } from '../constants/defaultPrices';
 import { sendAdminOTP, verifyAdminOTP } from '../services/api';
+import { PricingRulesEditor } from './PricingRulesEditor';
 import {
   Sliders,
   Save,
@@ -44,7 +46,7 @@ interface AdminPanelProps {
   onUpdateConstants: (newConstants: ConstantProfilesConfig) => void;
   onUpdatePrices: (newPrices: MaterialPricesConfig) => void;
   onBackToHome: () => void;
-  initialMainTab?: 'prices' | 'constants';
+  initialMainTab?: 'client_pricing' | 'prices' | 'constants';
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -53,7 +55,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdateConstants,
   onUpdatePrices,
   onBackToHome,
-  initialMainTab = 'prices',
+  initialMainTab = 'client_pricing',
 }) => {
   // Authentication Guard State
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
@@ -66,7 +68,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [authError, setAuthError] = useState<string>('');
   const [authSuccess, setAuthSuccess] = useState<string>('');
 
-  const [mainMode, setMainMode] = useState<'prices' | 'constants'>(initialMainTab);
+  const [mainMode, setMainMode] = useState<'client_pricing' | 'prices' | 'constants'>(initialMainTab);
   const [constantFormData, setConstantFormData] = useState<ConstantProfilesConfig>(constants);
   const [priceFormData, setPriceFormData] = useState<MaterialPricesConfig>(prices);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -180,9 +182,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (mainMode === 'prices') {
       saveStoredPrices(priceFormData);
       onUpdatePrices(priceFormData);
+      saveAdminBaseline(constantFormData, priceFormData);
     } else {
       saveStoredConstants(constantFormData);
       onUpdateConstants(constantFormData);
+      saveAdminBaseline(constantFormData, priceFormData);
     }
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -476,32 +480,60 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
       )}
 
-      {/* Primary Admin Mode Tabs (Material Prices vs Constant Measurements) */}
-      <div className="flex border-b border-slate-200 bg-white rounded-t-xl px-4 pt-2 gap-2 shadow-xs">
+      {/* Primary Admin Mode Tabs */}
+      <div className="flex border-b border-slate-200 bg-white rounded-t-xl px-4 pt-2 gap-2 shadow-xs overflow-x-auto">
+        <button
+          onClick={() => setMainMode('client_pricing')}
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+            mainMode === 'client_pricing'
+              ? 'border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Tag className="w-4 h-4" />
+          <span>1. Client Work Pricing & Size Ranges</span>
+        </button>
+
         <button
           onClick={() => setMainMode('prices')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             mainMode === 'prices'
               ? 'border-blue-600 text-blue-600 bg-blue-50/50 rounded-t-lg'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           <DollarSign className="w-4 h-4" />
-          <span>1. Material & Item Prices (Quotation Rates)</span>
+          <span>2. Material & Item Prices (Raw Procurement)</span>
         </button>
 
         <button
           onClick={() => setMainMode('constants')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
             mainMode === 'constants'
               ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-lg'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
           <Sliders className="w-4 h-4" />
-          <span>2. Constant Measurements & Profiles (Engineering)</span>
+          <span>3. Constant Measurements & Profiles (Engineering)</span>
         </button>
       </div>
+
+      {/* ========================================================================= */}
+      {/* MODE 0: CLIENT WORK PRICING & SIZE RANGES (NEW) */}
+      {/* ========================================================================= */}
+      {mainMode === 'client_pricing' && (
+        <div className="space-y-6">
+          <PricingRulesEditor
+            isAdmin={true}
+            currencySymbol={priceFormData.currencySymbol}
+            onRulesChanged={() => {
+              setSaveSuccess(true);
+              setTimeout(() => setSaveSuccess(false), 3000);
+            }}
+          />
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* MODE 1: MATERIAL & ITEM PRICES (QUOTATION SECTION) */}
@@ -2202,12 +2234,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Deduction / Depth (mm)</label>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Stock Length (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.glazingDivider?.pocketDepth ?? 10}
+                      value={constantFormData.glazingDivider?.stockLength ?? 5800}
                       onChange={(e) =>
-                        handleConstantFieldChange(['glazingDivider', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['glazingDivider', 'stockLength'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -2220,9 +2252,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Cut Length per Joint (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementIronAngle?.cutLengthPerJoint ?? 35}
+                      value={constantFormData.casementIronAngle?.cutLength ?? 35}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementIronAngle', 'cutLengthPerJoint'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementIronAngle', 'cutLength'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -2296,12 +2328,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Pocket Depth (mm)</label>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Stock Length (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementBurglaryTopSideFrame?.pocketDepth ?? 15}
+                      value={constantFormData.casementBurglaryTopSideFrame?.stockLength ?? 5800}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementBurglaryTopSideFrame', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementBurglaryTopSideFrame', 'stockLength'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -2322,12 +2354,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Pocket Depth (mm)</label>
+                    <label className="block text-[11px] font-medium text-slate-600 mb-1">Stock Length (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.casementBurglaryBottomFrame?.pocketDepth ?? 15}
+                      value={constantFormData.casementBurglaryBottomFrame?.stockLength ?? 5800}
                       onChange={(e) =>
-                        handleConstantFieldChange(['casementBurglaryBottomFrame', 'pocketDepth'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['casementBurglaryBottomFrame', 'stockLength'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -2340,9 +2372,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Min Pitch Spacing (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.burglaryIronRod?.minSpacing ?? 100}
+                      value={constantFormData.burglaryIronRod?.spacingMin ?? 100}
                       onChange={(e) =>
-                        handleConstantFieldChange(['burglaryIronRod', 'minSpacing'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['burglaryIronRod', 'spacingMin'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
@@ -2351,9 +2383,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="block text-[11px] font-medium text-slate-600 mb-1">Max Pitch Spacing (mm)</label>
                     <input
                       type="number"
-                      value={constantFormData.burglaryIronRod?.maxSpacing ?? 150}
+                      value={constantFormData.burglaryIronRod?.spacingMax ?? 150}
                       onChange={(e) =>
-                        handleConstantFieldChange(['burglaryIronRod', 'maxSpacing'], parseFloat(e.target.value) || 0)
+                        handleConstantFieldChange(['burglaryIronRod', 'spacingMax'], parseFloat(e.target.value) || 0)
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />

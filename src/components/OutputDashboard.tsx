@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CombinedProjectCalculation,
   ConstantProfilesConfig,
@@ -10,6 +10,7 @@ import { PreviewSkeleton } from './PreviewSkeleton';
 import { ProfilesOutput } from './ProfilesOutput';
 import { FrameMeasurementsOutput } from './FrameMeasurementsOutput';
 import { QuotationOutput } from './QuotationOutput';
+import { ErrorBoundary } from './ErrorBoundary';
 import { saveProject } from '../utils/storage';
 import {
   Eye,
@@ -48,6 +49,12 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'preview' | 'profiles' | 'frames' | 'quotation'>(initialTab);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   const handleSaveProject = () => {
     const project: SavedProject = {
@@ -245,25 +252,27 @@ export const OutputDashboard: React.FC<OutputDashboardProps> = ({
       </div>
 
       {/* RENDER ACTIVE TAB CONTENT */}
-      {activeTab === 'preview' && (
-        <PreviewSkeleton calculation={calculation} constants={constants} />
-      )}
+      <ErrorBoundary fallbackTitle="Error loading calculation module">
+        {activeTab === 'preview' && (
+          <PreviewSkeleton calculation={calculation} constants={constants} />
+        )}
 
-      {activeTab === 'profiles' && (
-        <ProfilesOutput calculation={calculation} constants={constants} />
-      )}
+        {activeTab === 'profiles' && (
+          <ProfilesOutput calculation={calculation} constants={constants} />
+        )}
 
-      {activeTab === 'frames' && (
-        <FrameMeasurementsOutput calculation={calculation} constants={constants} />
-      )}
+        {activeTab === 'frames' && (
+          <FrameMeasurementsOutput calculation={calculation} constants={constants} />
+        )}
 
-      {activeTab === 'quotation' && (
-        <QuotationOutput
-          calc={calculation}
-          prices={prices}
-          onOpenAdminPrices={onOpenAdminPrices}
-        />
-      )}
+        {activeTab === 'quotation' && (
+          <QuotationOutput
+            calc={calculation}
+            prices={prices}
+            onOpenAdminPrices={onOpenAdminPrices}
+          />
+        )}
+      </ErrorBoundary>
     </div>
   );
 };

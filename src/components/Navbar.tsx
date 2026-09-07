@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Sparkles,
   ShieldCheck,
+  Settings,
 } from 'lucide-react';
 import {
   getLastSyncedAt,
@@ -30,8 +31,8 @@ import { PWAInstallButton } from './PWAInstallButton';
 import './Navbar.css';
 
 interface NavbarProps {
-  currentView: 'home' | 'input' | 'output' | 'saved' | 'admin';
-  onNavigate: (view: 'home' | 'input' | 'output' | 'saved' | 'admin') => void;
+  currentView: 'home' | 'input' | 'output' | 'saved' | 'admin' | 'settings';
+  onNavigate: (view: 'home' | 'input' | 'output' | 'saved' | 'admin' | 'settings') => void;
   hasActiveCalculation: boolean;
   onOpenRestoreModal?: () => void;
   onSyncComplete?: () => void;
@@ -131,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const handleNavClick = (view: 'home' | 'input' | 'output' | 'saved' | 'admin') => {
+  const handleNavClick = (view: 'home' | 'input' | 'output' | 'saved' | 'admin' | 'settings') => {
     onNavigate(view);
     setIsMobileMenuOpen(false);
   };
@@ -210,6 +211,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button
+              onClick={() => handleNavClick('settings')}
+              className={`omas-nav-tab-btn border-l border-slate-700/80 ${
+                currentView === 'settings' ? 'active-slate text-blue-300' : 'text-slate-300'
+              }`}
+              title="Settings: Company, Prices & Ranges (/settings)"
+            >
+              <Settings className="w-4 h-4 text-blue-400" />
+              <span>Settings</span>
+            </button>
+
+            <button
               onClick={() => handleNavClick('admin')}
               className={`omas-nav-tab-btn border-l border-slate-700/80 ${
                 currentView === 'admin' ? 'active-slate text-indigo-300' : 'text-slate-300'
@@ -220,6 +232,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Admin</span>
             </button>
           </nav>
+
+          {/* Desktop Direct Settings Icon Button */}
+          <button
+            type="button"
+            onClick={() => handleNavClick('settings')}
+            className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+              currentView === 'settings'
+                ? 'bg-blue-600/30 border-blue-500 text-blue-300 shadow-sm'
+                : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
+            }`}
+            title="System & Company Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
 
           {/* Desktop Cloud Sync & Backup Popover */}
           <div className="relative ml-2" ref={desktopSyncRef}>
@@ -464,6 +490,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               </div>
               {currentView === 'saved' && (
+                <span className="text-[10px] font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">Active</span>
+              )}
+            </button>
+
+            <button
+              onClick={() => handleNavClick('settings')}
+              className={`omas-mobile-nav-item ${
+                currentView === 'settings' ? 'active-slate' : ''
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 rounded bg-blue-600/30 text-blue-300">
+                  <Settings className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold text-sm">Company & Pricing Settings</div>
+                  <div className="text-[11px] text-slate-400">Company info, prices, and size ranges</div>
+                </div>
+              </div>
+              {currentView === 'settings' && (
                 <span className="text-[10px] font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded">Active</span>
               )}
             </button>

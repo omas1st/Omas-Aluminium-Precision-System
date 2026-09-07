@@ -4,6 +4,7 @@ import {
   ConstantProfilesConfig,
 } from '../types';
 import { downloadFrameMeasurementsPdf } from '../utils/pdfGenerator';
+import { getMaterialDisplayName } from '../utils/materialNamesStorage';
 import {
   Ruler,
   Download,
@@ -282,7 +283,7 @@ export const FrameMeasurementsOutput: React.FC<FrameMeasurementsOutputProps> = (
                       <div className="font-semibold text-slate-800">{c.purpose}</div>
                       {c.notes && <div className="text-[10px] text-slate-400">{c.notes}</div>}
                     </td>
-                    <td className="px-4 py-3 text-slate-600 font-medium">{c.profileName}</td>
+                    <td className="px-4 py-3 text-slate-600 font-medium">{getMaterialDisplayName(c.profileName)}</td>
                     <td className="px-4 py-3 text-center">
                       <span
                         className={`inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold ${

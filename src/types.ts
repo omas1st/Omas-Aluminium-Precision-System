@@ -269,6 +269,7 @@ export interface CutPiece {
   cutAngle: '90°' | '45°' | '90° / 45°';
   purpose: string; // e.g. "Top Track", "Bottom Track", "Side Jamb (Left/Right)", "Lock Stile", "Top Sash Rail"
   componentType: 'outer_frame' | 'sash' | 'mullion' | 'bead' | 'door_frame' | 'burglary' | 'net' | 'divider';
+  notes?: string;
 }
 
 export interface GlassCutSize {
@@ -476,4 +477,28 @@ export interface ClientQuotationInfo {
   quoteRefNumber: string;
   validityDays: number;
   notesOrTerms?: string;
+}
+
+export interface MaterialCatalogItem {
+  key: string;
+  defaultName: string;
+  category: string;
+  unit: string;
+  description?: string;
+}
+
+export interface SystemRestorePoint {
+  id: string;
+  timestamp: string; // ISO string
+  formattedDate: string; // e.g. "Sep 6, 2026, 11:20 AM"
+  title: string;
+  category: 'names' | 'prices' | 'profile' | 'rules' | 'admin' | 'full';
+  description: string;
+  snapshot: {
+    customNames?: Record<string, string>;
+    materialPrices?: MaterialPricesConfig;
+    constants?: ConstantProfilesConfig;
+    companyProfile?: any;
+    pricingRules?: any[];
+  };
 }
