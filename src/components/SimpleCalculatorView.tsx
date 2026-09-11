@@ -92,9 +92,9 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
     return [];
   });
 
-  // Active numeric inputs for width and height
+  // Active numeric inputs for width and height (1200 by 1200 by default)
   const [widthInput, setWidthInput] = useState<string>('1200');
-  const [heightInput, setHeightInput] = useState<string>('1500');
+  const [heightInput, setHeightInput] = useState<string>('1200');
   const [quantityInput, setQuantityInput] = useState<string>('1');
 
   // Features dropdown state
@@ -950,8 +950,8 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
                             </div>
                             <div className="text-[10px] text-slate-400 font-mono flex items-center gap-2 mt-0.5">
                               <span>Cut Pcs: <strong className="text-slate-200">{prof.totalPieces}</strong></span>
-                              <span>Net: <strong className="text-slate-200">{(prof.totalLengthRequired / 1000).toFixed(2)}m</strong></span>
-                              <span>Offcut: <strong className="text-amber-400">{prof.wastePercentage}%</strong></span>
+                              <span>Net: <strong className="text-slate-200">{prof.totalLengthRequired.toLocaleString()} mm</strong></span>
+                              <span>Offcut: <strong className="text-amber-400">{prof.totalWasteLength.toLocaleString()} mm ({prof.wastePercentage}%)</strong></span>
                             </div>
                           </div>
                           <div className="text-right shrink-0">
@@ -1051,8 +1051,8 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
               inputMode="numeric"
               value={widthInput}
               onChange={(e) => setWidthInput(e.target.value)}
-              placeholder="1200"
-              className={`w-full bg-transparent font-mono font-bold text-sm sm:text-base ${activeTheme.inputText} focus:outline-hidden`}
+              placeholder="0"
+              className={`w-full bg-transparent font-mono font-bold text-sm sm:text-base ${activeTheme.inputText} focus:outline-hidden placeholder:text-slate-500`}
             />
           </div>
 
@@ -1066,8 +1066,8 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
               inputMode="numeric"
               value={heightInput}
               onChange={(e) => setHeightInput(e.target.value)}
-              placeholder="1500"
-              className={`w-full bg-transparent font-mono font-bold text-sm sm:text-base ${activeTheme.inputText} focus:outline-hidden`}
+              placeholder="0"
+              className={`w-full bg-transparent font-mono font-bold text-sm sm:text-base ${activeTheme.inputText} focus:outline-hidden placeholder:text-slate-500`}
             />
           </div>
 
@@ -1198,10 +1198,10 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
                             {p.totalPieces} pcs
                           </td>
                           <td className="p-2.5 text-right font-mono text-slate-300">
-                            {(p.totalLengthRequired / 1000).toFixed(2)} m
+                            {p.totalLengthRequired.toLocaleString()} mm
                           </td>
                           <td className="p-2.5 text-right font-mono text-amber-400">
-                            {(p.totalWasteLength / 1000).toFixed(2)}m ({p.wastePercentage}%)
+                            {p.totalWasteLength.toLocaleString()} mm ({p.wastePercentage}%)
                           </td>
                         </tr>
                       ))}

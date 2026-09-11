@@ -155,8 +155,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
                     {p.totalPieces} pcs
                   </td>
                   <td className="px-4 py-3 text-right font-mono font-medium text-slate-700">
-                    {(p.totalLengthRequired / 1000).toFixed(2)} m{' '}
-                    <span className="text-slate-400 text-[10px]">({p.totalLengthRequired} mm)</span>
+                    {p.totalLengthRequired.toLocaleString()} mm
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-blue-100 text-blue-800">
@@ -164,7 +163,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-slate-600">
-                    {(p.totalWasteLength / 1000).toFixed(2)} m{' '}
+                    {p.totalWasteLength.toLocaleString()} mm{' '}
                     <span className="text-[11px] font-semibold text-amber-600">
                       ({p.wastePercentage}%)
                     </span>

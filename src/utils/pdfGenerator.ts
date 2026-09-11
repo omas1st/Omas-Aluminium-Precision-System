@@ -105,9 +105,9 @@ export function downloadProfilesMaterialsPdf(
     (idx + 1).toString(),
     getMaterialDisplayName(p.profileName),
     p.totalPieces.toString(),
-    `${(p.totalLengthRequired / 1000).toFixed(2)} m (${p.totalLengthRequired} mm)`,
-    `${p.barsNeeded} bars (${(p.barsNeeded * constants.stockProfileLength) / 1000} m)`,
-    `${(p.totalWasteLength / 1000).toFixed(2)} m (${p.wastePercentage}%)`,
+    `${p.totalLengthRequired.toLocaleString()} mm`,
+    `${p.barsNeeded} bars (${(p.barsNeeded * constants.stockProfileLength).toLocaleString()} mm)`,
+    `${p.totalWasteLength.toLocaleString()} mm (${p.wastePercentage}%)`,
   ]);
 
   autoTable(doc, {
@@ -982,8 +982,8 @@ export function downloadSimpleOutputPdf(
     getMaterialDisplayName(p.profileName),
     `${p.barsNeeded} bar${p.barsNeeded > 1 ? 's' : ''}`,
     `${p.totalPieces} pcs`,
-    `${(p.totalLengthRequired / 1000).toFixed(2)} m`,
-    `${(p.totalWasteLength / 1000).toFixed(2)} m (${p.wastePercentage}%)`
+    `${p.totalLengthRequired.toLocaleString()} mm`,
+    `${p.totalWasteLength.toLocaleString()} mm (${p.wastePercentage}%)`
   ]);
 
   autoTable(doc, {
