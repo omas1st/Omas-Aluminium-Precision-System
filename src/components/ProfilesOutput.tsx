@@ -15,6 +15,8 @@ import {
   Percent,
   CheckCircle2,
   HelpCircle,
+  Maximize2,
+  Grid,
 } from 'lucide-react';
 import './ProfilesOutput.css';
 
@@ -78,7 +80,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
       {/* Metric Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-          <div className="text-xs text-slate-500 font-medium">Total 5.8m Bars Needed</div>
+          <div className="text-xs text-slate-500 font-medium">Total 5800mm Bars Needed</div>
           <div className="text-2xl font-extrabold text-blue-700 mt-1 font-mono">
             {calculation.totalBarsCount} <span className="text-xs font-normal text-slate-600">bars</span>
           </div>
@@ -138,7 +140,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
                 <th className="px-4 py-3">Profile Name & Extrusion Section</th>
                 <th className="px-4 py-3 text-center">Cut Pcs</th>
                 <th className="px-4 py-3 text-right">Net Length</th>
-                <th className="px-4 py-3 text-center">Bars Needed (5.8m)</th>
+                <th className="px-4 py-3 text-center">Bars Needed (5800mm)</th>
                 <th className="px-4 py-3 text-right">Offcut / Waste</th>
               </tr>
             </thead>
@@ -273,13 +275,81 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
         </div>
       </div>
 
-      {/* SECTION 3: ACCESSORIES & MATERIALS TABLE */}
+      {/* SECTION 3: GLASS PANES REQUIRED (CUT SIZING SCHEDULE) */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Maximize2 className="w-4 h-4 text-emerald-600" />
+            <h4 className="font-semibold text-slate-800 text-sm">
+              3. Glass Panes Required (Glass Cut Sizing Schedule)
+            </h4>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-500">
+              Total Glazed Area:{' '}
+              <strong className="font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                {calculation.totalGlassAreaM2} m²
+              </strong>
+            </span>
+            <span className="text-xs text-slate-400">
+              ({calculation.allGlasses.length} total panes)
+            </span>
+          </div>
+        </div>
+
+        {calculation.allGlasses.length === 0 ? (
+          <div className="p-6 text-center text-xs text-slate-500">
+            No glazed window or door units requiring glass in this project.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-100/75 text-slate-700 font-semibold border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3">#</th>
+                  <th className="px-4 py-3">Unit Tag</th>
+                  <th className="px-4 py-3">Glass Pane Description</th>
+                  <th className="px-4 py-3 text-center">Cut Width</th>
+                  <th className="px-4 py-3 text-center">Cut Height</th>
+                  <th className="px-4 py-3 text-center">Cut Size (W × H mm)</th>
+                  <th className="px-4 py-3 text-center">Quantity</th>
+                  <th className="px-4 py-3 text-right">Area (m²)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {calculation.allGlasses.map((g, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50/75 transition-colors">
+                    <td className="px-4 py-3 font-mono text-slate-400">{idx + 1}</td>
+                    <td className="px-4 py-3 font-bold font-mono text-blue-700">{g.itemTag}</td>
+                    <td className="px-4 py-3 font-medium text-slate-800">{g.paneDescription}</td>
+                    <td className="px-4 py-3 text-center font-mono text-slate-600">{g.width} mm</td>
+                    <td className="px-4 py-3 text-center font-mono text-slate-600">{g.height} mm</td>
+                    <td className="px-4 py-3 text-center font-mono font-bold text-emerald-700 bg-emerald-50/50">
+                      {g.width} × {g.height} mm
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded font-mono font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">
+                        {g.quantity} {g.quantity > 1 ? 'panes' : 'pane'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-mono font-bold text-slate-700">
+                      {g.areaM2} m²
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* SECTION 4: ACCESSORIES & MATERIALS TABLE */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Wrench className="w-4 h-4 text-purple-600" />
             <h4 className="font-semibold text-slate-800 text-sm">
-              3. Materials, Hardware, Gaskets & Sealants Bill of Quantities
+              4. Materials, Hardware, Gaskets & Sealants Bill of Quantities
             </h4>
           </div>
 

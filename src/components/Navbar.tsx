@@ -19,6 +19,7 @@ import {
   Sparkles,
   ShieldCheck,
   Settings,
+  Calculator,
 } from 'lucide-react';
 import {
   getLastSyncedAt,
@@ -36,6 +37,7 @@ interface NavbarProps {
   hasActiveCalculation: boolean;
   onOpenRestoreModal?: () => void;
   onSyncComplete?: () => void;
+  onSwitchToSimpleView?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -44,6 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   hasActiveCalculation,
   onOpenRestoreModal,
   onSyncComplete,
+  onSwitchToSimpleView,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSyncOpen, setIsDesktopSyncOpen] = useState(false);
@@ -247,6 +250,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Settings className="w-4 h-4" />
           </button>
 
+          {/* Switch to Simple View Button */}
+          {onSwitchToSimpleView && (
+            <button
+              type="button"
+              onClick={onSwitchToSimpleView}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 hover:text-emerald-200 text-xs font-bold transition-all cursor-pointer shadow-sm ml-1"
+              title="Switch to Simple Full-Screen Calculator View"
+            >
+              <Calculator className="w-4 h-4 text-emerald-400" />
+              <span>Simple View</span>
+            </button>
+          )}
+
           {/* Desktop Cloud Sync & Backup Popover */}
           <div className="relative ml-2" ref={desktopSyncRef}>
             <button
@@ -411,6 +427,27 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 py-1">
               Navigation Menu
             </div>
+
+            {onSwitchToSimpleView && (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onSwitchToSimpleView();
+                }}
+                className="omas-mobile-nav-item bg-emerald-950/50 border border-emerald-800/60 text-emerald-200 hover:bg-emerald-900/60 mb-2"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-1.5 rounded bg-emerald-600/30 text-emerald-300">
+                    <Calculator className="w-4 h-4" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-bold text-sm text-emerald-300">Switch to Simple View</div>
+                    <div className="text-[11px] text-emerald-400/80">Full-screen calculator app mode</div>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">Switch</span>
+              </button>
+            )}
 
             <button
               onClick={() => handleNavClick('home')}

@@ -26,10 +26,23 @@ import { RestoreDataModal } from './components/RestoreDataModal';
 import { CloudSyncBanner } from './components/CloudSyncBanner';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { SimpleCalculatorView } from './components/SimpleCalculatorView';
 
 export default function App() {
   const [constants, setConstants] = useState<ConstantProfilesConfig>(getStoredConstants());
   const [prices, setPrices] = useState<MaterialPricesConfig>(getStoredPrices());
+
+  // App View Mode: 'simple' (Default home calculator) or 'professional' (Full system features)
+  const [appMode, setAppMode] = useState<'simple' | 'professional'>(() => {
+    try {
+      const saved = localStorage.getItem('omas_app_view_mode_v2');
+      if (saved === 'professional' || saved === 'simple') {
+        return saved;
+      }
+    } catch {}
+    return 'simple';
+  });
+
   const [currentView, setCurrentView] = useState<'home' | 'input' | 'output' | 'saved' | 'admin' | 'settings'>('home');
   const [outputInitialTab, setOutputInitialTab] = useState<'preview' | 'profiles' | 'frames' | 'quotation'>('preview');
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState<boolean>(false);
@@ -41,6 +54,13 @@ export default function App() {
 
   const [activeCalculation, setActiveCalculation] = useState<CombinedProjectCalculation | null>(null);
   const [savedProjectsList, setSavedProjectsList] = useState<SavedProject[]>(getSavedProjects());
+
+  // Sync view mode to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('omas_app_view_mode_v2', appMode);
+    } catch {}
+  }, [appMode]);
 
   // Background 24-hour daily cloud sync checker
   useEffect(() => {
@@ -212,6 +232,41 @@ export default function App() {
     saveStoredPrices(newPrices);
   };
 
+  const handleSwitchToProfessional = (items?: FabricationItemInput[], projectName?: string) => {
+    if (items && items.length > 0) {
+      setActiveItems(items);
+      if (projectName) setActiveProjectName(projectName);
+      const calc = calculateEntireProject(projectName || activeProjectName, items, constants);
+      setActiveCalculation(calc);
+      setOutputInitialTab('preview');
+      navigateTo('output');
+    }
+    setAppMode('professional');
+  };
+
+  const handleSwitchToSimple = () => {
+    setAppMode('simple');
+  };
+
+  // If Simple View Mode is active, render the dedicated full-screen calculator app view
+  if (appMode === 'simple') {
+    return (
+      <ErrorBoundary fallbackTitle="An error occurred in Simple Calculator View">
+        <SimpleCalculatorView
+          constants={constants}
+          prices={prices}
+          initialItems={activeItems}
+          initialProjectName={activeProjectName}
+          onSwitchToProfessional={handleSwitchToProfessional}
+          onUpdateItems={(newItems, newProjName) => {
+            setActiveItems(newItems);
+            setActiveProjectName(newProjName);
+          }}
+        />
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
       {/* Top Navbar with integrated Mobile Dropdown Menu & Cloud Sync/Backup/Restore */}
@@ -223,6 +278,7 @@ export default function App() {
         onSyncComplete={() => {
           setSavedProjectsList(getSavedProjects());
         }}
+        onSwitchToSimpleView={handleSwitchToSimple}
       />
 
       {/* Main Content Area */}
@@ -236,6 +292,7 @@ export default function App() {
               savedProjectsCount={savedProjectsList.length}
               recentProjects={savedProjectsList}
               onOpenProject={(proj) => handleOpenSavedProject(proj, 'preview')}
+              onSwitchToSimpleView={handleSwitchToSimple}
             />
           )}
 

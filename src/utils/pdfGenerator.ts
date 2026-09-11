@@ -99,7 +99,7 @@ export function downloadProfilesMaterialsPdf(
   // Table 1: Profiles Summary (Bar Counts)
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('1. Aluminum Profile Extrusion Bars Required (5.8m Stock Length)', 14, 54);
+  doc.text('1. Aluminum Profile Extrusion Bars Required (5800mm Stock Length)', 14, 54);
 
   const profileRows = calc.profileOptimizations.map((p, idx) => [
     (idx + 1).toString(),
@@ -112,7 +112,7 @@ export function downloadProfilesMaterialsPdf(
 
   autoTable(doc, {
     startY: 58,
-    head: [['#', 'Profile Name / Extrusion Section', 'Cut Pcs', 'Net Length', 'Full Bars (5.8m)', 'Total Offcut/Waste']],
+    head: [['#', 'Profile Name / Extrusion Section', 'Cut Pcs', 'Net Length', 'Full Bars (5800mm)', 'Total Offcut/Waste']],
     body: profileRows,
     theme: 'grid',
     headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 9 },
@@ -130,7 +130,7 @@ export function downloadProfilesMaterialsPdf(
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('2. Optimized Linear Cutting Schedule (Saw Cut Sequence & Offcuts)', 14, currentY);
+  doc.text('2. Optimized Linear Cutting Schedule (Saw Cut Sequence & Offcuts per 5800mm Bar)', 14, currentY);
 
   const cutPlanRows: string[][] = [];
   calc.profileOptimizations.forEach((p) => {
@@ -158,7 +158,42 @@ export function downloadProfilesMaterialsPdf(
 
   currentY = (doc as any).lastAutoTable.finalY + 12;
 
-  // Table 3: Accessories & Hardware Requirements
+  // Table 3: Glass Panes Required (Glass Cut Sizing Schedule)
+  if (calc.allGlasses && calc.allGlasses.length > 0) {
+    if (currentY > 220) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`3. Glass Panes Required (Glass Cut Sizing Schedule - Total Area: ${calc.totalGlassAreaM2} m²)`, 14, currentY);
+
+    const glassPlanRows = calc.allGlasses.map((g, idx) => [
+      (idx + 1).toString(),
+      g.itemTag,
+      g.paneDescription,
+      `${g.width} mm`,
+      `${g.height} mm`,
+      `${g.width} × ${g.height} mm`,
+      `${g.quantity} pcs`,
+      `${g.areaM2} m²`,
+    ]);
+
+    autoTable(doc, {
+      startY: currentY + 4,
+      head: [['#', 'Tag', 'Glass Pane Description', 'Width', 'Height', 'Cut Size (W×H mm)', 'Panes', 'Area (m²)']],
+      body: glassPlanRows,
+      theme: 'grid',
+      headStyles: { fillColor: [13, 148, 136], textColor: 255, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 12;
+  }
+
+  // Table 4: Accessories & Hardware Requirements
   if (currentY > 220) {
     doc.addPage();
     currentY = 20;
@@ -166,7 +201,8 @@ export function downloadProfilesMaterialsPdf(
 
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('3. Hardware, Gaskets, Fasteners & Accessories Bill of Quantities', 14, currentY);
+  const accTableNum = calc.allGlasses && calc.allGlasses.length > 0 ? '4' : '3';
+  doc.text(`${accTableNum}. Hardware, Gaskets, Fasteners & Accessories Bill of Quantities`, 14, currentY);
 
   const accRows = calc.allAccessories.map((a, idx) => [
     (idx + 1).toString(),
@@ -892,6 +928,198 @@ export function downloadClientBillPdf(
   }
 
   doc.save(`${projectName.replace(/[^a-zA-Z0-9]/g, '_')}_Client_Quotation_Bill.pdf`);
+}
+
+/**
+ * Generates a clean, professional Output Specification PDF for Simple View.
+ * Contains ONLY Extrusion Profiles and Materials Needed.
+ * Strictly NO price or amount data as requested.
+ */
+export function downloadSimpleOutputPdf(
+  calc: CombinedProjectCalculation,
+  companyName?: string
+) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const orgName = (companyName || 'OMAS ALUMINIUM PRECISION SYSTEMS').toUpperCase();
+
+  // Header Banner (Slate-900 / Industrial Dark)
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.rect(0, 0, pageWidth, 30, 'F');
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text(orgName, 14, 11);
+
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(148, 163, 184); // slate-400
+  doc.text('FABRICATION CUTTING & MATERIAL REQUIREMENTS SPECIFICATION (OUTPUT ONLY)', 14, 17);
+  doc.text('Simple Workshop Layout • Extrusions Stock & Accessories BOM', 14, 23);
+
+  // Right-side Project Info
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text(`PROJECT: ${(calc.projectName || 'Project').toUpperCase()}`, pageWidth - 14, 11, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Date: ${new Date(calc.dateCalculated || Date.now()).toLocaleDateString()}`, pageWidth - 14, 17, { align: 'right' });
+  const totalUnitsCount = (calc.items || []).reduce((s, it) => s + (it.item?.quantity || 1), 0);
+  doc.text(`Total Units: ${totalUnitsCount} pcs | Total 5800mm Bars: ${calc.totalBarsCount}`, pageWidth - 14, 23, { align: 'right' });
+
+  let currentY = 36;
+
+  // Section 1 Header: Aluminum Extrusion Profiles
+  doc.setFontSize(10.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text('1. ALUMINUM EXTRUSION PROFILES (5800mm Standard Bars)', 14, currentY);
+
+  const profileRows = (calc.profileOptimizations || []).map((p) => [
+    getMaterialDisplayName(p.profileName),
+    `${p.barsNeeded} bar${p.barsNeeded > 1 ? 's' : ''}`,
+    `${p.totalPieces} pcs`,
+    `${(p.totalLengthRequired / 1000).toFixed(2)} m`,
+    `${(p.totalWasteLength / 1000).toFixed(2)} m (${p.wastePercentage}%)`
+  ]);
+
+  autoTable(doc, {
+    startY: currentY + 3,
+    head: [['Profile Name', 'Bars Needed (5800mm)', 'Cut Pcs', 'Net Length', 'Offcut / Waste']],
+    body: profileRows,
+    theme: 'grid',
+    headStyles: {
+      fillColor: [30, 41, 59], // slate-800
+      textColor: [255, 255, 255],
+      fontSize: 8.5,
+      fontStyle: 'bold',
+    },
+    styles: {
+      fontSize: 8,
+      cellPadding: 2.5,
+      textColor: [30, 41, 59],
+    },
+    columnStyles: {
+      0: { fontStyle: 'bold' },
+      1: { halign: 'center', fontStyle: 'bold', textColor: [29, 78, 216] },
+      2: { halign: 'center' },
+      3: { halign: 'right' },
+      4: { halign: 'right', textColor: [180, 83, 9] },
+    },
+    margin: { left: 14, right: 14 },
+  });
+
+  currentY = (doc as any).lastAutoTable.finalY + 8;
+
+  // Section 2 Header: Glass Panes Needed (Cutting Schedule) - Always before Materials
+  if (calc.allGlasses && calc.allGlasses.length > 0) {
+    if (currentY > 230) {
+      doc.addPage();
+      currentY = 20;
+    }
+
+    doc.setFontSize(10.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text(`2. GLASS PANES NEEDED (CUTTING SCHEDULE - Total Area: ${calc.totalGlassAreaM2} m²)`, 14, currentY);
+
+    const glassRows = calc.allGlasses.map((g, idx) => [
+      (idx + 1).toString(),
+      g.itemTag,
+      g.paneDescription,
+      `${g.width} × ${g.height} mm`,
+      `${g.quantity} panes`,
+      `${g.areaM2} m²`
+    ]);
+
+    autoTable(doc, {
+      startY: currentY + 3,
+      head: [['#', 'Tag', 'Glass Pane Description', 'Cut Size (W×H mm)', 'Panes Needed', 'Area (m²)']],
+      body: glassRows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [13, 148, 136], // teal-600
+        textColor: [255, 255, 255],
+        fontSize: 8.5,
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2.5,
+        textColor: [30, 41, 59],
+      },
+      columnStyles: {
+        0: { halign: 'center' },
+        1: { halign: 'center', fontStyle: 'bold' },
+        2: { fontStyle: 'bold' },
+        3: { halign: 'center', fontStyle: 'bold', textColor: [13, 148, 136] },
+        4: { halign: 'center' },
+        5: { halign: 'right' },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  // Section 3 Header: Materials & Hardware Needed
+  if (currentY > 230) {
+    doc.addPage();
+    currentY = 20;
+  }
+
+  const matSectionNum = calc.allGlasses && calc.allGlasses.length > 0 ? '3' : '2';
+  doc.setFontSize(10.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text(`${matSectionNum}. MATERIALS & HARDWARE NEEDED`, 14, currentY);
+
+  const accessoryRows = (calc.allAccessories || []).map((acc) => [
+    getMaterialDisplayName(acc.name),
+    `${acc.quantity} ${acc.unit}`
+  ]);
+
+  autoTable(doc, {
+    startY: currentY + 3,
+    head: [['Material / Accessory Name', 'Required Quantity']],
+    body: accessoryRows,
+    theme: 'grid',
+    headStyles: {
+      fillColor: [180, 83, 9], // amber-700
+      textColor: [255, 255, 255],
+      fontSize: 8.5,
+      fontStyle: 'bold',
+    },
+    styles: {
+      fontSize: 8,
+      cellPadding: 2.5,
+      textColor: [30, 41, 59],
+    },
+    columnStyles: {
+      0: { fontStyle: 'bold' },
+      1: { halign: 'right', fontStyle: 'bold', textColor: [180, 83, 9] },
+    },
+    margin: { left: 14, right: 14 },
+  });
+
+  // Footer / Page numbers
+  const pageCount = doc.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(7.5);
+    doc.setTextColor(148, 163, 184);
+    doc.text(
+      `${orgName} • Workshop Extrusion Cutting & Material Requirements • Page ${i} of ${pageCount}`,
+      pageWidth / 2,
+      290,
+      { align: 'center' }
+    );
+  }
+
+  doc.save(`${(calc.projectName || 'Project').replace(/[^a-zA-Z0-9]/g, '_')}_Cutting_Output.pdf`);
 }
 
 

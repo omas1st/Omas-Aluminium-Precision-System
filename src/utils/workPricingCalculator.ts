@@ -289,17 +289,8 @@ export function detectUserCountryCurrency(): { code: string; symbol: string; nam
       } catch {}
     }
 
-    const timeZone = (Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone || '').toLowerCase();
-    const languages = navigator.languages || [navigator.language || ''];
-    const isNigeria =
-      timeZone.includes('lagos') ||
-      timeZone.includes('nigeria') ||
-      languages.some((l) => l.toUpperCase().includes('-NG'));
-
-    if (isNigeria) {
-      return { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' };
-    }
-    return { code: 'USD', symbol: '$', name: 'US Dollar' };
+    // Default currency is Naira (NGN, ₦) by default
+    return { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' };
   } catch {
     return { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' };
   }

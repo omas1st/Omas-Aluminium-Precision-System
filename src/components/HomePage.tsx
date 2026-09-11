@@ -25,6 +25,7 @@ interface HomePageProps {
   savedProjectsCount: number;
   recentProjects: SavedProject[];
   onOpenProject: (project: SavedProject) => void;
+  onSwitchToSimpleView?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -34,6 +35,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   savedProjectsCount,
   recentProjects,
   onOpenProject,
+  onSwitchToSimpleView,
 }) => {
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -53,6 +55,37 @@ export const HomePage: React.FC<HomePageProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Simple View Switch Banner */}
+      {onSwitchToSimpleView && (
+        <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-900 border border-emerald-700/60 rounded-xl p-4 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600/30 border border-emerald-500/50 flex items-center justify-center text-emerald-300 shrink-0">
+              <Calculator className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-black text-sm text-white">Simple Workshop Calculator Mode</h3>
+                <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                  Quick View
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Full-screen calculator layout for quick dimension entry, instant profile cut & accessory counts.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onSwitchToSimpleView}
+            className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm transition-all cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
+          >
+            <Calculator className="w-3.5 h-3.5" />
+            <span>Switch to Simple View</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* PWA Standalone App Install Banner */}
       <PWAInstallButton variant="card" />

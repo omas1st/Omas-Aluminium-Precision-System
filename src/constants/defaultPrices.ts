@@ -1,8 +1,8 @@
 import { MaterialPricesConfig } from '../types';
 
 export const DEFAULT_MATERIAL_PRICES: MaterialPricesConfig = {
-  currency: 'USD',
-  currencySymbol: '$',
+  currency: 'NGN',
+  currencySymbol: '₦',
 
   // Profile bar prices (per 5.8m standard extrusion bar)
   profileBarPrices: {
