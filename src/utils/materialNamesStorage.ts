@@ -168,24 +168,24 @@ export const DEFAULT_MATERIAL_CATALOG: MaterialCatalogItem[] = [
   },
   {
     key: 'transomOuterFrame',
-    defaultName: 'Transom Window Outer Frame Profile',
+    defaultName: 'Outer Transom Profile',
     category: 'Transom Systems',
     unit: 'per 5.8m bar',
-    description: 'Outer perimeter frame for high-level transom and vent windows',
+    description: '60mm outer perimeter frame for transom window units (used for both width and height)',
   },
   {
     key: 'transomMullion',
-    defaultName: 'Transom Intermediate Mullion T-Bar',
+    defaultName: 'Outer Transom Profile',
     category: 'Transom Systems',
     unit: 'per 5.8m bar',
-    description: 'Horizontal and vertical intermediate dividing bar for transom combinations',
+    description: '60mm outer transom profile also used as center dividing mullion',
   },
   {
     key: 'transomTopHungSash',
-    defaultName: 'Transom Top-Hung Vent Sash Profile',
+    defaultName: 'Inner Structural Transom Profile',
     category: 'Transom Systems',
     unit: 'per 5.8m bar',
-    description: 'Awning / top-hung outward projecting sash frame',
+    description: 'Inner structural frame profile for transom window vent panels (used for both width and height)',
   },
   {
     key: 'transomGlazingBead',
@@ -193,6 +193,41 @@ export const DEFAULT_MATERIAL_CATALOG: MaterialCatalogItem[] = [
     category: 'Transom Systems',
     unit: 'per 5.8m bar',
     description: 'Snap-in glass retaining bead profile for transom units',
+  },
+  {
+    key: 'transomIronAngle',
+    defaultName: 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)',
+    category: 'Transom Systems',
+    unit: 'per 5.0m bar',
+    description: 'Unified iron angle profile used for both outer frame cleats (55mm cut) and inner structural sash cleats (45mm cut)',
+  },
+  {
+    key: 'transomOuterAngle',
+    defaultName: 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)',
+    category: 'Transom Systems',
+    unit: 'per 5.0m bar',
+    description: 'Same Transom Iron Angle Profile: 55mm cut cleats tied to top and bottom outer frame width, entering jambs',
+  },
+  {
+    key: 'transomInnerAngle',
+    defaultName: 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)',
+    category: 'Transom Systems',
+    unit: 'per 5.0m bar',
+    description: 'Same Transom Iron Angle Profile: 45mm cut cleats for 45° mitered inner structural sash frame corners',
+  },
+  {
+    key: 'transomStopper',
+    defaultName: 'Transom Stoppers',
+    category: 'Transom Systems',
+    unit: 'per piece',
+    description: 'Transom stoppers (one at top, one at bottom per panel) connecting structural panel to outer transom profile for opening',
+  },
+  {
+    key: 'transomPressingHandle',
+    defaultName: 'Transom Pressing Handle',
+    category: 'Transom Systems',
+    unit: 'per piece',
+    description: 'Transom pressing handle to lock window panel to the outer frame',
   },
 
   // 5. Fixed & Door Profiles
@@ -515,6 +550,18 @@ export function getMaterialDisplayName(keyOrDefaultName: string): string {
   if (lower.includes('de curve sash') || lower.includes('de-curve')) {
     if (customNames['casementDeCurveSash']) return customNames['casementDeCurveSash'];
   }
+  if (lower.includes('outer transom') || lower.includes('transom outer') || (lower.includes('transom') && lower.includes('mullion'))) {
+    if (customNames['transomOuterFrame']) return customNames['transomOuterFrame'];
+  }
+  if (lower.includes('inner structural transom') || lower.includes('structural transom') || lower.includes('transom top-hung')) {
+    if (customNames['transomTopHungSash']) return customNames['transomTopHungSash'];
+  }
+  if (lower.includes('transom') && (lower.includes('iron angle') || lower.includes('angle cleat') || lower.includes('cleat profile') || lower.includes('55mm') || lower.includes('45mm'))) {
+    if (customNames['transomIronAngle']) return customNames['transomIronAngle'];
+    if (customNames['transomOuterAngle']) return customNames['transomOuterAngle'];
+    if (customNames['transomInnerAngle']) return customNames['transomInnerAngle'];
+    return 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)';
+  }
   if (lower.includes('snap-in bead') || lower.includes('glazing bead')) {
     if (customNames['casementGlazingBead']) return customNames['casementGlazingBead'];
   }
@@ -567,6 +614,12 @@ export function getMaterialDisplayName(keyOrDefaultName: string): string {
   }
   if (lower.includes('door hinge')) {
     if (customNames['doorHingePair']) return customNames['doorHingePair'];
+  }
+  if (lower.includes('transom stopper')) {
+    if (customNames['transomStopper']) return customNames['transomStopper'];
+  }
+  if (lower.includes('transom pressing handle') || (lower.includes('transom') && lower.includes('pressing handle'))) {
+    if (customNames['transomPressingHandle']) return customNames['transomPressingHandle'];
   }
   if (lower.includes('stopper') || lower.includes('anti-lift')) {
     if (customNames['steelStopperPiece']) return customNames['steelStopperPiece'];

@@ -1351,72 +1351,126 @@ function calculateTransomSinglePanelItem(
   glasses: GlassCutSize[],
   accessories: AccessoryRequirement[]
 ) {
-  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
-  const outer = constants.transomOuterFrame || constants.casementOuterFrame;
-  const sash = constants.transomTopHungSash || constants.casementDeCurveSash;
+  const { width: W, height: H, quantity: qty, tag, id: itemId, hasBurglary, hasNet } = item;
+  // Outer frame profile: "Outer Transom Profile" (same profile used for both width and height, 60mm)
+  const outer = constants.transomOuterFrame || {
+    name: 'Outer Transom Profile',
+    faceWidth: 60,
+    edgeOverlap: 25,
+    stockLength: 5800,
+  };
+  // Inner frame profile: "Inner Structural Transom Profile" (same profile used for both width and height)
+  const structural = constants.transomTopHungSash || {
+    name: 'Inner Structural Transom Profile',
+    faceWidth: 60,
+    edgeOverlap: 25,
+    stockLength: 5800,
+  };
+  // Unified Iron Angle Cleat Profile: The inner transom iron angle is the SAME profile as the outer transom iron angle profile
+  const ironAngleProfile =
+    constants.transomIronAngle?.name ||
+    constants.transomOuterAngle?.name ||
+    'Transom Corner Iron Angle Cleat Profile (5.0m Stock)';
+  const outerCleatLength = constants.transomIronAngle?.outerCutLength || constants.transomOuterAngle?.cutLength || 55;
+  const innerCleatLength = constants.transomIronAngle?.innerCutLength || constants.transomInnerAngle?.cutLength || 45;
 
-  // Outer frame cuts (45° miter cuts on all 4 corners)
+  // 1. Outer Frame Cuts (90° square butt joints)
+  // The outer frame of the transom is designed so the height sits on the bottom width, and the top width sits on the height.
+  // Top width & bottom width = measurement width (W)
   cuts.push({
-    id: `${itemId}-transom-outer-top-bottom`,
+    id: `${itemId}-transom-outer-width`,
     itemId,
     itemTag: tag,
     profileType: 'transom_outer',
     profileName: outer.name,
     length: Math.round(W),
     quantity: 2 * qty,
-    cutAngle: '45°',
-    purpose: 'Transom Window Outer Frame Top & Bottom Rails',
+    cutAngle: '90°',
+    purpose: 'Outer Transom Profile (Top & Bottom Rails - Sits Over Jambs)',
     componentType: 'outer_frame',
   });
 
+  // Height of outer frame = H - (top width 60mm + bottom width 60mm) = H - 120mm
+  const outerHeight = Math.max(100, Math.round(H - 120));
   cuts.push({
-    id: `${itemId}-transom-outer-sides`,
+    id: `${itemId}-transom-outer-height`,
     itemId,
     itemTag: tag,
     profileType: 'transom_outer',
     profileName: outer.name,
-    length: Math.round(H),
+    length: outerHeight,
     quantity: 2 * qty,
-    cutAngle: '45°',
-    purpose: 'Transom Window Outer Frame Side Jambs',
+    cutAngle: '90°',
+    purpose: 'Outer Transom Profile (Side Jambs - Sits on Bottom Rail)',
     componentType: 'outer_frame',
   });
 
-  // Top-Hung Vent Sash (45° miter cuts)
-  const innerOpeningW = W - 2 * (outer.faceWidth - outer.edgeOverlap);
-  const innerOpeningH = H - 2 * (outer.faceWidth - outer.edgeOverlap);
-  const sashW = Math.round(innerOpeningW + 2 * sash.edgeOverlap - 4);
-  const sashH = Math.round(innerOpeningH + 2 * sash.edgeOverlap - 4);
+  // 2. Outer Profile Iron Angles (55mm cut from the Transom Iron Angle Profile)
+  // Tied to the 4 ends of top & bottom width, entering height jambs, screwed to height
+  cuts.push({
+    id: `${itemId}-transom-outer-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_iron_angle',
+    profileName: ironAngleProfile,
+    length: outerCleatLength,
+    quantity: 4 * qty,
+    cutAngle: '90°',
+    purpose: `Transom Corner Iron Angle Cleat Profile - Outer Frame Cleats (${outerCleatLength}mm)`,
+    componentType: 'outer_frame',
+  });
+
+  // 3. Inner Structural Frame (45° miter cuts at 135° edge, connecting like casement)
+  // Inner frame height = outer frame height = H - 120mm (no overlap added for height so stopper screws to it)
+  // Inner frame width = outer clear opening (W - 120mm) + 50mm overlap (25mm on each height jamb) = W - 70mm
+  const innerH = outerHeight; // H - 120mm
+  const innerW = Math.max(100, Math.round(W - 70)); // W - 120 + 50 = W - 70mm
 
   cuts.push({
-    id: `${itemId}-transom-sash-w`,
+    id: `${itemId}-transom-inner-width`,
     itemId,
     itemTag: tag,
     profileType: 'transom_sash',
-    profileName: sash.name,
-    length: sashW,
+    profileName: structural.name,
+    length: innerW,
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Transom Top-Hung Vent Sash Top & Bottom Rails',
+    purpose: 'Inner Structural Transom Profile - Top & Bottom Rails (W - 70mm)',
     componentType: 'sash',
   });
 
   cuts.push({
-    id: `${itemId}-transom-sash-h`,
+    id: `${itemId}-transom-inner-height`,
     itemId,
     itemTag: tag,
     profileType: 'transom_sash',
-    profileName: sash.name,
-    length: sashH,
+    profileName: structural.name,
+    length: innerH,
     quantity: 2 * qty,
     cutAngle: '45°',
-    purpose: 'Transom Top-Hung Vent Sash Left & Right Stiles',
+    purpose: 'Inner Structural Transom Profile - Left & Right Stiles (H - 120mm)',
     componentType: 'sash',
   });
 
-  // Glass Size for 1-Panel Transom Top-Hung Vent
-  const glassW = Math.round(sashW - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
-  const glassH = Math.round(sashH - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
+  // 4. Inner Profile Iron Angles (45mm cut from the SAME Transom Iron Angle Profile)
+  // 4 pieces for 45° mitered structural frame corners
+  cuts.push({
+    id: `${itemId}-transom-inner-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_iron_angle',
+    profileName: ironAngleProfile,
+    length: innerCleatLength,
+    quantity: 4 * qty,
+    cutAngle: '90°',
+    purpose: `Transom Corner Iron Angle Cleat Profile - Inner Structural Sash Cleats (${innerCleatLength}mm)`,
+    componentType: 'sash',
+  });
+
+  // 5. Glass Cut Size:
+  // "for the glass, the height of the glass is the height of the inner frame, and the width of the glass is the width of the inner frame."
+  const glassW = innerW;
+  const glassH = innerH;
   const paneAreaM2 = (glassW * glassH) / 1000000;
 
   glasses.push({
@@ -1427,33 +1481,45 @@ function calculateTransomSinglePanelItem(
     height: glassH,
     quantity: 1 * qty,
     areaM2: Number((paneAreaM2 * qty).toFixed(3)),
-    paneDescription: 'Transom 1-Panel Top-Hung Vent Glass',
+    paneDescription: 'Transom Window 1-Panel Glass (Matches Inner Frame)',
   });
 
-  // Accessories: 1 pair friction stays, 1 handle, seal, cleats, screws, silicone
+  // 6. Accessories & Hardware:
+  // - 2 Transom Stoppers (one at top, one at bottom per panel, connecting structural panel to outer transom profile for opening)
   accessories.push({
-    name: 'Stainless Steel Friction Stays (10" / 12")',
+    name: 'Transom Stoppers',
     category: 'hardware',
-    quantity: 1 * qty,
-    unit: 'pairs',
-    description: 'Top-hung projected friction hinges for transom vent',
+    quantity: 2 * qty,
+    unit: 'pcs',
+    description: 'Transom stoppers (one at top and one at bottom) connecting structural panel to outer transom profile for opening and closing',
   });
 
+  // - 1 Transom Pressing Handle (locks window panel to outer frame)
   accessories.push({
-    name: 'Transom / Casement Cockspur Cam Handle',
+    name: 'Transom Pressing Handle',
     category: 'hardware',
     quantity: 1 * qty,
     unit: 'pcs',
-    description: 'Locking cam handle with strike plate',
+    description: 'Transom pressing handle locking window panel to outer frame',
   });
 
-  const totalPerimeterMeters = Math.ceil(((sashW * 2 + sashH * 2) * qty) / 1000);
+  // - Transom Iron Angle Cleats (Same profile for outer 55mm and inner 45mm: 8 pcs total)
+  accessories.push({
+    name: 'Transom Corner Iron Angle Cleats (55mm Outer & 45mm Inner - Same Profile)',
+    category: 'fastener',
+    quantity: 8 * qty,
+    unit: 'pcs',
+    description: `8 pcs total cut from ${ironAngleProfile}: 4 pcs @ 55mm (outer frame corners) + 4 pcs @ 45mm (inner structural sash corners)`,
+  });
+
+  // Weatherseal & Gasket & Screws & Sealant
+  const totalPerimeterMeters = Math.ceil(((innerW * 2 + innerH * 2) * qty) / 1000);
   accessories.push({
     name: 'Weatherseal Woolpile (Silicone-Treated Strip)',
     category: 'seal',
     quantity: totalPerimeterMeters,
     unit: 'meters',
-    description: 'Draft excluder strip around transom vent perimeter',
+    description: 'Draft excluder weatherseal strip around inner structural transom frame',
   });
 
   accessories.push({
@@ -1461,33 +1527,68 @@ function calculateTransomSinglePanelItem(
     category: 'seal',
     quantity: totalPerimeterMeters,
     unit: 'meters',
-    description: 'Glass channel wrap and pressure seal',
-  });
-
-  accessories.push({
-    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
-    category: 'fastener',
-    quantity: (4 + 4) * qty, // 4 for outer frame + 4 for sash
-    unit: 'pcs',
-    description: 'Mechanical locking cleats for 45° corner joints',
+    description: 'Rubber gasket around glass panel in structural frame',
   });
 
   accessories.push({
     name: 'Self-Tapping Stainless Assembly Screws (#8 x 1½")',
     category: 'fastener',
-    quantity: 14 * qty,
+    quantity: 16 * qty,
     unit: 'pcs',
-    description: 'Hinge and frame assembly fasteners',
+    description: 'Fasteners for securing iron angles, transom stoppers, and pressing handle',
   });
 
-  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 7500));
+  const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 8000));
   accessories.push({
     name: 'Neutral Cure Weatherproof Silicone Sealant',
     category: 'chemical',
     quantity: siliconeTubes,
     unit: 'tubes (300ml)',
-    description: 'Perimeter waterproofing and outer frame glass bead seals',
+    description: 'Perimeter waterproofing and outer frame glass/angle joint sealant',
   });
+
+  // 7. Burglary Iron Bars (if selected):
+  // Length of iron burglary = width of measurement (W), entered into both heights
+  if (hasBurglary) {
+    const targetSpacing = 125;
+    const numDivisions = Math.max(2, Math.round(H / targetSpacing));
+    const numRods = Math.max(1, numDivisions - 1);
+    const rodLength = Math.round(W);
+
+    cuts.push({
+      id: `${itemId}-transom-burglary-rods`,
+      itemId,
+      itemTag: tag,
+      profileType: 'burglary_rod',
+      profileName: constants.burglaryIronRod?.name || 'Burglary Iron Rod / Ballo Straight (5.8m)',
+      length: rodLength,
+      quantity: numRods * qty,
+      cutAngle: '90°',
+      purpose: `Burglary Iron Rod (${numRods} rods - length = width of measurement, enters both height stiles)`,
+      componentType: 'burglary',
+    });
+  }
+
+  // 8. Netting (if selected):
+  if (hasNet) {
+    const netW = Math.max(50, innerW - 10);
+    const netH = Math.max(50, innerH - 10);
+    const netPerimeter = Math.ceil(((netW * 2 + netH * 2) * qty) / 1000);
+    accessories.push({
+      name: 'Insect / Mosquito Net Mesh Roll',
+      category: 'hardware',
+      quantity: Number(((netW * netH * qty) / 1000000).toFixed(2)),
+      unit: 'm²',
+      description: 'Fiberglass insect net screen for operable transom panel',
+    });
+    accessories.push({
+      name: 'Net Rubber Spline Gasket Roll',
+      category: 'seal',
+      quantity: netPerimeter,
+      unit: 'meters',
+      description: 'Spline cord to secure insect netting mesh',
+    });
+  }
 }
 
 function calculateCasementItem(
@@ -1800,95 +1901,144 @@ function calculateTransomTwoPanelItem(
   glasses: GlassCutSize[],
   accessories: AccessoryRequirement[]
 ) {
-  const { width: W, height: H, quantity: qty, tag, id: itemId } = item;
-  const outer = constants.transomOuterFrame || constants.casementOuterFrame;
-  const mullion = constants.transomMullion || constants.casementMullion;
-  const sash = constants.transomTopHungSash || constants.casementDeCurveSash;
+  const { width: W, height: H, quantity: qty, tag, id: itemId, hasBurglary, hasNet } = item;
+  // Outer frame profile: "Outer Transom Profile" (same profile used for width, height, and mullion, 60mm size)
+  const outer = constants.transomOuterFrame || {
+    name: 'Outer Transom Profile',
+    faceWidth: 60,
+    edgeOverlap: 25,
+    stockLength: 5800,
+  };
+  // Inner frame profile: "Inner Structural Transom Profile"
+  const structural = constants.transomTopHungSash || {
+    name: 'Inner Structural Transom Profile',
+    faceWidth: 60,
+    edgeOverlap: 25,
+    stockLength: 5800,
+  };
+  // Unified Iron Angle Cleat Profile: The inner transom iron angle is the SAME profile as the outer transom iron angle profile
+  const ironAngleProfile =
+    constants.transomIronAngle?.name ||
+    constants.transomOuterAngle?.name ||
+    'Transom Corner Iron Angle Cleat Profile (5.0m Stock)';
+  const outerCleatLength = constants.transomIronAngle?.outerCutLength || constants.transomOuterAngle?.cutLength || 55;
+  const innerCleatLength = constants.transomIronAngle?.innerCutLength || constants.transomInnerAngle?.cutLength || 45;
 
-  const panelsCount = 2;
-  const mullionsCount = 1;
-
-  // 1. Outer Frame Cuts (45° miter cuts on all 4 corners)
+  // 1. Outer Frame Cuts (90° square butt joints)
+  // The outer frame of the transom is designed so the height sits on the bottom width, and the top width sits on the height.
+  // Top width & bottom width = measurement width (W)
   cuts.push({
-    id: `${itemId}-transom-outer-top-bottom`,
+    id: `${itemId}-transom-outer-width`,
     itemId,
     itemTag: tag,
     profileType: 'transom_outer',
     profileName: outer.name,
     length: Math.round(W),
     quantity: 2 * qty,
-    cutAngle: '45°',
-    purpose: 'Transom Outer Frame Top & Bottom Rails',
+    cutAngle: '90°',
+    purpose: 'Outer Transom Profile (Top & Bottom Rails - Sits Over Jambs)',
     componentType: 'outer_frame',
   });
 
+  // Height of outer frame = H - (top width 60mm + bottom width 60mm) = H - 120mm
+  const outerHeight = Math.max(100, Math.round(H - 120));
   cuts.push({
-    id: `${itemId}-transom-outer-sides`,
+    id: `${itemId}-transom-outer-height`,
     itemId,
     itemTag: tag,
     profileType: 'transom_outer',
     profileName: outer.name,
-    length: Math.round(H),
+    length: outerHeight,
     quantity: 2 * qty,
-    cutAngle: '45°',
-    purpose: 'Transom Outer Frame Side Jambs',
+    cutAngle: '90°',
+    purpose: 'Outer Transom Profile (Side Jambs - Sits on Bottom Rail)',
     componentType: 'outer_frame',
   });
 
-  // 2. Central Vertical Transom Mullion (T-Bar)
-  const mullionLength = Math.round(H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  // 2. Central Vertical Transom Mullion:
+  // "the outer transom profile, is also used as the mullion, the size of the mullion is 60mm, because the size of the outer frame is 60mm."
   cuts.push({
     id: `${itemId}-transom-mullion`,
     itemId,
     itemTag: tag,
-    profileType: 'transom_mullion',
-    profileName: mullion.name,
-    length: mullionLength,
+    profileType: 'transom_outer', // Grouped with outer profile in stock optimization
+    profileName: outer.name,
+    length: outerHeight,
     quantity: 1 * qty,
     cutAngle: '90°',
-    purpose: 'Center Vertical Transom Dividing Mullion (T-Bar)',
+    purpose: 'Outer Transom Profile (Center Mullion - 60mm, H - 120mm)',
     componentType: 'mullion',
   });
 
-  // 3. Inner Operable Top-Hung / Transom Sashes (Vent Sash):
-  // Inner opening width split in 2 by mullion
-  const innerOpeningWidth = W - 2 * (outer.faceWidth - outer.edgeOverlap) - (mullion.faceWidth - 2 * mullion.edgeOverlap);
-  const bayWidth = Math.max(150, innerOpeningWidth / 2);
-  const bayHeight = Math.max(150, H - 2 * (outer.faceWidth - outer.edgeOverlap));
+  // 3. Outer Profile Iron Angles (55mm cut from Transom Iron Angle Profile):
+  // 4 pieces for frame corners + 2 pieces for center dividing mullion = 6 pcs
+  cuts.push({
+    id: `${itemId}-transom-outer-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_iron_angle',
+    profileName: ironAngleProfile,
+    length: outerCleatLength,
+    quantity: 6 * qty,
+    cutAngle: '90°',
+    purpose: `Transom Corner Iron Angle Cleat Profile - Frame & Mullion Cleats (${outerCleatLength}mm, 6 pcs)`,
+    componentType: 'outer_frame',
+  });
 
-  // Top-hung sash cut sizes (45° miter cuts)
-  const sashW = Math.round(bayWidth + 2 * sash.edgeOverlap - 4);
-  const sashH = Math.round(bayHeight + 2 * sash.edgeOverlap - 4);
+  // 4. Inner Structural Transom Sashes (2 Panels, side-opening like casement):
+  // "the inner frame is cut like the casement inner frame, it cuts 135 degree miter away at its edge..."
+  // Inner frame height = outer frame height = H - 120mm
+  // Width: Outer frame width minus 2 side jambs (60mm each) and center mullion (60mm) = W - 180mm.
+  // Each panel has 25mm overlap on jamb and 25mm overlap on mullion = 50mm overlap.
+  // Inner width per panel = Math.round((W - 180) / 2 + 50)
+  const innerH = outerHeight; // H - 120mm
+  const innerW = Math.max(100, Math.round((W - 180) / 2 + 50));
 
   cuts.push({
-    id: `${itemId}-transom-sash-width`,
+    id: `${itemId}-transom-inner-width`,
     itemId,
     itemTag: tag,
     profileType: 'transom_sash',
-    profileName: sash.name,
-    length: sashW,
-    quantity: 4 * qty, // 2 panels * 2 (top & bottom)
+    profileName: structural.name,
+    length: innerW,
+    quantity: 4 * qty, // 2 panels * 2 rails
     cutAngle: '45°',
-    purpose: 'Transom Top-Hung Sash Top & Bottom Rails (2 Sashes)',
+    purpose: 'Inner Structural Transom Profile - Top & Bottom Rails (2 Panels, 4 pcs)',
     componentType: 'sash',
   });
 
   cuts.push({
-    id: `${itemId}-transom-sash-height`,
+    id: `${itemId}-transom-inner-height`,
     itemId,
     itemTag: tag,
     profileType: 'transom_sash',
-    profileName: sash.name,
-    length: sashH,
-    quantity: 4 * qty, // 2 panels * 2 (left & right)
+    profileName: structural.name,
+    length: innerH,
+    quantity: 4 * qty, // 2 panels * 2 stiles
     cutAngle: '45°',
-    purpose: 'Transom Top-Hung Sash Left & Right Stiles (2 Sashes)',
+    purpose: 'Inner Structural Transom Profile - Left & Right Stiles (2 Panels, 4 pcs)',
     componentType: 'sash',
   });
 
-  // 4. Glass Cut Sizes (2 panes)
-  const glassW = Math.round(sashW - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
-  const glassH = Math.round(sashH - 2 * (sash.faceWidth - sash.pocketDepth) - constants.glassClearance);
+  // 5. Inner Profile Iron Angles (45mm cut from the SAME Transom Iron Angle Profile):
+  // 4 corners per panel * 2 panels = 8 pcs
+  cuts.push({
+    id: `${itemId}-transom-inner-iron-angle`,
+    itemId,
+    itemTag: tag,
+    profileType: 'transom_iron_angle',
+    profileName: ironAngleProfile,
+    length: innerCleatLength,
+    quantity: 8 * qty,
+    cutAngle: '90°',
+    purpose: `Transom Corner Iron Angle Cleat Profile - Inner Structural Sash Cleats (${innerCleatLength}mm, 8 pcs)`,
+    componentType: 'sash',
+  });
+
+  // 6. Glass Cut Sizes (2 panes):
+  // "for the glass, the height of the glass is the height of the inner frame, and the width of the glass is the width of the inner frame."
+  const glassW = innerW;
+  const glassH = innerH;
   const paneAreaM2 = (glassW * glassH) / 1000000;
 
   glasses.push({
@@ -1899,7 +2049,7 @@ function calculateTransomTwoPanelItem(
     height: glassH,
     quantity: 1 * qty,
     areaM2: Number((paneAreaM2 * qty).toFixed(3)),
-    paneDescription: 'Transom Left Top-Hung Sash Glass (1-Pane)',
+    paneDescription: 'Transom Window Left Panel Glass (Matches Inner Frame)',
   });
 
   glasses.push({
@@ -1910,36 +2060,47 @@ function calculateTransomTwoPanelItem(
     height: glassH,
     quantity: 1 * qty,
     areaM2: Number((paneAreaM2 * qty).toFixed(3)),
-    paneDescription: 'Transom Right Top-Hung Sash Glass (1-Pane)',
+    paneDescription: 'Transom Window Right Panel Glass (Matches Inner Frame)',
   });
 
-  // 5. Hardware & Accessories
-  // Friction stays: 2 pairs for 2 top-hung sashes
+  // 7. Accessories:
+  // - Transom Stoppers: 2 per panel * 2 panels = 4 stoppers
+  // "each window panel used 2 transom stoppers, one at the top, and one at the bottom, it connects the structural panel, to the outer transom profile, its allows it to open and close."
   accessories.push({
-    name: 'Heavy Duty Stainless Steel Friction Stays (10" / 12")',
+    name: 'Transom Stoppers',
     category: 'hardware',
-    quantity: 2 * qty,
-    unit: 'pairs',
-    description: 'Top-hung projected friction hinges for 2 transom operable panels',
+    quantity: 4 * qty,
+    unit: 'pcs',
+    description: 'Transom stoppers (one at top and one at bottom per panel) connecting structural panels to outer frame for side opening',
   });
 
-  // Cockspur / Cam Handles: 2 pcs
+  // - Transom Pressing Handle: 1 per panel * 2 panels = 2 handles
+  // "one transom pressing handle is also needed for each window panel, it is used to lock to window panel to the outer frame."
   accessories.push({
-    name: 'Casement / Transom Cockspur Locking Cam Handle',
+    name: 'Transom Pressing Handle',
     category: 'hardware',
     quantity: 2 * qty,
     unit: 'pcs',
-    description: 'Quarter-turn compression locking handles with strike keepers',
+    description: 'Transom pressing handles locking window panels to outer transom frame',
   });
 
-  // Woolpile & Rubber Gasket
-  const totalPerimeterMeters = Math.ceil(((sashW * 2 + sashH * 2) * 2 * qty) / 1000);
+  // - Transom Iron Angle Cleats (Same profile for outer 55mm and inner 45mm: 14 pcs total)
+  accessories.push({
+    name: 'Transom Corner Iron Angle Cleats (55mm Outer & 45mm Inner - Same Profile)',
+    category: 'fastener',
+    quantity: 14 * qty,
+    unit: 'pcs',
+    description: `14 pcs total cut from ${ironAngleProfile}: 6 pcs @ 55mm (outer frame & mullion) + 8 pcs @ 45mm (2 inner structural sashes)`,
+  });
+
+  // Weatherseal & Gasket & Screws & Sealant
+  const totalPerimeterMeters = Math.ceil(((innerW * 2 + innerH * 2) * 2 * qty) / 1000);
   accessories.push({
     name: 'Weatherseal Woolpile (Silicone-Treated Strip)',
     category: 'seal',
     quantity: totalPerimeterMeters,
     unit: 'meters',
-    description: 'Draft excluder strip around transom operable sash perimeters',
+    description: 'Draft excluder weatherseal strip around inner structural transom frames',
   });
 
   accessories.push({
@@ -1947,25 +2108,15 @@ function calculateTransomTwoPanelItem(
     category: 'seal',
     quantity: totalPerimeterMeters,
     unit: 'meters',
-    description: 'Glass channel wrap and pressure seal',
+    description: 'Rubber gasket around glass panels in structural frames',
   });
 
-  // Corner Cleats
   accessories.push({
-    name: 'Cast Aluminum Corner Cleats (Miter Joints)',
+    name: 'Self-Tapping Stainless Assembly Screws (#8 x 1½")',
     category: 'fastener',
-    quantity: (8 + 4) * qty, // 8 for 2 sashes + 4 for outer frame
+    quantity: 28 * qty,
     unit: 'pcs',
-    description: 'Mechanical locking cleats for 45° corner joints',
-  });
-
-  // Screws & Sealant
-  accessories.push({
-    name: 'Self-Tapping Stainless Screws (#8 x 1½")',
-    category: 'fastener',
-    quantity: 24 * qty,
-    unit: 'pcs',
-    description: 'Friction stay fixing and mullion assembly fasteners',
+    description: 'Fasteners for securing iron angles, center mullion, transom stoppers, and pressing handles',
   });
 
   const siliconeTubes = Math.max(1, Math.ceil(((W * 2 + H * 2) * qty) / 7500));
@@ -1974,8 +2125,51 @@ function calculateTransomTwoPanelItem(
     category: 'chemical',
     quantity: siliconeTubes,
     unit: 'tubes (300ml)',
-    description: 'Perimeter waterproofing and outer frame glass bead seals',
+    description: 'Perimeter waterproofing and outer frame glass/angle joint sealant',
   });
+
+  // 8. Burglary Iron Bars (if selected):
+  // Length of iron burglary = width of measurement (W), enters both height stiles
+  if (hasBurglary) {
+    const targetSpacing = 125;
+    const numDivisions = Math.max(2, Math.round(H / targetSpacing));
+    const numRods = Math.max(1, numDivisions - 1);
+    const rodLength = Math.round(W);
+
+    cuts.push({
+      id: `${itemId}-transom-burglary-rods`,
+      itemId,
+      itemTag: tag,
+      profileType: 'burglary_rod',
+      profileName: constants.burglaryIronRod?.name || 'Burglary Iron Rod / Ballo Straight (5.8m)',
+      length: rodLength,
+      quantity: numRods * qty,
+      cutAngle: '90°',
+      purpose: `Burglary Iron Rod (${numRods} rods - length = width of measurement, enters both height stiles)`,
+      componentType: 'burglary',
+    });
+  }
+
+  // 9. Netting (if selected):
+  if (hasNet) {
+    const netW = Math.max(50, innerW - 10);
+    const netH = Math.max(50, innerH - 10);
+    const netPerimeter = Math.ceil(((netW * 2 + netH * 2) * 2 * qty) / 1000);
+    accessories.push({
+      name: 'Insect / Mosquito Net Mesh Roll',
+      category: 'hardware',
+      quantity: Number(((netW * netH * 2 * qty) / 1000000).toFixed(2)),
+      unit: 'm²',
+      description: 'Fiberglass insect net screen for 2 operable transom panels',
+    });
+    accessories.push({
+      name: 'Net Rubber Spline Gasket Roll',
+      category: 'seal',
+      quantity: netPerimeter,
+      unit: 'meters',
+      description: 'Spline cord to secure insect netting mesh',
+    });
+  }
 }
 
 function calculateDoorItem(

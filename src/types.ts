@@ -179,21 +179,21 @@ export interface ConstantProfilesConfig {
   // 4. Transom Window Profiles (Separated from Casement)
   transomOuterFrame: {
     name: string;
-    faceWidth: number; // default 45mm
-    edgeOverlap: number; // default 10mm
+    faceWidth: number; // default 60mm
+    edgeOverlap: number; // default 25mm
     pocketDepth: number; // default 15mm
     stockLength: number; // 5800mm
   };
   transomMullion: {
     name: string;
-    faceWidth: number; // default 55mm
-    edgeOverlap: number; // default 10mm
+    faceWidth: number; // default 60mm
+    edgeOverlap: number; // default 25mm
     stockLength: number; // 5800mm
   };
   transomTopHungSash: {
-    name: string;
-    faceWidth: number; // default 50mm
-    edgeOverlap: number; // default 10mm
+    name: string; // Inner Structural Transom Profile
+    faceWidth: number; // default 60mm
+    edgeOverlap: number; // default 25mm
     pocketDepth: number; // default 10mm
     stockLength: number; // 5800mm
   };
@@ -202,6 +202,22 @@ export interface ConstantProfilesConfig {
     faceWidth: number; // default 15mm
     pocketDepth: number; // default 12mm
     stockLength: number; // 5800mm
+  };
+  transomIronAngle?: {
+    name: string; // Transom Corner Iron Angle Cleat Profile (5.0m Stock) - same profile for outer & inner
+    stockLength: number; // 5000mm
+    outerCutLength: number; // 55mm
+    innerCutLength: number; // 45mm
+  };
+  transomOuterAngle?: {
+    name: string; // Outer Transom Iron Angle (55mm)
+    stockLength: number; // 5000mm
+    cutLength: number; // 55mm
+  };
+  transomInnerAngle?: {
+    name: string; // Inner Structural Transom Iron Angle (45mm)
+    stockLength: number; // 5000mm
+    cutLength: number; // 45mm
   };
 
   // 5. Fixed / General Profiles
@@ -386,6 +402,7 @@ export interface MaterialPricesConfig {
     transomMullion: number;
     transomTopHungSash: number;
     transomGlazingBead: number;
+    transomIronAngle?: number;
 
     // Fixed & Door Profiles
     fixedFrame: number;

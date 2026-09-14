@@ -82,7 +82,7 @@ export const TapeRuleHelperModal: React.FC<TapeRuleHelperModalProps> = ({
                 <strong>Example 30.3</strong>: <code className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-mono">(30 × 10) + (3 × 10) = 330 mm</code>.
               </li>
               <li>
-                <strong>Standard Millimeters (mm)</strong>: Standard entry (e.g., <code className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-mono">1200 × 1500 mm</code>).
+                <strong>Standard Millimeters (mm)</strong>: Standard entry (e.g., <code className="bg-white px-1.5 py-0.5 rounded border border-blue-200 text-blue-800 font-mono">1200 × 1200 mm</code>).
               </li>
             </ul>
           </div>
@@ -115,7 +115,7 @@ export const TapeRuleHelperModal: React.FC<TapeRuleHelperModalProps> = ({
                 }`}
               >
                 <div className="font-semibold">Direct Millimeters (mm)</div>
-                <div className="text-[11px] text-slate-500 mt-0.5">e.g., 1200 × 1500 mm</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">e.g., 1200 × 1200 mm</div>
               </button>
             </div>
           </div>

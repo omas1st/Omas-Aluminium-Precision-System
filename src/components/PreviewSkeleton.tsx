@@ -1169,52 +1169,89 @@ function renderSkeletonLayout(
     );
   }
 
-  if (kind === 'transom_2_panel') {
-    const panels = 2;
-    const mullionWidth = 20;
-    const bayW = (w - frameThickness * 2 - mullionWidth) / 2;
-    const bayH = h - frameThickness * 2;
-    const sashBorder = 22;
+  if (kind === 'transom_window' || kind === 'transom_2_panel') {
+    const isDual = kind === 'transom_2_panel';
+    const panels = isDual ? 2 : 1;
+    const outerProfileW = 24; // Visual representation of 60mm outer profile
+    const mullionW = isDual ? outerProfileW : 0; // Same 60mm outer profile used as mullion
+    const sashBorder = 20;
 
-    const mx = x + frameThickness + bayW;
+    const bayW = isDual ? (w - outerProfileW * 2 - mullionW) / 2 : w - outerProfileW * 2;
+    const bayH = h - outerProfileW * 2;
+    const mx = x + outerProfileW + bayW;
 
     return (
       <g>
-        {/* Outer Frame (Mitered) */}
-        <rect x={x} y={y} width={w} height={h} fill="#1e293b" stroke="#64748b" strokeWidth="4" />
-        <rect
-          x={x + frameThickness}
-          y={y + frameThickness}
-          width={w - frameThickness * 2}
-          height={h - frameThickness * 2}
-          fill="#0f172a"
-          stroke="#475569"
-          strokeWidth="2"
-        />
+        {/* Outer Frame Top Width (Spans Full Width W, 90° Square Cut) */}
+        <rect x={x} y={y} width={w} height={outerProfileW} fill="#1e293b" stroke="#64748b" strokeWidth="2.5" />
+        {/* Outer Frame Bottom Width (Spans Full Width W, 90° Square Cut) */}
+        <rect x={x} y={y + h - outerProfileW} width={w} height={outerProfileW} fill="#1e293b" stroke="#64748b" strokeWidth="2.5" />
 
-        {/* 45° Miter Corner Lines for Outer Frame */}
-        <line x1={x} y1={y} x2={x + frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
-        <line x1={x + w} y1={y} x2={x + w - frameThickness} y2={y + frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
-        <line x1={x} y1={y + h} x2={x + frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
-        <line x1={x + w} y1={y + h} x2={x + w - frameThickness} y2={y + h - frameThickness} stroke="#38bdf8" strokeWidth="2" strokeDasharray="3 1" />
+        {/* Outer Frame Left Height Jamb (Sits on Bottom Width, Top Width Sits on It, H - 120mm) */}
+        <rect x={x} y={y + outerProfileW} width={outerProfileW} height={bayH} fill="#1e293b" stroke="#64748b" strokeWidth="2.5" />
+        {/* Outer Frame Right Height Jamb (Sits on Bottom Width, Top Width Sits on It, H - 120mm) */}
+        <rect x={x + w - outerProfileW} y={y + outerProfileW} width={outerProfileW} height={bayH} fill="#1e293b" stroke="#64748b" strokeWidth="2.5" />
 
-        {/* Central Dividing Mullion T-Bar */}
-        <rect
-          x={mx}
-          y={y + frameThickness}
-          width={mullionWidth}
-          height={bayH}
-          fill="#334155"
-          stroke="#94a3b8"
-          strokeWidth="1.5"
-        />
+        {/* 90° Butt Joint Seams between Rails and Jambs */}
+        <line x1={x} y1={y + outerProfileW} x2={x + outerProfileW} y2={y + outerProfileW} stroke="#94a3b8" strokeWidth="2" />
+        <line x1={x + w - outerProfileW} y1={y + outerProfileW} x2={x + w} y2={y + outerProfileW} stroke="#94a3b8" strokeWidth="2" />
+        <line x1={x} y1={y + h - outerProfileW} x2={x + outerProfileW} y2={y + h - outerProfileW} stroke="#94a3b8" strokeWidth="2" />
+        <line x1={x + w - outerProfileW} y1={y + h - outerProfileW} x2={x + w} y2={y + h - outerProfileW} stroke="#94a3b8" strokeWidth="2" />
 
-        {/* 2 Top-Hung Operable Transom Sashes */}
-        {Array.from({ length: 2 }).map((_, pIdx) => {
-          const sx = x + frameThickness + pIdx * (bayW + mullionWidth) + 5;
-          const sy = y + frameThickness + 5;
-          const sw = bayW - 10;
-          const sh = bayH - 10;
+        {/* 55mm Outer Transom Iron Angle Cleats (4 Corners) */}
+        <path d={`M ${x + outerProfileW} ${y + outerProfileW} L ${x + outerProfileW + 12} ${y + outerProfileW} L ${x + outerProfileW + 12} ${y + outerProfileW + 4} L ${x + outerProfileW + 4} ${y + outerProfileW + 4} L ${x + outerProfileW + 4} ${y + outerProfileW + 12} L ${x + outerProfileW} ${y + outerProfileW + 12} Z`} fill="#f59e0b" stroke="#d97706" strokeWidth="0.8" />
+        <path d={`M ${x + w - outerProfileW} ${y + outerProfileW} L ${x + w - outerProfileW - 12} ${y + outerProfileW} L ${x + w - outerProfileW - 12} ${y + outerProfileW + 4} L ${x + w - outerProfileW - 4} ${y + outerProfileW + 4} L ${x + w - outerProfileW - 4} ${y + outerProfileW + 12} L ${x + w - outerProfileW} ${y + outerProfileW + 12} Z`} fill="#f59e0b" stroke="#d97706" strokeWidth="0.8" />
+        <path d={`M ${x + outerProfileW} ${y + h - outerProfileW} L ${x + outerProfileW + 12} ${y + h - outerProfileW} L ${x + outerProfileW + 12} ${y + h - outerProfileW - 4} L ${x + outerProfileW + 4} ${y + h - outerProfileW - 4} L ${x + outerProfileW + 4} ${y + h - outerProfileW - 12} L ${x + outerProfileW} ${y + h - outerProfileW - 12} Z`} fill="#f59e0b" stroke="#d97706" strokeWidth="0.8" />
+        <path d={`M ${x + w - outerProfileW} ${y + h - outerProfileW} L ${x + w - outerProfileW - 12} ${y + h - outerProfileW} L ${x + w - outerProfileW - 12} ${y + h - outerProfileW - 4} L ${x + w - outerProfileW - 4} ${y + h - outerProfileW - 4} L ${x + w - outerProfileW - 4} ${y + h - outerProfileW - 12} L ${x + w - outerProfileW} ${y + h - outerProfileW - 12} Z`} fill="#f59e0b" stroke="#d97706" strokeWidth="0.8" />
+
+        {/* Central Dividing Mullion (2-Panel Transom: uses Outer Transom Profile, 60mm) */}
+        {isDual && (
+          <g>
+            <rect
+              x={mx}
+              y={y + outerProfileW}
+              width={mullionW}
+              height={bayH}
+              fill="#1e293b"
+              stroke="#64748b"
+              strokeWidth="2"
+            />
+            {/* 90° Joint Lines for Mullion to Rails */}
+            <line x1={mx} y1={y + outerProfileW} x2={mx + mullionW} y2={y + outerProfileW} stroke="#94a3b8" strokeWidth="1.5" />
+            <line x1={mx} y1={y + h - outerProfileW} x2={mx + mullionW} y2={y + h - outerProfileW} stroke="#94a3b8" strokeWidth="1.5" />
+            {/* Mullion Cleats */}
+            <rect x={mx - 2} y={y + outerProfileW} width={mullionW + 4} height={4} fill="#f59e0b" stroke="#d97706" strokeWidth="0.5" />
+            <rect x={mx - 2} y={y + h - outerProfileW - 4} width={mullionW + 4} height={4} fill="#f59e0b" stroke="#d97706" strokeWidth="0.5" />
+          </g>
+        )}
+
+        {/* Burglary Iron Bars (Horizontally spanning full width W, entering both height jambs) */}
+        {item.hasBurglary && (() => {
+          const numRods = Math.max(1, Math.round(h / 125) - 1);
+          const spacing = bayH / (numRods + 1);
+          return (
+            <g className="burglary-rods" opacity="0.85">
+              {Array.from({ length: numRods }).map((_, rIdx) => {
+                const ry = y + outerProfileW + (rIdx + 1) * spacing;
+                return (
+                  <g key={`transom-burg-${rIdx}`}>
+                    <line x1={x + 4} y1={ry} x2={x + w - 4} y2={ry} stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" />
+                    <circle cx={x + outerProfileW / 2} cy={ry} r="3" fill="#cbd5e1" />
+                    <circle cx={x + w - outerProfileW / 2} cy={ry} r="3" fill="#cbd5e1" />
+                    {isDual && <circle cx={mx + mullionW / 2} cy={ry} r="3" fill="#cbd5e1" />}
+                  </g>
+                );
+              })}
+            </g>
+          );
+        })()}
+
+        {/* Inner Structural Transom Sashes (1 or 2 panels, side-opening like casement) */}
+        {Array.from({ length: panels }).map((_, pIdx) => {
+          const sx = x + outerProfileW + pIdx * (bayW + mullionW) + 4;
+          const sy = y + outerProfileW + 4;
+          const sw = bayW - 8;
+          const sh = bayH - 8;
 
           const gx = sx + sashBorder;
           const gy = sy + sashBorder;
@@ -1222,30 +1259,70 @@ function renderSkeletonLayout(
           const gh = Math.max(10, sh - sashBorder * 2);
 
           const glassItem = glasses[pIdx] || glasses[0];
+          // Determine hinge side: for 2-panel, left hinges on left, right hinges on right
+          const isRightHinged = isDual ? pIdx === 1 : false;
 
           return (
             <g key={pIdx}>
-              {/* De Curve Sash Frame */}
+              {/* Inner Structural Frame (45° Miter at 135° Cut Away) */}
               <rect x={sx} y={sy} width={sw} height={sh} fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
-              {/* 45° Miter lines on Sash Frame */}
+              {/* 45° Miter Corner Seams */}
               <line x1={sx} y1={sy} x2={sx + sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
               <line x1={sx + sw} y1={sy} x2={sx + sw - sashBorder} y2={sy + sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
               <line x1={sx} y1={sy + sh} x2={sx + sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
               <line x1={sx + sw} y1={sy + sh} x2={sx + sw - sashBorder} y2={sy + sh - sashBorder} stroke="#60a5fa" strokeWidth="1.5" />
 
+              {/* 45mm Inner Structural Corner Angles */}
+              <circle cx={sx + 8} cy={sy + 8} r="2.5" fill="#38bdf8" />
+              <circle cx={sx + sw - 8} cy={sy + 8} r="2.5" fill="#38bdf8" />
+              <circle cx={sx + 8} cy={sy + sh - 8} r="2.5" fill="#38bdf8" />
+              <circle cx={sx + sw - 8} cy={sy + sh - 8} r="2.5" fill="#38bdf8" />
+
+              {/* Transom Stoppers (2 per panel: one top, one bottom, connecting inner panel to outer frame) */}
+              {isRightHinged ? (
+                <>
+                  {/* Top Stopper (Right side) */}
+                  <rect x={sx + sw - 20} y={sy - 3} width="18" height="6" rx="1.5" fill="#cbd5e1" stroke="#475569" strokeWidth="1" />
+                  {/* Bottom Stopper (Right side) */}
+                  <rect x={sx + sw - 20} y={sy + sh - 3} width="18" height="6" rx="1.5" fill="#cbd5e1" stroke="#475569" strokeWidth="1" />
+                </>
+              ) : (
+                <>
+                  {/* Top Stopper (Left side) */}
+                  <rect x={sx + 2} y={sy - 3} width="18" height="6" rx="1.5" fill="#cbd5e1" stroke="#475569" strokeWidth="1" />
+                  {/* Bottom Stopper (Left side) */}
+                  <rect x={sx + 2} y={sy + sh - 3} width="18" height="6" rx="1.5" fill="#cbd5e1" stroke="#475569" strokeWidth="1" />
+                </>
+              )}
+
               {/* Glass Infill */}
               <rect x={gx} y={gy} width={gw} height={gh} fill="url(#glassGrad)" stroke="#0284c7" strokeWidth="1.5" />
 
-              {/* Top-Hung Projection Lines (Dashed V-shape from top center to bottom corners) */}
-              <line x1={gx + gw / 2} y1={gy} x2={gx} y2={gy + gh} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
-              <line x1={gx + gw / 2} y1={gy} x2={gx + gw} y2={gy + gh} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+              {/* Side-Opening Projection Lines (Opens to Side Like Casement) */}
+              {isRightHinged ? (
+                // Right-hinged: Apex points to left opening stile
+                <>
+                  <line x1={gx + gw} y1={gy} x2={gx} y2={gy + gh / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+                  <line x1={gx + gw} y1={gy + gh} x2={gx} y2={gy + gh / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+                  {/* Transom Pressing Handle on Left Stile */}
+                  <rect x={gx + 3} y={gy + gh / 2 - 12} width="5" height="24" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+                  <circle cx={gx + 5.5} cy={gy + gh / 2} r="3" fill="#f59e0b" />
+                </>
+              ) : (
+                // Left-hinged: Apex points to right opening stile
+                <>
+                  <line x1={gx} y1={gy} x2={gx + gw} y2={gy + gh / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+                  <line x1={gx} y1={gy + gh} x2={gx + gw} y2={gy + gh / 2} stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="5 4" />
+                  {/* Transom Pressing Handle on Right Stile */}
+                  <rect x={gx + gw - 8} y={gy + gh / 2 - 12} width="5" height="24" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
+                  <circle cx={gx + gw - 5.5} cy={gy + gh / 2} r="3" fill="#f59e0b" />
+                </>
+              )}
 
-              {/* Bottom Cockspur Locking Handle */}
-              <rect x={gx + gw / 2 - 8} y={gy + gh - 10} width="16" height="6" rx="2" fill="#fbbf24" stroke="#d97706" strokeWidth="1" />
-
+              {/* Glass Dimension Badge */}
               {showLabels && glassItem && (
                 <g transform={`translate(${gx + gw / 2}, ${gy + gh / 2})`}>
-                  <rect x="-68" y="-12" width="136" height="24" rx="3" fill="#0369a1" fillOpacity="0.9" />
+                  <rect x="-64" y="-12" width="128" height="24" rx="3" fill="#0369a1" fillOpacity="0.9" />
                   <text x="0" y="4" fill="#ffffff" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
                     Glass: {glassItem.width}×{glassItem.height}mm
                   </text>
@@ -1258,12 +1335,14 @@ function renderSkeletonLayout(
         {/* Global Component Callouts if Labels ON */}
         {showLabels && (
           <g>
-            <text x={x + w / 2} y={y + 19} fill="#cbd5e1" fontSize="9.5" fontWeight="bold" textAnchor="middle">
-              Transom Outer Head [45° Miter]
+            <text x={x + w / 2} y={y + 16} fill="#cbd5e1" fontSize="9" fontWeight="bold" textAnchor="middle">
+              Transom Outer Profile [90° Square Cut]
             </text>
-            <text x={mx + mullionWidth / 2} y={y + h - 12} fill="#fbbf24" fontSize="8.5" fontWeight="bold" textAnchor="middle">
-              Center Mullion
-            </text>
+            {isDual && (
+              <text x={mx + mullionW / 2} y={y + h - 10} fill="#fbbf24" fontSize="8" fontWeight="bold" textAnchor="middle">
+                Center Mullion (60mm)
+              </text>
+            )}
           </g>
         )}
       </g>
@@ -1379,7 +1458,7 @@ function renderSkeletonLayout(
     );
   }
 
-  // Fixed / Transom / Door default rendering
+  // Fixed / Picture Window default rendering
   const beadW = 20;
   const glassX = x + frameThickness + beadW;
   const glassY = y + frameThickness + beadW;
@@ -1411,7 +1490,7 @@ function renderSkeletonLayout(
         <g transform={`translate(${glassX + glassW / 2}, ${glassY + glassH / 2})`}>
           <rect x="-80" y="-16" width="160" height="32" rx="4" fill="#0f172a" stroke="#38bdf8" strokeWidth="1.5" />
           <text x="0" y="-1" fill="#93c5fd" fontSize="10" fontWeight="bold" textAnchor="middle">
-            {kind === 'transom_window' ? 'Transom 1-Pane Glass' : 'Fixed Picture Glass'}
+            Fixed Picture Glass
           </text>
           <text x="0" y="11" fill="#ffffff" fontSize="10" fontWeight="bold" textAnchor="middle" fontFamily="monospace">
             {singleGlass.width} × {singleGlass.height} mm

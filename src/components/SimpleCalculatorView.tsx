@@ -65,7 +65,8 @@ const getCleanSubtypeLabel = (st: FabricationKind): string => {
     sliding_2_panel: 'Sliding 2-Panel',
     sliding_3_panel: 'Sliding 3-Panel',
     sliding_4_panel: 'Sliding 4-Panel',
-    transom_window: 'Transom Window',
+    transom_window: 'Transom 1-Panel',
+    transom_2_panel: 'Transom 2-Panel',
     casement_door_single: 'Casement Single Door',
     casement_door_double: 'Casement Double Door',
     sliding_door_2_panel: 'Sliding Door 2-Panel',
@@ -157,14 +158,14 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
     setIsThemeModalOpen(false);
   };
 
-  // Clear button at the top of the simple view screen: Empty the input list on screen
+  // Clear button at the bottom of the simple view screen: Empty the input list on screen and reset to defaults
   const handleClearInputList = () => {
-    if (items.length === 0 && !widthInput && !heightInput) {
+    if (items.length === 0 && widthInput === '1200' && heightInput === '1200') {
       return;
     }
     setItems([]);
-    setWidthInput('');
-    setHeightInput('');
+    setWidthInput('1200');
+    setHeightInput('1200');
     setQuantityInput('1');
     setCalculation(null);
     setDisplayTab('inputs');
@@ -579,25 +580,7 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
                   </div>
                 </button>
 
-                {/* 4. Clear Input List Button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    handleClearInputList();
-                  }}
-                  className="w-full px-3 py-2.5 text-left text-xs font-medium text-rose-200 hover:text-white hover:bg-rose-600/20 flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <div className="w-7 h-7 rounded-lg bg-rose-600/30 border border-rose-500/40 flex items-center justify-center text-rose-400">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-rose-300">Clear Input List</div>
-                    <div className="text-[10px] text-slate-400">Empty all measurements on screen</div>
-                  </div>
-                </button>
-
-                {/* 5. Install App Button */}
+                {/* 4. Install App Button */}
                 <button
                   type="button"
                   onClick={handleInstallApp}
@@ -721,7 +704,8 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
                       <option value="sliding_2_panel">Sliding Window (2-Track / 2-Panel)</option>
                       <option value="sliding_3_panel">Sliding Window (3-Track / 3-Panel)</option>
                       <option value="sliding_4_panel">Sliding Window (4-Panel Center Open)</option>
-                      <option value="transom_window">Transom Window (Top Hung / Toilet)</option>
+                      <option value="transom_window">Transom 1-Panel Window (Side-Opening)</option>
+                      <option value="transom_2_panel">Transom 2-Panel Window (Side-Opening with Center Mullion)</option>
                     </>
                   ) : (
                     <>
@@ -838,21 +822,6 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
                 >
                   <Maximize2 className="w-3 h-3" />
                   <span>Pop-up View</span>
-                </button>
-              )}
-
-              {displayTab === 'inputs' && items.length > 0 && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleClearAll();
-                  }}
-                  className="text-[11px] text-rose-400 hover:text-rose-300 flex items-center gap-1 bg-rose-950/40 border border-rose-900/50 px-2 py-0.5 rounded-md cursor-pointer"
-                  title="Clear all measurements"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Clear</span>
                 </button>
               )}
             </div>
@@ -1179,8 +1148,8 @@ export const SimpleCalculatorView: React.FC<SimpleCalculatorViewProps> = ({
                         <th className="p-2.5">Profile Name</th>
                         <th className="p-2.5 text-center">Bars Needed</th>
                         <th className="p-2.5 text-center">Cut Pcs</th>
-                        <th className="p-2.5 text-right">Net Length</th>
-                        <th className="p-2.5 text-right">Offcut</th>
+                        <th className="p-2.5 text-right">Net Length (mm)</th>
+                        <th className="p-2.5 text-right">Offcut (mm)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/80">

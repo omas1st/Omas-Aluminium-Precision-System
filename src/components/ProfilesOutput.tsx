@@ -85,7 +85,7 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
             {calculation.totalBarsCount} <span className="text-xs font-normal text-slate-600">bars</span>
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">
-            Total Linear: {((calculation.totalBarsCount * constants.stockProfileLength) / 1000).toFixed(1)} m
+            Total Linear: {(calculation.totalBarsCount * constants.stockProfileLength).toLocaleString()} mm
           </div>
         </div>
 
@@ -139,9 +139,9 @@ export const ProfilesOutput: React.FC<ProfilesOutputProps> = ({
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Profile Name & Extrusion Section</th>
                 <th className="px-4 py-3 text-center">Cut Pcs</th>
-                <th className="px-4 py-3 text-right">Net Length</th>
+                <th className="px-4 py-3 text-right">Net Length (mm)</th>
                 <th className="px-4 py-3 text-center">Bars Needed (5800mm)</th>
-                <th className="px-4 py-3 text-right">Offcut / Waste</th>
+                <th className="px-4 py-3 text-right">Offcut / Waste (mm)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">

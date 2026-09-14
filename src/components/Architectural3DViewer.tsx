@@ -1279,7 +1279,8 @@ function buildWindow3DModel(
 
   // Center window around (0, H/2, 0)
   const halfW = W / 2;
-  const frameThickness = 45;
+  const isTransom = kind.startsWith('transom_');
+  const frameThickness = isTransom ? 60 : 45;
 
   // 1. Architectural Wall Opening Infill (Surrounding Masonry Reveal)
   if (showWall) {
@@ -1333,9 +1334,19 @@ function buildWindow3DModel(
   outerFrameGroup.position.z = -explodeOffset * 0.5;
   group.add(outerFrameGroup);
 
-  const isCasementOrTransom = kind.startsWith('casement_') || kind.startsWith('transom_');
-
-  if (isCasementOrTransom) {
+  if (isTransom) {
+    // Transom Outer Frame: 90° Square Cut with Top Width sitting on Jambs, Jambs sitting on Bottom Width + 55mm Iron Angle Cleats
+    createTransomOuterFrame(
+      outerFrameGroup,
+      W,
+      H,
+      frameThickness,
+      frameDepth,
+      materials,
+      showWireframe,
+      showIronCleats
+    );
+  } else if (kind.startsWith('casement_')) {
     // Casement Outer Frame: 45° Miter Cuts for Top/Bottom (Outer Width) & Sides (Outer Height) + 35mm Iron Angle Cleats
     createCasementMiterOuterFrame(
       outerFrameGroup,
@@ -1759,18 +1770,20 @@ function buildWindow3DModel(
     }
   }
 
-  // C. Transom / Top-Hung Windows
+  // C. Transom Windows (Side-opening single panel or 2-panel)
   else if (kind.startsWith('transom_')) {
     let panels = 1;
     if (kind === 'transom_2_panel') panels = 2;
 
-    const mullionW = panels > 1 ? 30 : 0;
-    const bayW = (innerW - (panels - 1) * mullionW) / panels;
-    const bayH = innerH;
+    const transomOuterProfileSize = 60; // 60mm outer transom profile
+    const mullionW = panels > 1 ? transomOuterProfileSize : 0; // Same 60mm outer transom profile used as mullion
+    const bayW = panels > 1 ? (innerW - mullionW) / panels : innerW;
+    const bayH = innerH; // H - 120mm
 
     if (panels > 1) {
+      // Central Mullion: uses Outer Transom Profile (60mm), length H - 120
       createExtrusionBar(
-        group,
+        outerFrameGroup,
         mullionW,
         bayH,
         frameDepth,
@@ -1780,45 +1793,129 @@ function buildWindow3DModel(
         materials.frame,
         materials.wire,
         showWireframe,
-        'Transom Center Mullion',
-        `Mullion Profile (${bayH}mm)`,
+        'Outer Transom Center Mullion Profile (60mm)',
+        `Dividing Mullion using Outer Transom Profile (${bayH}mm, 90° Square Cut)`,
         `${mullionW} × ${bayH} × ${frameDepth} mm`
       );
+
+      // 55mm Iron Angle Cleats for Mullion connection at top and bottom
+      if (showIronCleats) {
+        createCornerIronAngleCleat(
+          outerFrameGroup,
+          0,
+          H - transomOuterProfileSize,
+          0,
+          180,
+          materials,
+          showWireframe,
+          55,
+          '55mm Outer Transom Mullion Angle Cleat (Unified Transom Iron Angle Profile)'
+        );
+        createCornerIronAngleCleat(
+          outerFrameGroup,
+          0,
+          transomOuterProfileSize,
+          0,
+          0,
+          materials,
+          showWireframe,
+          55,
+          '55mm Outer Transom Mullion Angle Cleat (Unified Transom Iron Angle Profile)'
+        );
+      }
     }
 
     for (let p = 0; p < panels; p++) {
+      // Inner structural transom panel opens to the side like casement
       const sashW = bayW - 8;
       const sashH = bayH - 8;
-      const bayCenterX = -halfW + frameThickness + p * (bayW + mullionW) + bayW / 2;
-      const tiltAngle = (openPct / 100) * (Math.PI / 5.5); // Top-hung outwards tilt
+      const bayCenterX = panels > 1
+        ? (p === 0 ? -halfW + transomOuterProfileSize + bayW / 2 : halfW - transomOuterProfileSize - bayW / 2)
+        : 0;
 
-      const topHingeGroup = new THREE.Group();
-      topHingeGroup.position.set(bayCenterX, H - frameThickness - 4, frameDepth / 2 + explodeOffset * 0.4);
-      topHingeGroup.rotation.x = tiltAngle;
-      sashesGroup.add(topHingeGroup);
+      // Hinging: for 2-panel, left hinges on left, right hinges on right
+      const isRightHinged = panels > 1 ? p === 1 : false;
+      const hingeX = isRightHinged ? bayCenterX + sashW / 2 : bayCenterX - sashW / 2;
+      const openAngle = isRightHinged
+        ? -(openPct / 100) * (Math.PI / 2.2)
+        : (openPct / 100) * (Math.PI / 2.2);
+
+      const hingeGroup = new THREE.Group();
+      hingeGroup.position.set(hingeX, H / 2, frameDepth / 2 + explodeOffset * 0.4);
+      hingeGroup.rotation.y = openAngle; // Side opening like casement!
+      sashesGroup.add(hingeGroup);
 
       const leafGroup = new THREE.Group();
-      leafGroup.position.set(0, -sashH / 2, 0);
-      topHingeGroup.add(leafGroup);
+      leafGroup.position.set(isRightHinged ? -sashW / 2 : sashW / 2, 0, 0);
+      hingeGroup.add(leafGroup);
 
+      // Inner structural frame: 45° miter cuts on all corners
       createCasementMiterSashFrame(
         leafGroup,
         sashW,
         sashH,
         sashDepth,
-        48,
+        45, // 45mm inner structural transom profile
         materials.sash,
         materials.wire,
         materials.glass,
         materials.ironAngle,
         showWireframe,
         showIronCleats,
-        `Transom Top-Hung Sash #${p + 1} (45° Miter)`,
+        `Inner Structural Transom Sash #${p + 1} (45° Miter)`,
         `${sashW} × ${sashH} mm`
       );
 
-      // Bottom Cockspur Handle
-      createHandle(leafGroup, 0, -sashH / 2 + 15, sashDepth / 2 + 4, materials.hardware, 'cockspur');
+      // 45mm Inner Structural Corner Iron Angles (4 corners - Unified Transom Iron Angle Profile)
+      if (showIronCleats) {
+        const halfSW = sashW / 2;
+        const halfSH = sashH / 2;
+        createCornerIronAngleCleat(leafGroup, -halfSW + 6, -halfSH + 6, 0, 0, materials, showWireframe, 45, '45mm Inner Structural Transom Iron Angle Cleat (Unified Profile)');
+        createCornerIronAngleCleat(leafGroup, halfSW - 6, -halfSH + 6, 0, 90, materials, showWireframe, 45, '45mm Inner Structural Transom Iron Angle Cleat (Unified Profile)');
+        createCornerIronAngleCleat(leafGroup, halfSW - 6, halfSH - 6, 0, 180, materials, showWireframe, 45, '45mm Inner Structural Transom Iron Angle Cleat (Unified Profile)');
+        createCornerIronAngleCleat(leafGroup, -halfSW + 6, halfSH - 6, 0, 270, materials, showWireframe, 45, '45mm Inner Structural Transom Iron Angle Cleat (Unified Profile)');
+      }
+
+      // Transom Stoppers: Top & Bottom articulated friction stays connecting the opening panel to the outer frame
+      createTransomConnectedFrictionStopper(
+        sashesGroup,
+        true, // isTop
+        isRightHinged,
+        bayCenterX,
+        bayW,
+        hingeX,
+        hingeGroup.position,
+        openAngle,
+        sashW,
+        sashH,
+        sashDepth,
+        H,
+        transomOuterProfileSize,
+        materials,
+        showWireframe
+      );
+
+      createTransomConnectedFrictionStopper(
+        sashesGroup,
+        false, // isBottom
+        isRightHinged,
+        bayCenterX,
+        bayW,
+        hingeX,
+        hingeGroup.position,
+        openAngle,
+        sashW,
+        sashH,
+        sashDepth,
+        H,
+        transomOuterProfileSize,
+        materials,
+        showWireframe
+      );
+
+      // Transom Pressing Handle (1 per panel, locks window panel to outer frame)
+      const handleX = isRightHinged ? -sashW / 2 + 16 : sashW / 2 - 16;
+      createHandle(leafGroup, handleX, 0, sashDepth / 2 + 4, materials.hardware, 'transom_pressing');
     }
   }
 
@@ -1934,13 +2031,15 @@ function createCornerIronAngleCleat(
   cornerZ: number,
   rotationAngleDeg: number,
   materials: any,
-  showWireframe: boolean
+  showWireframe: boolean,
+  customCleatSize: number = 35,
+  customTitle?: string
 ) {
   const cleatGroup = new THREE.Group();
   cleatGroup.position.set(cornerX, cornerY, cornerZ);
   cleatGroup.rotation.z = (rotationAngleDeg * Math.PI) / 180;
 
-  const cleatSize = 35; // 35mm standard casement angle cleat
+  const cleatSize = customCleatSize; // 35mm casement or 45mm/55mm transom angle cleats
   const cleatThick = 4;
   const cleatWidth = 24;
 
@@ -1959,10 +2058,10 @@ function createCornerIronAngleCleat(
   mesh.castShadow = true;
 
   mesh.userData = {
-    title: '35mm Corner Iron Angle Cleat',
-    description: 'Internal galvanized iron angle bracket (5.0m stock, 35mm cut) reinforcing 45° miter joint',
-    dimensions: '35 × 35 × 24 mm',
-    material: 'Heavy-Duty Galvanized Iron Cleat (35mm)',
+    title: customTitle || `${cleatSize}mm Corner Iron Angle Cleat`,
+    description: `Internal galvanized iron angle bracket (${cleatSize}mm cut) reinforcing corner joint`,
+    dimensions: `${cleatSize} × ${cleatSize} × ${cleatWidth} mm`,
+    material: `Galvanized Iron Cleat (${cleatSize}mm)`,
   };
 
   if (showWireframe) {
@@ -1986,6 +2085,297 @@ function createCornerIronAngleCleat(
   cleatGroup.add(screw2);
 
   parent.add(cleatGroup);
+}
+
+function createTransomOuterFrame(
+  parent: THREE.Group,
+  W: number,
+  H: number,
+  thickness: number, // 60mm outer transom profile
+  depth: number,
+  materials: any,
+  showWireframe: boolean,
+  showIronCleats: boolean
+) {
+  const halfW = W / 2;
+  const jambH = H - thickness * 2; // H - 120mm
+
+  // 1. Top Head Profile (Transom Outer Profile - Full Width W, sits on top of jambs)
+  createExtrusionBar(
+    parent,
+    W,
+    thickness,
+    depth,
+    0,
+    H - thickness / 2,
+    0,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Transom / Outer Transom Profile (Top Width)',
+    `Horizontal Top Rail Full Width W (${W}mm, 90° Square Cut)`,
+    `${W} × ${thickness} × ${depth} mm`
+  );
+
+  // 2. Bottom Sill Profile (Transom Outer Profile - Full Width W, jambs sit on top of it)
+  createExtrusionBar(
+    parent,
+    W,
+    thickness,
+    depth,
+    0,
+    thickness / 2,
+    0,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Transom / Outer Transom Profile (Bottom Width)',
+    `Horizontal Bottom Rail Full Width W (${W}mm, 90° Square Cut)`,
+    `${W} × ${thickness} × ${depth} mm`
+  );
+
+  // 3. Left Side Jamb (Transom Outer Profile - Sits on Bottom Width, H - 120mm)
+  createExtrusionBar(
+    parent,
+    thickness,
+    jambH,
+    depth,
+    -halfW + thickness / 2,
+    H / 2,
+    0,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Transom / Outer Transom Profile (Left Height Jamb)',
+    `Vertical Left Jamb (H - 120mm = ${jambH}mm, 90° Square Cut)`,
+    `${thickness} × ${jambH} × ${depth} mm`
+  );
+
+  // 4. Right Side Jamb (Transom Outer Profile - Sits on Bottom Width, H - 120mm)
+  createExtrusionBar(
+    parent,
+    thickness,
+    jambH,
+    depth,
+    halfW - thickness / 2,
+    H / 2,
+    0,
+    materials.frame,
+    materials.wire,
+    showWireframe,
+    'Transom / Outer Transom Profile (Right Height Jamb)',
+    `Vertical Right Jamb (H - 120mm = ${jambH}mm, 90° Square Cut)`,
+    `${thickness} × ${jambH} × ${depth} mm`
+  );
+
+  // 5. 55mm Outer Transom Iron Angle Cleats at 4 corner joints
+  if (showIronCleats) {
+    const cleatSize = 55;
+    const cleatInset = thickness;
+    // Bottom-Left
+    createCornerIronAngleCleat(
+      parent,
+      -halfW + cleatInset,
+      cleatInset,
+      0,
+      0,
+      materials,
+      showWireframe,
+      cleatSize,
+      '55mm Outer Transom Iron Angle Cleat (Unified Transom Iron Angle Profile)'
+    );
+    // Bottom-Right
+    createCornerIronAngleCleat(
+      parent,
+      halfW - cleatInset,
+      cleatInset,
+      0,
+      90,
+      materials,
+      showWireframe,
+      cleatSize,
+      '55mm Outer Transom Iron Angle Cleat (Unified Transom Iron Angle Profile)'
+    );
+    // Top-Right
+    createCornerIronAngleCleat(
+      parent,
+      halfW - cleatInset,
+      H - cleatInset,
+      0,
+      180,
+      materials,
+      showWireframe,
+      cleatSize,
+      '55mm Outer Transom Iron Angle Cleat (Unified Transom Iron Angle Profile)'
+    );
+    // Top-Left
+    createCornerIronAngleCleat(
+      parent,
+      -halfW + cleatInset,
+      H - cleatInset,
+      0,
+      270,
+      materials,
+      showWireframe,
+      cleatSize,
+      '55mm Outer Transom Iron Angle Cleat (Unified Transom Iron Angle Profile)'
+    );
+  }
+}
+
+function createConnectingStayArm(
+  parent: THREE.Group,
+  pA: THREE.Vector3,
+  pB: THREE.Vector3,
+  width: number,
+  thickness: number,
+  material: THREE.Material,
+  userData: any
+) {
+  const dir = new THREE.Vector3().subVectors(pB, pA);
+  const len = dir.length();
+  if (len < 0.5) return null;
+
+  const mid = new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5);
+  const geo = new THREE.BoxGeometry(width, thickness, len);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.copy(mid);
+  mesh.lookAt(pB);
+  mesh.userData = userData;
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  parent.add(mesh);
+  return mesh;
+}
+
+function createPivotPin(
+  parent: THREE.Group,
+  pos: THREE.Vector3,
+  radius: number,
+  height: number,
+  material: THREE.Material,
+  userData: any
+) {
+  const geo = new THREE.CylinderGeometry(radius, radius, height, 12);
+  const mesh = new THREE.Mesh(geo, material);
+  mesh.position.copy(pos);
+  mesh.userData = userData;
+  parent.add(mesh);
+  return mesh;
+}
+
+function createTransomConnectedFrictionStopper(
+  parent: THREE.Group,
+  isTop: boolean,
+  isRightHinged: boolean,
+  bayCenterX: number,
+  bayW: number,
+  hingeX: number,
+  hingeGroupPos: THREE.Vector3,
+  openAngle: number,
+  sashW: number,
+  sashH: number,
+  sashDepth: number,
+  H: number,
+  transomOuterProfileSize: number,
+  materials: any,
+  showWireframe: boolean
+) {
+  const stopperGroup = new THREE.Group();
+  const dir = isRightHinged ? -1 : 1;
+
+  // Track length based on panel opening size
+  const trackLen = Math.min(260, Math.max(130, sashW * 0.52));
+  const outerRailY = isTop ? (H - transomOuterProfileSize - 2) : (transomOuterProfileSize + 2);
+  const trackZ = hingeGroupPos.z - sashDepth / 2;
+
+  // 1. Outer Frame Track Channel (fixed to outer frame rail)
+  const trackStartX = hingeX + dir * 14;
+  const trackEndX = trackStartX + dir * trackLen;
+  const trackMidX = (trackStartX + trackEndX) / 2;
+
+  const trackGeo = new THREE.BoxGeometry(trackLen, 3.5, 14);
+  const trackMesh = new THREE.Mesh(trackGeo, materials.hardware);
+  trackMesh.position.set(trackMidX, outerRailY, trackZ);
+  trackMesh.userData = {
+    title: isTop ? 'Transom Top Stopper Track' : 'Transom Bottom Stopper Track',
+    description: 'Fixed stainless steel guide channel on outer transom frame for friction stopper',
+    dimensions: `${Math.round(trackLen)} × 14 × 3.5 mm`,
+    material: 'Grade 304 Stainless Steel Track',
+  };
+  stopperGroup.add(trackMesh);
+
+  // 2. Fixed Outer Track Pivot
+  const outerPivot = new THREE.Vector3(trackStartX + dir * 18, outerRailY + (isTop ? -2 : 2), trackZ);
+  createPivotPin(stopperGroup, outerPivot, 3.2, 5, materials.hardware, {
+    title: 'Transom Stopper Frame Pivot',
+    description: 'Stainless steel anchor pivot securing stay arm to outer frame channel',
+    dimensions: 'Ø6.4 × 5 mm',
+    material: 'Stainless Steel Pivot Pin',
+  });
+
+  // 3. Sliding Friction Block on Outer Track
+  const openRatio = Math.min(1, Math.abs(openAngle) / (Math.PI / 2.2));
+  const sliderTravel = (trackLen - 45) * (1 - openRatio * 0.52);
+  const sliderPos = new THREE.Vector3(outerPivot.x + dir * sliderTravel, outerRailY + (isTop ? -2 : 2), trackZ);
+
+  const sliderGeo = new THREE.BoxGeometry(16, 4, 10);
+  const sliderMesh = new THREE.Mesh(sliderGeo, materials.hardware);
+  sliderMesh.position.copy(sliderPos);
+  sliderMesh.userData = {
+    title: 'Transom Stopper Friction Slider',
+    description: 'Sliding friction shoe with nylon/brass pad that holds the opening panel at desired angle',
+    dimensions: '16 × 10 × 4 mm',
+    material: 'Brass & Stainless Steel Friction Slider',
+  };
+  stopperGroup.add(sliderMesh);
+
+  // 4. Sash Attachment Point (mounted on rotating opening panel)
+  const sashAttachDist = Math.min(210, Math.max(110, sashW * 0.46));
+  const localVec = new THREE.Vector3(dir * sashAttachDist, 0, -2);
+  localVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), openAngle);
+
+  const sashPivotY = isTop ? (H / 2 + sashH / 2 - 2) : (H / 2 - sashH / 2 + 2);
+  const sashPivot = new THREE.Vector3(
+    hingeGroupPos.x + localVec.x,
+    sashPivotY,
+    hingeGroupPos.z + localVec.z
+  );
+
+  createPivotPin(stopperGroup, sashPivot, 3.2, 5, materials.hardware, {
+    title: 'Transom Stopper Sash Pivot',
+    description: 'Connecting pivot securing stopper arm to the opening structural sash panel',
+    dimensions: 'Ø6.4 × 5 mm',
+    material: 'Stainless Steel Sash Pivot Pin',
+  });
+
+  // 5. Primary Articulated Stay Arm (physically connecting Outer Frame Track to Opening Panel)
+  const primaryArmData = {
+    title: isTop ? 'Transom Top Stopper (Stay Arm)' : 'Transom Bottom Stopper (Stay Arm)',
+    description: 'Heavy-duty stainless steel stay arm physically connecting the opening panel to the outer frame',
+    dimensions: `${Math.round(outerPivot.distanceTo(sashPivot))} × 8 × 3 mm`,
+    material: 'Grade 304 Stainless Steel Stay Arm',
+  };
+  createConnectingStayArm(stopperGroup, outerPivot, sashPivot, 8, 2.8, materials.hardware, primaryArmData);
+
+  // 6. Secondary Scissor Link Arm (connecting Slider to Primary Arm Midpoint)
+  const mid1 = new THREE.Vector3().addVectors(outerPivot, sashPivot).multiplyScalar(0.5);
+  createPivotPin(stopperGroup, mid1, 2.5, 4.5, materials.hardware, {
+    title: 'Transom Stopper Scissor Knuckle',
+    description: 'Central articulated scissor joint connecting primary stay arm and guide link',
+    dimensions: 'Ø5 × 4.5 mm',
+    material: 'Stainless Steel Rivet Knuckle',
+  });
+
+  const secondaryArmData = {
+    title: 'Transom Stopper Scissor Guide Link',
+    description: 'Articulated guide link connecting track friction slider to primary stay arm',
+    dimensions: `${Math.round(sliderPos.distanceTo(mid1))} × 7 × 2.5 mm`,
+    material: 'Grade 304 Stainless Steel Link',
+  };
+  createConnectingStayArm(stopperGroup, sliderPos, mid1, 7, 2.5, materials.hardware, secondaryArmData);
+
+  parent.add(stopperGroup);
 }
 
 function createCasementMiterOuterFrame(
@@ -2660,7 +3050,7 @@ function createHandle(
   y: number,
   z: number,
   hardwareMat: THREE.Material,
-  type: 'casement_lever' | 'sliding_latch' | 'cockspur' | 'flush_pull'
+  type: 'casement_lever' | 'sliding_latch' | 'cockspur' | 'flush_pull' | 'transom_pressing'
 ) {
   const handleGroup = new THREE.Group();
   handleGroup.position.set(x, y, z);
@@ -2677,6 +3067,29 @@ function createHandle(
     leverMesh.position.set(0, -20, 35);
     leverMesh.rotation.x = Math.PI / 2;
     handleGroup.add(leverMesh);
+  } else if (type === 'transom_pressing') {
+    // Transom Pressing Handle (locks window panel to outer frame)
+    const baseGeo = new THREE.BoxGeometry(18, 52, 8);
+    const baseMesh = new THREE.Mesh(baseGeo, hardwareMat);
+    handleGroup.add(baseMesh);
+
+    const pressLeverGeo = new THREE.BoxGeometry(10, 14, 50);
+    const pressLeverMesh = new THREE.Mesh(pressLeverGeo, hardwareMat);
+    pressLeverMesh.position.set(0, -14, 26);
+    pressLeverMesh.rotation.x = Math.PI / 2.3;
+    handleGroup.add(pressLeverMesh);
+
+    const camGeo = new THREE.BoxGeometry(12, 10, 14);
+    const camMesh = new THREE.Mesh(camGeo, hardwareMat);
+    camMesh.position.set(0, 8, -6);
+    handleGroup.add(camMesh);
+
+    handleGroup.userData = {
+      title: 'Transom Pressing Handle',
+      description: 'Pressing handle used to lock the structural window panel securely to the outer frame',
+      dimensions: '18 × 52 × 50 mm',
+      material: 'Architectural Transom Pressing Locking Handle',
+    };
   } else if (type === 'cockspur') {
     const baseGeo = new THREE.BoxGeometry(20, 45, 8);
     const baseMesh = new THREE.Mesh(baseGeo, hardwareMat);

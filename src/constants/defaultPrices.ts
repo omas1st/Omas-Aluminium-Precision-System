@@ -39,6 +39,7 @@ export const DEFAULT_MATERIAL_PRICES: MaterialPricesConfig = {
     transomMullion: 46.0,
     transomTopHungSash: 41.0,
     transomGlazingBead: 18.0,
+    transomIronAngle: 12.0,
 
     // Fixed & Door Profiles
     fixedFrame: 35.0,

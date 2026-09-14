@@ -55,8 +55,8 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
   const [windowSubtype, setWindowSubtype] = useState<WindowType>('sliding_2_panel');
   const [doorSubtype, setDoorSubtype] = useState<DoorType>('sliding_door_2_panel');
 
-  const [inputWidth, setInputWidth] = useState<string>('');
-  const [inputHeight, setInputHeight] = useState<string>('');
+  const [inputWidth, setInputWidth] = useState<string>('1200');
+  const [inputHeight, setInputHeight] = useState<string>('1200');
   const [inputQuantity, setInputQuantity] = useState<number>(1);
   const [inputTag, setInputTag] = useState<string>('');
   const [inputNotes, setInputNotes] = useState<string>('');
@@ -178,10 +178,12 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
       setItemsList((prev) => [...prev, newItem]);
     }
 
-    // Auto-advance default tag for next entry
+    // Auto-advance default tag for next entry and empty inputs so user does not mistake
     const nextIndex = itemsList.length + (editingItemId ? 1 : 2);
     setInputTag(fabType === 'window' ? `W${nextIndex}` : `D${nextIndex}`);
     setInputNotes('');
+    setInputWidth('');
+    setInputHeight('');
   };
 
   const handleEditItem = (item: FabricationItemInput) => {
@@ -355,8 +357,8 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                         <option value="casement_fixed_window">Casement Fixed Window (Picture Light with Snap Bead)</option>
                       </optgroup>
                       <optgroup label="Transom & Highlight Windows">
-                        <option value="transom_2_panel">Transom 2-Panel Window (Dual Operable Top-Hung)</option>
-                        <option value="transom_window">Transom Window (1-Panel Top-Hung / Vent)</option>
+                        <option value="transom_2_panel">Transom 2-Panel Window (Side-Opening with Center Mullion)</option>
+                        <option value="transom_window">Transom 1-Panel Window (Side-Opening)</option>
                         <option value="fixed_window">Fixed Picture Window (Standard 1-Pane)</option>
                       </optgroup>
                     </select>
@@ -484,7 +486,7 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                         type="number"
                         value={inputWidth}
                         onChange={(e) => setInputWidth(e.target.value)}
-                        placeholder="0.0"
+                        placeholder="0"
                         className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono text-base font-bold text-slate-900"
                       />
                       <span className="absolute right-3.5 top-2.5 text-slate-400 font-bold text-xs">
@@ -502,7 +504,7 @@ export const MeasurementInput: React.FC<MeasurementInputProps> = ({
                         type="number"
                         value={inputHeight}
                         onChange={(e) => setInputHeight(e.target.value)}
-                        placeholder="0.0"
+                        placeholder="0"
                         className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono text-base font-bold text-slate-900"
                       />
                       <span className="absolute right-3.5 top-2.5 text-slate-400 font-bold text-xs">

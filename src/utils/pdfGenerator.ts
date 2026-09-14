@@ -112,7 +112,7 @@ export function downloadProfilesMaterialsPdf(
 
   autoTable(doc, {
     startY: 58,
-    head: [['#', 'Profile Name / Extrusion Section', 'Cut Pcs', 'Net Length', 'Full Bars (5800mm)', 'Total Offcut/Waste']],
+    head: [['#', 'Profile Name / Extrusion Section', 'Cut Pcs', 'Net Length (mm)', 'Full Bars (5800mm)', 'Total Offcut / Waste (mm)']],
     body: profileRows,
     theme: 'grid',
     headStyles: { fillColor: [30, 41, 59], textColor: 255, fontSize: 9 },
@@ -988,7 +988,7 @@ export function downloadSimpleOutputPdf(
 
   autoTable(doc, {
     startY: currentY + 3,
-    head: [['Profile Name', 'Bars Needed (5800mm)', 'Cut Pcs', 'Net Length', 'Offcut / Waste']],
+    head: [['Profile Name', 'Bars Needed (5800mm)', 'Cut Pcs', 'Net Length (mm)', 'Offcut / Waste (mm)']],
     body: profileRows,
     theme: 'grid',
     headStyles: {

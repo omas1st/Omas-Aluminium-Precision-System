@@ -1127,6 +1127,30 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Transom Iron Angle Profile (5.0m Stock Bar)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={priceFormData.profileBarPrices.transomIronAngle ?? 12}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'transomIronAngle', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      Unified profile: 55mm cut (outer frame/mullion) & 45mm cut (inner structural sash)
+                    </p>
+                  </div>
                 </div>
 
                 {/* Fixed & Door Profiles */}
@@ -2556,6 +2580,55 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       }
                       className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                     />
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 md:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-bold text-slate-800 uppercase">
+                      Transom Iron Angle Profile (Same Profile for Outer & Inner Cleats)
+                    </div>
+                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Unified 5.0m Stock Bar
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600">
+                    The inner structural transom iron angle is the exact same profile as the outer transom iron angle. Cleats of 55mm (outer frame/mullion) and 45mm (inner structural sashes) are cut from this same 5.0m stock bar.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-600 mb-1">Stock Length (mm)</label>
+                      <input
+                        type="number"
+                        value={constantFormData.transomIronAngle?.stockLength ?? 5000}
+                        onChange={(e) =>
+                          handleConstantFieldChange(['transomIronAngle', 'stockLength'], parseFloat(e.target.value) || 5000)
+                        }
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-600 mb-1">Outer Cleat Cut Length (mm)</label>
+                      <input
+                        type="number"
+                        value={constantFormData.transomIronAngle?.outerCutLength ?? 55}
+                        onChange={(e) =>
+                          handleConstantFieldChange(['transomIronAngle', 'outerCutLength'], parseFloat(e.target.value) || 55)
+                        }
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-600 mb-1">Inner Sash Cleat Cut Length (mm)</label>
+                      <input
+                        type="number"
+                        value={constantFormData.transomIronAngle?.innerCutLength ?? 45}
+                        onChange={(e) =>
+                          handleConstantFieldChange(['transomIronAngle', 'innerCutLength'], parseFloat(e.target.value) || 45)
+                        }
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

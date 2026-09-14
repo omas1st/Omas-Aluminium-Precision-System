@@ -151,24 +151,24 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
     length: 5000, // 5000mm (5m) roll
   },
 
-  // 4. Transom Window Profiles (Separated from Casement)
+  // 4. Transom Window Profiles (60mm Outer & Inner Structural Profiles)
   transomOuterFrame: {
-    name: 'Transom Window Outer Frame Profile',
-    faceWidth: 45, // mm
-    edgeOverlap: 10, // mm
+    name: 'Outer Transom Profile',
+    faceWidth: 60, // 60mm outer profile size
+    edgeOverlap: 25, // 25mm overlap
     pocketDepth: 15, // mm
     stockLength: 5800,
   },
   transomMullion: {
-    name: 'Transom Intermediate Mullion T-Bar',
-    faceWidth: 55, // mm
-    edgeOverlap: 10, // mm
+    name: 'Outer Transom Profile', // Same outer transom profile is used as the mullion
+    faceWidth: 60, // 60mm mullion size
+    edgeOverlap: 25, // mm
     stockLength: 5800,
   },
   transomTopHungSash: {
-    name: 'Transom Top-Hung Vent Sash Profile',
-    faceWidth: 50, // mm
-    edgeOverlap: 10, // mm
+    name: 'Inner Structural Transom Profile',
+    faceWidth: 60, // 60mm structural profile size
+    edgeOverlap: 25, // mm
     pocketDepth: 10, // mm
     stockLength: 5800,
   },
@@ -177,6 +177,22 @@ export const DEFAULT_FABRICATION_CONSTANTS: ConstantProfilesConfig = {
     faceWidth: 15, // mm
     pocketDepth: 12, // mm
     stockLength: 5800,
+  },
+  transomIronAngle: {
+    name: 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)',
+    stockLength: 5000,
+    outerCutLength: 55, // 55mm cut for outer frame & center mullion
+    innerCutLength: 45, // 45mm cut for inner structural sashes
+  },
+  transomOuterAngle: {
+    name: 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)',
+    stockLength: 5000,
+    cutLength: 55, // 55mm outer angle size
+  },
+  transomInnerAngle: {
+    name: 'Transom Corner Iron Angle Cleat Profile (5.0m Stock)',
+    stockLength: 5000,
+    cutLength: 45, // 45mm inner angle size
   },
 
   // 5. Fixed Frame Profiles

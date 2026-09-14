@@ -32,9 +32,9 @@ export function calculateQuotationBreakdown(
       id: `prof-quote-${idx}`,
       category: 'profile',
       name: getMaterialDisplayName(prof.profileName),
-      description: `Optimized cut from 5.8m bars (${prof.totalPieces} pcs, ${(prof.totalLengthRequired / 1000).toFixed(2)}m net required)`,
+      description: `Optimized cut from 5800mm bars (${prof.totalPieces} pcs, ${prof.totalLengthRequired.toLocaleString()} mm net required)`,
       quantity: prof.barsNeeded,
-      unit: 'bars (5.8m)',
+      unit: 'bars (5800mm)',
       unitPrice,
       totalPrice,
     });
