@@ -214,6 +214,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const sym = priceFormData.currencySymbol;
 
+  const renderExchangeHelper = (val: number | undefined) => {
+    const num = Number(val) || 0;
+    const rate = priceFormData.exchangeRateToUSD || 1400;
+    if (priceFormData.currency === 'NGN' || priceFormData.currencySymbol === '₦') {
+      const valUSD = (num / rate).toFixed(2);
+      return (
+        <span className="text-[10px] text-emerald-600 font-semibold mt-0.5 block">
+          ≈ ${valUSD} USD (@ ₦{rate}/$)
+        </span>
+      );
+    }
+    const valNGN = Math.round(num * rate);
+    return (
+      <span className="text-[10px] text-blue-600 font-semibold mt-0.5 block">
+        ≈ ₦{valNGN.toLocaleString()} NGN (@ ₦{rate}/$)
+      </span>
+    );
+  };
+
   // Render Authentication Gate if not authenticated
   if (!isAdminAuthenticated) {
     return (
@@ -618,7 +637,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Top / Bottom Track / Two Track Profile (5.8m)
+                      Top & Bottom Track Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -627,7 +646,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
+                        step="100"
                         value={priceFormData.profileBarPrices.topBottomTrack}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'topBottomTrack', parseFloat(e.target.value) || 0)
@@ -635,11 +654,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.topBottomTrack)}
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Side Jamb Frame Profile (5.8m)
+                      Double Jam / Side Jamb Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -648,7 +668,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
+                        step="100"
                         value={priceFormData.profileBarPrices.sideJambs}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'sideJambs', parseFloat(e.target.value) || 0)
@@ -656,11 +676,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.sideJambs)}
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Top / Bottom Sash Rail Profile (5.8m)
+                      Top & Bottom Sash Rail Profile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -669,7 +690,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
+                        step="100"
                         value={priceFormData.profileBarPrices.bottomSashRail}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value) || 0;
@@ -679,6 +700,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.bottomSashRail)}
                     <span className="text-[10px] text-slate-500 mt-0.5 block">
                       Single unified extrusion profile used for both top sash and bottom roller rails.
                     </span>
@@ -686,7 +708,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Lock Frame Stile / Handle Side (5.8m)
+                      Lock Profile / Stile Handle Side (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -695,7 +717,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
+                        step="100"
                         value={priceFormData.profileBarPrices.lockFrameStile}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'lockFrameStile', parseFloat(e.target.value) || 0)
@@ -703,11 +725,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.lockFrameStile)}
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Interlock Frame Stile / Center (5.8m)
+                      Interlock Profile / Meeting Stile (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -716,7 +739,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
+                        step="100"
                         value={priceFormData.profileBarPrices.interlockFrameStile}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'interlockFrameStile', parseFloat(e.target.value) || 0)
@@ -724,6 +747,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.interlockFrameStile)}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Net Profile / Bumper Frame (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="100"
+                        value={priceFormData.profileBarPrices.netProfileBumper ?? 20000}
+                        onChange={(e) =>
+                          handlePriceFieldChange('profileBarPrices', 'netProfileBumper', parseFloat(e.target.value) || 0)
+                        }
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.netProfileBumper ?? 20000)}
                   </div>
                 </div>
 
@@ -745,14 +791,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementOuterWidth ?? 44}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementOuterWidth ?? 15000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementOuterWidth', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementOuterWidth ?? 15000)}
                   </div>
 
                   <div>
@@ -766,14 +813,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementOuterHeight ?? 44}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementOuterHeight ?? 15000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementOuterHeight', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementOuterHeight ?? 15000)}
                   </div>
 
                   <div>
@@ -787,14 +835,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casement2Mullion ?? 48}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casement2Mullion ?? 20000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casement2Mullion', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casement2Mullion ?? 20000)}
                   </div>
 
                   <div>
@@ -808,14 +857,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casement3Mullion ?? 54}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casement3Mullion ?? 25000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casement3Mullion', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casement3Mullion ?? 25000)}
                   </div>
 
                   <div>
@@ -829,19 +879,20 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementDeCurveSash ?? 42}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementDeCurveSash ?? 20000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementDeCurveSash', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementDeCurveSash ?? 20000)}
                   </div>
 
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-                      Glazing Divider Bar Profile (5.8m)
+                      Glazing Divider Bar Profile - Small (5.8m)
                     </label>
                     <div className="flex items-center">
                       <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -850,14 +901,39 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.glazingDivider ?? 24}
+                        step="100"
+                        value={priceFormData.profileBarPrices.glazingDividerSmall ?? priceFormData.profileBarPrices.glazingDivider ?? 8000}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value) || 0;
+                          handlePriceFieldChange('profileBarPrices', 'glazingDividerSmall', val);
+                          handlePriceFieldChange('profileBarPrices', 'glazingDivider', val);
+                        }}
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.glazingDividerSmall ?? priceFormData.profileBarPrices.glazingDivider ?? 8000)}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      Glazing Divider Bar Profile - Big Heavy (5.8m)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        {sym}
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="100"
+                        value={priceFormData.profileBarPrices.glazingDividerBig ?? 15000}
                         onChange={(e) =>
-                          handlePriceFieldChange('profileBarPrices', 'glazingDivider', parseFloat(e.target.value) || 0)
+                          handlePriceFieldChange('profileBarPrices', 'glazingDividerBig', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.glazingDividerBig ?? 15000)}
                   </div>
 
                   <div>
@@ -871,14 +947,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementIronAngle ?? 12}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementIronAngle ?? 3500}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementIronAngle', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementIronAngle ?? 3500)}
                   </div>
 
                   <div>
@@ -892,14 +969,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementGlazingBead ?? 18}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementGlazingBead ?? 4000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementGlazingBead', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementGlazingBead ?? 4000)}
                   </div>
                 </div>
 
@@ -921,14 +999,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementBurglaryTopSideFrame ?? 38}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementBurglaryTopSideFrame ?? 15000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementBurglaryTopSideFrame', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementBurglaryTopSideFrame ?? 15000)}
                   </div>
 
                   <div>
@@ -942,14 +1021,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.casementBurglaryBottomFrame ?? 38}
+                        step="100"
+                        value={priceFormData.profileBarPrices.casementBurglaryBottomFrame ?? 15000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'casementBurglaryBottomFrame', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.casementBurglaryBottomFrame ?? 15000)}
                   </div>
 
                   <div>
@@ -963,14 +1043,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.netFrame1125 ?? 32}
+                        step="100"
+                        value={priceFormData.profileBarPrices.netFrame1125 ?? 5000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'netFrame1125', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.netFrame1125 ?? 5000)}
                   </div>
 
                   <div>
@@ -984,14 +1065,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.netFrame1126 ?? 32}
+                        step="100"
+                        value={priceFormData.profileBarPrices.netFrame1126 ?? 5000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'netFrame1126', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.netFrame1126 ?? 5000)}
                   </div>
 
                   <div>
@@ -1005,14 +1087,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.netFrame1132 ?? 28}
+                        step="100"
+                        value={priceFormData.profileBarPrices.netFrame1132 ?? 3500}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'netFrame1132', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.netFrame1132 ?? 3500)}
                   </div>
 
                   <div>
@@ -1026,14 +1109,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.burglaryIronRod ?? 18}
+                        step="100"
+                        value={priceFormData.profileBarPrices.burglaryIronRod ?? 7000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'burglaryIronRod', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.burglaryIronRod ?? 7000)}
                   </div>
                 </div>
 
@@ -1055,14 +1139,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.transomOuterFrame ?? 50}
+                        step="100"
+                        value={priceFormData.profileBarPrices.transomOuterFrame ?? 15000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'transomOuterFrame', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.transomOuterFrame ?? 15000)}
                   </div>
 
                   <div>
@@ -1076,14 +1161,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.transomMullion ?? 54}
+                        step="100"
+                        value={priceFormData.profileBarPrices.transomMullion ?? 20000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'transomMullion', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.transomMullion ?? 20000)}
                   </div>
 
                   <div>
@@ -1097,14 +1183,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.transomTopHungSash ?? 46}
+                        step="100"
+                        value={priceFormData.profileBarPrices.transomTopHungSash ?? 20000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'transomTopHungSash', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.transomTopHungSash ?? 20000)}
                   </div>
 
                   <div>
@@ -1118,14 +1205,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.transomGlazingBead ?? 18}
+                        step="100"
+                        value={priceFormData.profileBarPrices.transomGlazingBead ?? 4000}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'transomGlazingBead', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.transomGlazingBead ?? 4000)}
                   </div>
 
                   <div>
@@ -1139,14 +1227,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="0.5"
-                        value={priceFormData.profileBarPrices.transomIronAngle ?? 12}
+                        step="100"
+                        value={priceFormData.profileBarPrices.transomIronAngle ?? 3500}
                         onChange={(e) =>
                           handlePriceFieldChange('profileBarPrices', 'transomIronAngle', parseFloat(e.target.value) || 0)
                         }
                         className="w-full px-3 py-2 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
                       />
                     </div>
+                    {renderExchangeHelper(priceFormData.profileBarPrices.transomIronAngle ?? 3500)}
                     <p className="text-[10px] text-slate-500 mt-1">
                       Unified profile: 55mm cut (outer frame/mullion) & 45mm cut (inner structural sash)
                     </p>
@@ -1306,7 +1395,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      Glass Price per Square Meter (m²)
+                      Active Glass Price per Square Meter (m²)
                     </label>
                     <div className="flex items-center">
                       <span className="px-3 py-2 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
@@ -1315,7 +1404,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        step="1"
+                        step="100"
                         value={priceFormData.glassPricePerM2}
                         onChange={(e) =>
                           setPriceFormData({ ...priceFormData, glassPricePerM2: parseFloat(e.target.value) || 0 })
@@ -1324,6 +1413,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       />
                       <span className="ml-2 text-xs font-semibold text-slate-500">/ m²</span>
                     </div>
+                    {renderExchangeHelper(priceFormData.glassPricePerM2)}
                   </div>
 
                   <div>
@@ -1337,18 +1427,81 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         setPriceFormData({ ...priceFormData, glassTypeName: e.target.value })
                       }
                       className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800"
-                      placeholder="e.g. 5mm Clear / Tinted Float Glass"
+                      placeholder="e.g. 5mm Clear / Tinted Float Glass (₦140,000/sheet)"
                     />
                   </div>
                 </div>
 
-                <div className="p-5 rounded-xl bg-sky-50/60 border border-sky-200 text-xs space-y-2">
-                  <div className="font-bold text-sky-950 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-sky-700" />
-                    <span>Automatic Glass Area Calculations</span>
+                {/* Standard Sheet Size Rate Cards (3300 × 2140mm = 7.062 m²) */}
+                <div className="p-5 rounded-xl bg-sky-50/60 border border-sky-200 text-xs space-y-3">
+                  <div className="font-bold text-sky-950 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-sky-700" />
+                      <span>Full Sheet Pricing Rates (3300 × 2140 mm)</span>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold bg-sky-100 text-sky-800 px-2 py-0.5 rounded border border-sky-300">
+                      Area: 7.062 m² / sheet
+                    </span>
                   </div>
-                  <p className="text-slate-600">
-                    The quotation engine automatically aggregates the exact net cut width × cut height of every 1-pane glass opening in the project, converts the sum to m², and applies this unit rate.
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* 5mm Glass Sheet */}
+                    <div className="p-3 bg-white rounded-lg border border-sky-200 shadow-2xs space-y-1.5">
+                      <div className="flex items-center justify-between font-bold text-slate-800 text-xs">
+                        <span>5mm Glass Sheet</span>
+                        <span className="text-emerald-700">₦140,000</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-tight">
+                        3300 × 2140 mm ($100.00 USD)
+                      </p>
+                      <div className="text-[11px] font-mono font-semibold text-blue-700">
+                        = ₦19,825 / m² <span className="text-[10px] text-slate-500">($14.16/m²)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPriceFormData({
+                            ...priceFormData,
+                            glassPricePerM2: 19825,
+                            glassTypeName: '5mm Clear / Tinted Float Glass (₦140,000/sheet 3300×2140)',
+                          });
+                        }}
+                        className="w-full py-1 text-[10px] font-bold bg-sky-600 hover:bg-sky-700 text-white rounded transition-colors"
+                      >
+                        Set as Active 5mm
+                      </button>
+                    </div>
+
+                    {/* 4mm Glass Sheet */}
+                    <div className="p-3 bg-white rounded-lg border border-sky-200 shadow-2xs space-y-1.5">
+                      <div className="flex items-center justify-between font-bold text-slate-800 text-xs">
+                        <span>4mm Glass Sheet</span>
+                        <span className="text-emerald-700">₦110,000</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-tight">
+                        3300 × 2140 mm ($78.57 USD)
+                      </p>
+                      <div className="text-[11px] font-mono font-semibold text-blue-700">
+                        = ₦15,576 / m² <span className="text-[10px] text-slate-500">($11.13/m²)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPriceFormData({
+                            ...priceFormData,
+                            glassPricePerM2: 15576,
+                            glassTypeName: '4mm Clear / Tinted Float Glass (₦110,000/sheet 3300×2140)',
+                          });
+                        }}
+                        className="w-full py-1 text-[10px] font-bold bg-sky-600 hover:bg-sky-700 text-white rounded transition-colors"
+                      >
+                        Set as Active 4mm
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-600 pt-1">
+                    The quotation engine automatically aggregates exact glass cut sizes across all panes, converts the total area to m², and applies the active rate.
                   </p>
                 </div>
               </div>
@@ -1643,8 +1796,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <input
                       type="number"
                       min="0"
-                      step="0.5"
-                      value={priceFormData.accessoryPrices.netRollPrice ?? 22.0}
+                      step="100"
+                      value={priceFormData.accessoryPrices.netRollPrice ?? 13000}
                       onChange={(e) =>
                         handlePriceFieldChange('accessoryPrices', 'netRollPrice', parseFloat(e.target.value) || 0)
                       }
@@ -1652,6 +1805,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     />
                     <span className="ml-1.5 text-[10px] text-slate-500">/roll</span>
                   </div>
+                  {renderExchangeHelper(priceFormData.accessoryPrices.netRollPrice ?? 13000)}
                 </div>
 
                 <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
@@ -1665,8 +1819,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <input
                       type="number"
                       min="0"
-                      step="0.2"
-                      value={priceFormData.accessoryPrices.netRubberRollPrice ?? 5.0}
+                      step="50"
+                      value={priceFormData.accessoryPrices.netRubberRollPrice ?? 700}
                       onChange={(e) =>
                         handlePriceFieldChange('accessoryPrices', 'netRubberRollPrice', parseFloat(e.target.value) || 0)
                       }
@@ -1674,6 +1828,55 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     />
                     <span className="ml-1.5 text-[10px] text-slate-500">/roll</span>
                   </div>
+                  {renderExchangeHelper(priceFormData.accessoryPrices.netRubberRollPrice ?? 700)}
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Glazing Rubber Gasket (Full Roll)
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                      {sym}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={priceFormData.accessoryPrices.glazingRubberRollPrice ?? 1000}
+                      onChange={(e) =>
+                        handlePriceFieldChange('accessoryPrices', 'glazingRubberRollPrice', parseFloat(e.target.value) || 0)
+                      }
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                    />
+                    <span className="ml-1.5 text-[10px] text-slate-500">/roll</span>
+                  </div>
+                  {renderExchangeHelper(priceFormData.accessoryPrices.glazingRubberRollPrice ?? 1000)}
+                </div>
+
+                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                    Assembly Screws Pack (1,000 pcs/box)
+                  </label>
+                  <div className="flex items-center">
+                    <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                      {sym}
+                    </span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={priceFormData.accessoryPrices.assemblyScrewPackPrice ?? 5000}
+                      onChange={(e) => {
+                        const packVal = parseFloat(e.target.value) || 0;
+                        handlePriceFieldChange('accessoryPrices', 'assemblyScrewPackPrice', packVal);
+                        handlePriceFieldChange('accessoryPrices', 'assemblyScrewPiece', packVal / 1000);
+                      }}
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                    />
+                    <span className="ml-1.5 text-[10px] text-slate-500">/box</span>
+                  </div>
+                  {renderExchangeHelper(priceFormData.accessoryPrices.assemblyScrewPackPrice ?? 5000)}
                 </div>
               </div>
             </div>
@@ -1744,6 +1947,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono font-bold"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      USD Exchange Rate Conversion (1 USD = ₦ NGN)
+                    </label>
+                    <div className="flex items-center">
+                      <span className="px-2.5 py-1.5 bg-slate-200 border border-r-0 border-slate-300 rounded-l-lg text-xs font-bold text-slate-700">
+                        ₦
+                      </span>
+                      <input
+                        type="number"
+                        min="1"
+                        step="10"
+                        value={priceFormData.exchangeRateToUSD || 1400}
+                        onChange={(e) =>
+                          setPriceFormData({
+                            ...priceFormData,
+                            exchangeRateToUSD: parseFloat(e.target.value) || 1400,
+                          })
+                        }
+                        className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-r-lg text-xs font-mono font-bold text-slate-900"
+                      />
+                    </div>
+                    <span className="text-[10px] text-slate-500 mt-1 block">
+                      Dollar price = Nigerian price ÷ {priceFormData.exchangeRateToUSD || 1400}. All quotation dollar conversions use this rate.
+                    </span>
                   </div>
                 </div>
 

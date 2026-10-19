@@ -150,9 +150,17 @@ export function getStoredPrices(): MaterialPricesConfig {
       return DEFAULT_MATERIAL_PRICES;
     }
     const parsed = JSON.parse(raw);
+    // If cached prices were using the old dummy dollar values (e.g. sideJambs < 500), automatically upgrade to new Naira defaults
+    if (!parsed.profileBarPrices || (parsed.profileBarPrices.sideJambs && parsed.profileBarPrices.sideJambs < 500)) {
+      saveStoredPrices(DEFAULT_MATERIAL_PRICES);
+      return DEFAULT_MATERIAL_PRICES;
+    }
     return {
       ...DEFAULT_MATERIAL_PRICES,
       ...parsed,
+      currency: parsed.currency || 'NGN',
+      currencySymbol: parsed.currencySymbol || '₦',
+      exchangeRateToUSD: parsed.exchangeRateToUSD || DEFAULT_MATERIAL_PRICES.exchangeRateToUSD || 1400,
       profileBarPrices: {
         ...DEFAULT_MATERIAL_PRICES.profileBarPrices,
         ...(parsed.profileBarPrices || {}),

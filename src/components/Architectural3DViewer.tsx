@@ -96,10 +96,13 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
   // Dynamic state
   const { item, cuts, glasses } = itemResult;
   const { width: W, height: H, kind, tag } = item;
+  const isTransom = kind.startsWith('transom_');
 
   const [profileFinish, setProfileFinish] = useState<ProfileFinish>('charcoal');
-  const [glassTint, setGlassTint] = useState<GlassTint>('clear');
-  const [openPercentage, setOpenPercentage] = useState<number>(0);
+  const [glassTint, setGlassTint] = useState<GlassTint>(isTransom ? 'bronze_tint' : 'clear');
+  const [openPercentage, setOpenPercentage] = useState<number>(isTransom ? 75 : 0);
+  const [transomOpenMode, setTransomOpenMode] = useState<'both' | 'left_only' | 'right_only'>(isTransom ? 'left_only' : 'both');
+  const [showProtectiveFilm, setShowProtectiveFilm] = useState<boolean>(isTransom);
   const [isAutoAnimating, setIsAutoAnimating] = useState<boolean>(false);
   const [explodedView, setExplodedView] = useState<number>(0);
   const [showWallOpening, setShowWallOpening] = useState<boolean>(true);
@@ -253,10 +256,10 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
         glassTransmission = 0.85;
         break;
       case 'bronze_tint':
-        glassColor = 0xa3714b;
-        glassOpacity = 0.42;
-        glassRoughness = 0.08;
-        glassTransmission = 0.82;
+        glassColor = 0x85502a; // Warm Nigerian architectural bronze tint
+        glassOpacity = 0.52;
+        glassRoughness = 0.05;
+        glassTransmission = 0.76;
         break;
       case 'green_lowe':
         glassColor = 0x5eead4;
@@ -303,18 +306,31 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       color: 0x050505,
     });
 
-    // Galvanised Iron Angle Cleat Material (35mm corner connectors)
+    // Galvanised Iron Angle Cleat Material (35mm / 45mm / 55mm corner connectors)
     const ironAngleMaterial = new THREE.MeshStandardMaterial({
       color: 0x94a3b8,
       roughness: 0.25,
       metalness: 0.88,
     });
 
-    // Burglary Proofing Rod & Frame Material (Ballo Straight Rods)
+    // Burglary Proofing Rod Material (Ballo Straight Rods / Silver Metallic Security Tubes as in photos)
     const burglaryMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1e293b,
+      color: 0xd1d5db,
+      roughness: 0.22,
+      metalness: 0.9,
+    });
+
+    // Factory Protective Tape Materials (Songtai bright yellow tape with dark border line)
+    const protectiveTapeMaterial = new THREE.MeshStandardMaterial({
+      color: 0xfacc15, // Bright yellow
       roughness: 0.35,
-      metalness: 0.85,
+      metalness: 0.08,
+    });
+
+    const protectiveTapeBorderMaterial = new THREE.MeshStandardMaterial({
+      color: 0x0f172a, // Deep slate border accent
+      roughness: 0.45,
+      metalness: 0.1,
     });
 
     // Insect / Mosquito Mesh Screen (Translucent fine weave)
@@ -346,6 +362,8 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       wire: lineWireMaterial,
       ironAngle: ironAngleMaterial,
       burglary: burglaryMaterial,
+      protectiveTape: protectiveTapeMaterial,
+      protectiveTapeBorder: protectiveTapeBorderMaterial,
       netMesh: netMeshMaterial,
     };
   }, [profileFinish, glassTint, effectiveIsDark]);
@@ -482,7 +500,9 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
       showBurglary,
       showNet,
       showDividers,
-      showIronCleats
+      showIronCleats,
+      transomOpenMode,
+      showProtectiveFilm
     );
 
     // Raycaster for part inspection on click
@@ -555,6 +575,8 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
     showNet,
     showDividers,
     showIronCleats,
+    transomOpenMode,
+    showProtectiveFilm,
     showEnvironmentGrid,
     effectiveIsDark,
   ]);
@@ -1010,6 +1032,108 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
               <span>Slide / Swing Angle</span>
               <span>90° Full Open</span>
             </div>
+
+            {/* Transom Photo Reference Quick Presets */}
+            {isTransom && (
+              <div className="pt-2.5 mt-2.5 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <span>Photo Reference Match</span>
+                  <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-900/50">
+                    Workshop Match
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileFinish('charcoal');
+                      setGlassTint('bronze_tint');
+                      setShowBurglary(true);
+                      setTransomOpenMode('left_only');
+                      setOpenPercentage(75);
+                      setShowProtectiveFilm(true);
+                      setCameraPreset('perspective');
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-left flex flex-col gap-0.5 border ${
+                      transomOpenMode === 'left_only' && openPercentage > 0 && showProtectiveFilm
+                        ? 'bg-amber-500 text-slate-900 border-amber-600 shadow-sm'
+                        : effectiveIsDark
+                        ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className="font-bold flex items-center gap-1">
+                      📸 Photo 1
+                    </span>
+                    <span className="text-[10px] opacity-80">Left Open + Tape</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileFinish('charcoal');
+                      setGlassTint('bronze_tint');
+                      setShowBurglary(true);
+                      setTransomOpenMode('both');
+                      setOpenPercentage(60);
+                      setShowProtectiveFilm(false);
+                      setCameraPreset('perspective');
+                    }}
+                    className={`px-2 py-1.5 rounded-lg text-xs font-bold transition-all text-left flex flex-col gap-0.5 border ${
+                      transomOpenMode === 'both' && openPercentage > 0 && !showProtectiveFilm
+                        ? 'bg-blue-600 text-white border-blue-700 shadow-sm'
+                        : effectiveIsDark
+                        ? 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className="font-bold flex items-center gap-1">
+                      📸 Photo 2
+                    </span>
+                    <span className="text-[10px] opacity-80">Both Panels Open</span>
+                  </button>
+                </div>
+
+                {/* 2-Panel Transom Independent Opening Selector */}
+                {kind === 'transom_2_panel' && (
+                  <div className="flex rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800/80 text-[11px] font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setTransomOpenMode('left_only')}
+                      className={`flex-1 py-1 rounded text-center transition-colors ${
+                        transomOpenMode === 'left_only'
+                          ? 'bg-white dark:bg-slate-700 shadow-xs font-bold text-slate-900 dark:text-white'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Left Only
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTransomOpenMode('both')}
+                      className={`flex-1 py-1 rounded text-center transition-colors ${
+                        transomOpenMode === 'both'
+                          ? 'bg-white dark:bg-slate-700 shadow-xs font-bold text-slate-900 dark:text-white'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Both Panels
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTransomOpenMode('right_only')}
+                      className={`flex-1 py-1 rounded text-center transition-colors ${
+                        transomOpenMode === 'right_only'
+                          ? 'bg-white dark:bg-slate-700 shadow-xs font-bold text-slate-900 dark:text-white'
+                          : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Right Only
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Exploded View Assembly Slider */}
@@ -1107,7 +1231,7 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
             <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
               <span className="flex items-center gap-2 font-medium">
                 <Box className="w-4 h-4 text-amber-500" />
-                <span>35mm Iron Angle Cleats</span>
+                <span>35mm / 45mm / 55mm Iron Angle Cleats</span>
               </span>
               <input
                 type="checkbox"
@@ -1116,6 +1240,21 @@ export const Architectural3DViewer: React.FC<Architectural3DViewerProps> = ({
                 className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0 cursor-pointer"
               />
             </label>
+
+            {isTransom && (
+              <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
+                <span className="flex items-center gap-2 font-medium">
+                  <Shield className="w-4 h-4 text-amber-500" />
+                  <span>Workshop Protective Film (Tape)</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={showProtectiveFilm}
+                  onChange={(e) => setShowProtectiveFilm(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-0 cursor-pointer"
+                />
+              </label>
+            )}
 
             {!isSliding && (
               <label className="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer transition-colors">
@@ -1261,7 +1400,9 @@ function buildWindow3DModel(
   showBurglary: boolean,
   showNet: boolean,
   showDividers: boolean,
-  showIronCleats: boolean
+  showIronCleats: boolean,
+  transomOpenMode: 'both' | 'left_only' | 'right_only' = 'both',
+  showProtectiveFilm: boolean = false
 ) {
   // Clear any existing children
   while (group.children.length > 0) {
@@ -1636,7 +1777,8 @@ function buildWindow3DModel(
       const sashW = bayW - 8;
       const sashH = innerH - 8;
       const hingeX = halfW - frameThickness;
-      const openAngle = -(openPct / 100) * (Math.PI / 2.2); // Swing open outward
+      // Burglary is at the back; sash opens outward to the front (+Z)
+      const openAngle = (openPct / 100) * (Math.PI / 2.2);
 
       const hingeGroup = new THREE.Group();
       hingeGroup.position.set(hingeX, H / 2, frameDepth / 2 + explodeOffset * 0.4);
@@ -1719,9 +1861,10 @@ function buildWindow3DModel(
         const bayCenterX = -halfW + frameThickness + p * (bayW + mullionW) + bayW / 2;
         const isRightHinged = p % 2 === 1;
         const hingeX = isRightHinged ? bayCenterX + sashW / 2 : bayCenterX - sashW / 2;
+        // Burglary is at the back (z < 0); panels open outward to the front (z > 0)
         const openAngle = isRightHinged
-          ? -(openPct / 100) * (Math.PI / 2.2)
-          : (openPct / 100) * (Math.PI / 2.2);
+          ? (openPct / 100) * (Math.PI / 2.2)
+          : -(openPct / 100) * (Math.PI / 2.2);
 
         const hingeGroup = new THREE.Group();
         hingeGroup.position.set(hingeX, H / 2, frameDepth / 2 + explodeOffset * 0.4);
@@ -1836,12 +1979,27 @@ function buildWindow3DModel(
       // Hinging: for 2-panel, left hinges on left, right hinges on right
       const isRightHinged = panels > 1 ? p === 1 : false;
       const hingeX = isRightHinged ? bayCenterX + sashW / 2 : bayCenterX - sashW / 2;
-      const openAngle = isRightHinged
-        ? -(openPct / 100) * (Math.PI / 2.2)
-        : (openPct / 100) * (Math.PI / 2.2);
 
+      // Support independent or simultaneous opening for 2-panel transom (matching Photo 1 vs Photo 2)
+      let panelOpenPct = openPct;
+      if (panels > 1) {
+        if (transomOpenMode === 'left_only') {
+          panelOpenPct = p === 0 ? openPct : 0;
+        } else if (transomOpenMode === 'right_only') {
+          panelOpenPct = p === 1 ? openPct : 0;
+        } else if (transomOpenMode === 'both') {
+          panelOpenPct = openPct;
+        }
+      }
+
+      // Burglary bars are at the back (z = -14); panel opens outward to the front (+Z)
+      const openAngle = isRightHinged
+        ? (panelOpenPct / 100) * (Math.PI / 2.2)
+        : -(panelOpenPct / 100) * (Math.PI / 2.2);
+
+      const sashCenterZ = (frameDepth - sashDepth) / 2 + 2;
       const hingeGroup = new THREE.Group();
-      hingeGroup.position.set(hingeX, H / 2, frameDepth / 2 + explodeOffset * 0.4);
+      hingeGroup.position.set(hingeX, H / 2, sashCenterZ + explodeOffset * 0.4);
       hingeGroup.rotation.y = openAngle; // Side opening like casement!
       sashesGroup.add(hingeGroup);
 
@@ -1849,7 +2007,7 @@ function buildWindow3DModel(
       leafGroup.position.set(isRightHinged ? -sashW / 2 : sashW / 2, 0, 0);
       hingeGroup.add(leafGroup);
 
-      // Inner structural frame: 45° miter cuts on all corners
+      // Inner structural frame: 45° miter cuts on all corners with optional protective film tape
       createCasementMiterSashFrame(
         leafGroup,
         sashW,
@@ -1863,8 +2021,23 @@ function buildWindow3DModel(
         showWireframe,
         showIronCleats,
         `Inner Structural Transom Sash #${p + 1} (45° Miter)`,
-        `${sashW} × ${sashH} mm`
+        `${sashW} × ${sashH} mm`,
+        showProtectiveFilm,
+        materials.protectiveTape,
+        materials.protectiveTapeBorder
       );
+
+      // Stainless steel sash mounting brackets for friction stay stoppers (top & bottom rails)
+      const sashBracketLen = Math.min(220, Math.max(120, sashW * 0.48));
+      const sashBracketGeo = new THREE.BoxGeometry(sashBracketLen, 3, 12);
+      
+      const topSashBracket = new THREE.Mesh(sashBracketGeo, materials.hardware);
+      topSashBracket.position.set(isRightHinged ? (sashW / 2 - sashBracketLen / 2) : (-sashW / 2 + sashBracketLen / 2), sashH / 2 - 1.5, 0);
+      leafGroup.add(topSashBracket);
+
+      const bottomSashBracket = new THREE.Mesh(sashBracketGeo, materials.hardware);
+      bottomSashBracket.position.set(isRightHinged ? (sashW / 2 - sashBracketLen / 2) : (-sashW / 2 + sashBracketLen / 2), -sashH / 2 + 1.5, 0);
+      leafGroup.add(bottomSashBracket);
 
       // 45mm Inner Structural Corner Iron Angles (4 corners - Unified Transom Iron Angle Profile)
       if (showIronCleats) {
@@ -1939,18 +2112,33 @@ function buildWindow3DModel(
   // 4. Burglary Proofing Bars & Security Frame (Casement & Transom only)
   const isSlidingWindow = kind.startsWith('sliding_');
   if (!isSlidingWindow && showBurglary && item.hasBurglary !== false) {
-    createBurglaryBarsAndFrame(
-      group,
-      W,
-      H,
-      innerW,
-      innerH,
-      frameThickness,
-      frameDepth,
-      materials,
-      showWireframe,
-      explodeOffset
-    );
+    if (kind.startsWith('transom_')) {
+      const panels = kind === 'transom_2_panel' ? 2 : 1;
+      createTransomIntegratedBurglaryBars(
+        outerFrameGroup,
+        W,
+        H,
+        panels,
+        60,
+        frameDepth,
+        materials,
+        showWireframe,
+        explodeOffset
+      );
+    } else {
+      createBurglaryBarsAndFrame(
+        group,
+        W,
+        H,
+        innerW,
+        innerH,
+        frameThickness,
+        frameDepth,
+        materials,
+        showWireframe,
+        explodeOffset
+      );
+    }
   }
 
   // 5. 11:32 Insect / Mosquito Screen Net (Slidable 2-Panel System)
@@ -2285,9 +2473,9 @@ function createTransomConnectedFrictionStopper(
   const dir = isRightHinged ? -1 : 1;
 
   // Track length based on panel opening size
-  const trackLen = Math.min(260, Math.max(130, sashW * 0.52));
+  const trackLen = Math.min(270, Math.max(140, sashW * 0.54));
   const outerRailY = isTop ? (H - transomOuterProfileSize - 2) : (transomOuterProfileSize + 2);
-  const trackZ = hingeGroupPos.z - sashDepth / 2;
+  const trackZ = hingeGroupPos.z - 2;
 
   // 1. Outer Frame Track Channel (fixed to outer frame rail)
   const trackStartX = hingeX + dir * 14;
@@ -2299,40 +2487,47 @@ function createTransomConnectedFrictionStopper(
   trackMesh.position.set(trackMidX, outerRailY, trackZ);
   trackMesh.userData = {
     title: isTop ? 'Transom Top Stopper Track' : 'Transom Bottom Stopper Track',
-    description: 'Fixed stainless steel guide channel on outer transom frame for friction stopper',
+    description: 'Fixed polished stainless steel guide channel on outer transom frame for friction stopper',
     dimensions: `${Math.round(trackLen)} × 14 × 3.5 mm`,
-    material: 'Grade 304 Stainless Steel Track',
+    material: 'Grade 304 Polished Stainless Steel Track',
   };
   stopperGroup.add(trackMesh);
 
   // 2. Fixed Outer Track Pivot
   const outerPivot = new THREE.Vector3(trackStartX + dir * 18, outerRailY + (isTop ? -2 : 2), trackZ);
-  createPivotPin(stopperGroup, outerPivot, 3.2, 5, materials.hardware, {
+  createPivotPin(stopperGroup, outerPivot, 3.5, 5, materials.hardware, {
     title: 'Transom Stopper Frame Pivot',
     description: 'Stainless steel anchor pivot securing stay arm to outer frame channel',
-    dimensions: 'Ø6.4 × 5 mm',
+    dimensions: 'Ø7 × 5 mm',
     material: 'Stainless Steel Pivot Pin',
   });
 
   // 3. Sliding Friction Block on Outer Track
   const openRatio = Math.min(1, Math.abs(openAngle) / (Math.PI / 2.2));
-  const sliderTravel = (trackLen - 45) * (1 - openRatio * 0.52);
+  const sliderTravel = (trackLen - 46) * (1 - openRatio * 0.52);
   const sliderPos = new THREE.Vector3(outerPivot.x + dir * sliderTravel, outerRailY + (isTop ? -2 : 2), trackZ);
 
-  const sliderGeo = new THREE.BoxGeometry(16, 4, 10);
+  const sliderGeo = new THREE.BoxGeometry(18, 4.5, 11);
   const sliderMesh = new THREE.Mesh(sliderGeo, materials.hardware);
   sliderMesh.position.copy(sliderPos);
+
+  // Brass friction adjustment screw
+  const brassScrewGeo = new THREE.CylinderGeometry(2.5, 2.5, 3, 12);
+  const brassScrewMesh = new THREE.Mesh(brassScrewGeo, materials.lockGold);
+  brassScrewMesh.position.set(0, isTop ? -2.5 : 2.5, 0);
+  sliderMesh.add(brassScrewMesh);
+
   sliderMesh.userData = {
     title: 'Transom Stopper Friction Slider',
-    description: 'Sliding friction shoe with nylon/brass pad that holds the opening panel at desired angle',
-    dimensions: '16 × 10 × 4 mm',
-    material: 'Brass & Stainless Steel Friction Slider',
+    description: 'Sliding friction shoe with brass adjustment screw that holds the opening panel at desired angle',
+    dimensions: '18 × 11 × 4.5 mm',
+    material: 'Grade 304 Stainless Steel & Brass Friction Shoe',
   };
   stopperGroup.add(sliderMesh);
 
   // 4. Sash Attachment Point (mounted on rotating opening panel)
-  const sashAttachDist = Math.min(210, Math.max(110, sashW * 0.46));
-  const localVec = new THREE.Vector3(dir * sashAttachDist, 0, -2);
+  const sashAttachDist = Math.min(220, Math.max(120, sashW * 0.48));
+  const localVec = new THREE.Vector3(dir * sashAttachDist, 0, 0);
   localVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), openAngle);
 
   const sashPivotY = isTop ? (H / 2 + sashH / 2 - 2) : (H / 2 - sashH / 2 + 2);
@@ -2342,10 +2537,10 @@ function createTransomConnectedFrictionStopper(
     hingeGroupPos.z + localVec.z
   );
 
-  createPivotPin(stopperGroup, sashPivot, 3.2, 5, materials.hardware, {
+  createPivotPin(stopperGroup, sashPivot, 3.5, 5, materials.hardware, {
     title: 'Transom Stopper Sash Pivot',
     description: 'Connecting pivot securing stopper arm to the opening structural sash panel',
-    dimensions: 'Ø6.4 × 5 mm',
+    dimensions: 'Ø7 × 5 mm',
     material: 'Stainless Steel Sash Pivot Pin',
   });
 
@@ -2353,27 +2548,27 @@ function createTransomConnectedFrictionStopper(
   const primaryArmData = {
     title: isTop ? 'Transom Top Stopper (Stay Arm)' : 'Transom Bottom Stopper (Stay Arm)',
     description: 'Heavy-duty stainless steel stay arm physically connecting the opening panel to the outer frame',
-    dimensions: `${Math.round(outerPivot.distanceTo(sashPivot))} × 8 × 3 mm`,
-    material: 'Grade 304 Stainless Steel Stay Arm',
+    dimensions: `${Math.round(outerPivot.distanceTo(sashPivot))} × 9 × 3 mm`,
+    material: 'Grade 304 Polished Stainless Steel Stay Arm',
   };
-  createConnectingStayArm(stopperGroup, outerPivot, sashPivot, 8, 2.8, materials.hardware, primaryArmData);
+  createConnectingStayArm(stopperGroup, outerPivot, sashPivot, 9, 3, materials.hardware, primaryArmData);
 
   // 6. Secondary Scissor Link Arm (connecting Slider to Primary Arm Midpoint)
   const mid1 = new THREE.Vector3().addVectors(outerPivot, sashPivot).multiplyScalar(0.5);
-  createPivotPin(stopperGroup, mid1, 2.5, 4.5, materials.hardware, {
+  createPivotPin(stopperGroup, mid1, 2.8, 4.5, materials.hardware, {
     title: 'Transom Stopper Scissor Knuckle',
     description: 'Central articulated scissor joint connecting primary stay arm and guide link',
-    dimensions: 'Ø5 × 4.5 mm',
+    dimensions: 'Ø5.6 × 4.5 mm',
     material: 'Stainless Steel Rivet Knuckle',
   });
 
   const secondaryArmData = {
     title: 'Transom Stopper Scissor Guide Link',
     description: 'Articulated guide link connecting track friction slider to primary stay arm',
-    dimensions: `${Math.round(sliderPos.distanceTo(mid1))} × 7 × 2.5 mm`,
+    dimensions: `${Math.round(sliderPos.distanceTo(mid1))} × 8 × 2.5 mm`,
     material: 'Grade 304 Stainless Steel Link',
   };
-  createConnectingStayArm(stopperGroup, sliderPos, mid1, 7, 2.5, materials.hardware, secondaryArmData);
+  createConnectingStayArm(stopperGroup, sliderPos, mid1, 8, 2.5, materials.hardware, secondaryArmData);
 
   parent.add(stopperGroup);
 }
@@ -2517,6 +2712,116 @@ function createCasementMiterOuterFrame(
   }
 }
 
+function createProtectiveTapeStrip(
+  parent: THREE.Group,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+  z: number,
+  tapeMat: THREE.Material,
+  accentMat: THREE.Material
+) {
+  const tapeGroup = new THREE.Group();
+  tapeGroup.position.set(x, y, z);
+
+  // Main vibrant yellow fabrication film
+  const baseGeo = new THREE.BoxGeometry(w, h, 0.4);
+  const baseMesh = new THREE.Mesh(baseGeo, tapeMat);
+  tapeGroup.add(baseMesh);
+
+  // Dark central brand text stripe (Songtai / Aluminium)
+  const isHorizontal = w > h;
+  const stripeW = isHorizontal ? Math.max(4, w - 8) : Math.max(2.5, w * 0.35);
+  const stripeH = isHorizontal ? Math.max(2.5, h * 0.35) : Math.max(4, h - 8);
+  const stripeGeo = new THREE.BoxGeometry(stripeW, stripeH, 0.55);
+  const stripeMesh = new THREE.Mesh(stripeGeo, accentMat);
+  tapeGroup.add(stripeMesh);
+
+  tapeGroup.userData = {
+    title: 'Fabrication Protective Film Tape',
+    description: 'Factory protective adhesive film applied to aluminum sash profiles during fabrication (Songtai / Nigeria)',
+    dimensions: `${Math.round(w)} × ${Math.round(h)} mm`,
+    material: 'Polyethylene Protective Surface Tape',
+  };
+
+  parent.add(tapeGroup);
+}
+
+function createTransomIntegratedBurglaryBars(
+  parent: THREE.Group,
+  W: number,
+  H: number,
+  panels: number,
+  transomOuterProfileSize: number,
+  frameDepth: number,
+  materials: any,
+  showWireframe: boolean,
+  explodeOffset: number
+) {
+  const burglaryGroup = new THREE.Group();
+  // Situated in the rear rebate of the 60mm outer frame (z = -14) behind the opening sash
+  burglaryGroup.position.z = -14 - explodeOffset * 0.35;
+
+  const innerH = H - transomOuterProfileSize * 2;
+  const innerW = W - transomOuterProfileSize * 2;
+
+  // Real Nigerian fabrication: spaced ~125mm center-to-center
+  const numDivisions = Math.max(3, Math.round(innerH / 125));
+  const rodSpacing = innerH / numDivisions;
+  const numRods = Math.max(2, numDivisions - 1);
+  const rodLength = innerW + 16; // Passes through center mullion and embeds into side jambs
+
+  for (let r = 1; r <= numRods; r++) {
+    const rodY = transomOuterProfileSize + r * rodSpacing;
+    const rodRadius = 7.5; // ~15mm security tube / ballo straight rod
+
+    const rodGeo = new THREE.CylinderGeometry(rodRadius, rodRadius, rodLength, 18);
+    const rodMesh = new THREE.Mesh(rodGeo, materials.burglary);
+    rodMesh.rotation.z = Math.PI / 2;
+    rodMesh.position.set(0, rodY, 0);
+    rodMesh.castShadow = true;
+    rodMesh.receiveShadow = true;
+
+    // Metal collar rings at left and right jamb intersections
+    const collarGeo = new THREE.CylinderGeometry(rodRadius + 2.5, rodRadius + 2.5, 7, 18);
+    const leftCollar = new THREE.Mesh(collarGeo, materials.hardware);
+    leftCollar.rotation.z = Math.PI / 2;
+    leftCollar.position.set(-innerW / 2 + 3.5, 0, 0);
+    rodMesh.add(leftCollar);
+
+    const rightCollar = new THREE.Mesh(collarGeo, materials.hardware);
+    rightCollar.rotation.z = Math.PI / 2;
+    rightCollar.position.set(innerW / 2 - 3.5, 0, 0);
+    rodMesh.add(rightCollar);
+
+    // If 2-panel, collar at center mullion
+    if (panels > 1) {
+      const centerCollar = new THREE.Mesh(collarGeo, materials.hardware);
+      centerCollar.rotation.z = Math.PI / 2;
+      centerCollar.position.set(0, 0, 0);
+      rodMesh.add(centerCollar);
+    }
+
+    rodMesh.userData = {
+      title: `Transom Security Burglary Bar #${r}`,
+      description: `Solid horizontal burglary security tube passing through center mullion and embedded into side jambs (${Math.round(rodLength)}mm)`,
+      dimensions: `Ø15mm × ${Math.round(rodLength)}mm`,
+      material: 'Hardened Aluminum / Steel Security Tube (Ballo Straight)',
+    };
+
+    if (showWireframe) {
+      const edges = new THREE.EdgesGeometry(rodGeo);
+      const line = new THREE.LineSegments(edges, materials.wire);
+      rodMesh.add(line);
+    }
+
+    burglaryGroup.add(rodMesh);
+  }
+
+  parent.add(burglaryGroup);
+}
+
 function createCasementMiterSashFrame(
   parent: THREE.Group,
   width: number,
@@ -2530,7 +2835,10 @@ function createCasementMiterSashFrame(
   showWireframe: boolean,
   showIronCleats: boolean,
   title: string,
-  dims: string
+  dims: string,
+  showProtectiveFilm: boolean = false,
+  tapeMat?: THREE.Material,
+  tapeBorderMat?: THREE.Material
 ) {
   const halfW = width / 2;
   const halfH = height / 2;
@@ -2615,6 +2923,23 @@ function createCasementMiterSashFrame(
     `Casement De-Curve Sash Right Stile (${height}mm)`,
     `${borderWidth} × ${height} mm`
   );
+
+  // Protective yellow fabrication film tape (as in Nigerian aluminum workshop photo)
+  if (showProtectiveFilm && tapeMat && tapeBorderMat) {
+    const tapeThickness = borderWidth * 0.54;
+    const tapeZ = depth / 2 + 0.4;
+    const tapeLenH = width - borderWidth * 1.4;
+    const tapeLenV = height - borderWidth * 1.4;
+
+    // Top Rail Tape
+    createProtectiveTapeStrip(parent, tapeLenH, tapeThickness, 0, halfH - borderWidth / 2, tapeZ, tapeMat, tapeBorderMat);
+    // Bottom Rail Tape
+    createProtectiveTapeStrip(parent, tapeLenH, tapeThickness, 0, -halfH + borderWidth / 2, tapeZ, tapeMat, tapeBorderMat);
+    // Left Stile Tape
+    createProtectiveTapeStrip(parent, tapeThickness, tapeLenV, -halfW + borderWidth / 2, 0, tapeZ, tapeMat, tapeBorderMat);
+    // Right Stile Tape
+    createProtectiveTapeStrip(parent, tapeThickness, tapeLenV, halfW - borderWidth / 2, 0, tapeZ, tapeMat, tapeBorderMat);
+  }
 
   // Infill Glass Pane
   const glassW = width - borderWidth * 2 + 12;

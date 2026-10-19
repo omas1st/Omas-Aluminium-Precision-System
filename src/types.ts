@@ -396,6 +396,9 @@ export interface MaterialPricesConfig {
     burglaryIronRod: number;
     casementIronAngle: number;
     glazingDivider: number;
+    glazingDividerSmall?: number;
+    glazingDividerBig?: number;
+    netProfileBumper?: number;
 
     // Transom Profiles (Separated from Casement)
     transomOuterFrame: number;
@@ -414,9 +417,16 @@ export interface MaterialPricesConfig {
     [customKey: string]: number;
   };
 
-  // Glass Price per m²
+  // Currency Exchange Rate (1 USD = NGN_TO_USD_RATE NGN, e.g. 1400)
+  exchangeRateToUSD?: number;
+
+  // Glass Price per m² & Standard Sheet Specs
   glassPricePerM2: number;
   glassTypeName: string; // e.g. '5mm Clear / Tinted Float Glass'
+  glassSheetPrice4mm?: number; // ₦110,000 per sheet
+  glassSheetPrice5mm?: number; // ₦140,000 per sheet (3300 x 2140)
+  glassSheetWidth?: number;    // 3300 mm
+  glassSheetHeight?: number;   // 2140 mm
 
   // Hardware & Accessories unit prices
   accessoryPrices: {
@@ -424,15 +434,21 @@ export interface MaterialPricesConfig {
     crescentHookLock: number;
     woolpilePerMeter: number;
     rubberGasketPerMeter: number;
+    glazingRubberRollPrice?: number;
     cornerCleatPiece: number;
     frictionStayPair: number;
     casementCamHandle: number;
     assemblyScrewPiece: number;
+    assemblyScrewPackPrice?: number;
     siliconeSealantTube: number;
     wallAnchorPlug: number;
     doorHingePair: number;
     doorMortiseLockset: number;
     flushBoltPiece: number;
+    netRollPrice?: number;
+    netRubberRollPrice?: number;
+    steelStopperPiece?: number;
+    casementHingePiece?: number;
     [accessoryName: string]: number;
   };
 

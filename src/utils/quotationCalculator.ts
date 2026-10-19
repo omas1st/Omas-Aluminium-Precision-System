@@ -5,21 +5,29 @@ import {
   QuotationLineItem,
 } from '../types';
 import { getMaterialDisplayName } from './materialNamesStorage';
+import { convertPricesConfig } from '../constants/defaultPrices';
 
 export function calculateQuotationBreakdown(
   calc: CombinedProjectCalculation,
-  prices: MaterialPricesConfig,
+  rawPrices: MaterialPricesConfig,
   customMargin?: number,
   customTax?: number
 ): QuotationBreakdown {
+  const currency = rawPrices.currency || 'NGN';
+  const currencySymbol = rawPrices.currencySymbol || '₦';
+
+  // If quotation currency is USD, but stored prices are in Naira (or exchange rate is requested),
+  // convert using the formula: dollar price = Nigerian price / 1400!
+  const isUSD = currency === 'USD' || currencySymbol === '$';
+  const prices = (isUSD && (rawPrices.profileBarPrices?.sideJambs >= 500 || rawPrices.currency === 'USD'))
+    ? convertPricesConfig(rawPrices, 'USD', rawPrices.exchangeRateToUSD || 1400)
+    : rawPrices;
+
   const profileLines: QuotationLineItem[] = [];
   const glassLines: QuotationLineItem[] = [];
   const accessoryLines: QuotationLineItem[] = [];
   const laborLines: QuotationLineItem[] = [];
   const logisticsLines: QuotationLineItem[] = [];
-
-  const currency = prices.currency || 'USD';
-  const currencySymbol = prices.currencySymbol || '$';
 
   // 1. ALUMINUM PROFILE BARS CALCULATION
   let totalProfilesCost = 0;
@@ -208,155 +216,197 @@ function getProfilePrice(profileName: string, prices: MaterialPricesConfig): num
   const p = prices.profileBarPrices;
   const name = profileName.toLowerCase();
 
-  // 1. Casement Outer Width & Height
-  if (name.includes('casement outer width') || name.includes('outer width')) {
-    return p.casementOuterWidth || p.casementOuterFrame || 44.0;
+  // 1. Sliding Profiles
+  // Double Jam profile is 10000
+  if (name.includes('double jam') || name.includes('double jamb') || name.includes('side jamb')) {
+    return p.sideJambs || 10000;
   }
-  if (name.includes('casement outer height') || name.includes('outer height')) {
-    return p.casementOuterHeight || p.casementOuterFrame || 44.0;
+  // Lock and Interlock profiles are 10000
+  if (name.includes('lock frame') || name.includes('lock profile') || name.includes('handle side')) {
+    return p.lockFrameStile || 10000;
   }
-
-  // 2. Casement 2-Mullion and 3-Mullion
-  if (name.includes('3-mullion') || name.includes('3 mullion')) {
-    return p.casement3Mullion || 54.0;
+  if (name.includes('interlock') || name.includes('meeting')) {
+    return p.interlockFrameStile || 10000;
   }
-  if (name.includes('2-mullion') || name.includes('2 mullion') || name.includes('casement 2-mullion')) {
-    return p.casement2Mullion || p.casementMullion || 48.0;
-  }
-
-  // 3. Burglary Profiles & Iron Rods
-  if (name.includes('burglary top & side') || name.includes('burglary top') || name.includes('burglary side')) {
-    return p.casementBurglaryTopSideFrame || 38.0;
-  }
-  if (name.includes('burglary bottom')) {
-    return p.casementBurglaryBottomFrame || 38.0;
-  }
-  if (name.includes('burglary iron rod') || name.includes('ballo straight') || name.includes('iron rod')) {
-    return p.burglaryIronRod || 18.0;
-  }
-
-  // 4. Netting Frame Profiles
-  if (name.includes('11:25') || name.includes('1125')) {
-    return p.netFrame1125 || 32.0;
-  }
-  if (name.includes('11:26') || name.includes('1126')) {
-    return p.netFrame1126 || 32.0;
-  }
-  if (name.includes('11:32') || name.includes('1132')) {
-    return p.netFrame1132 || 28.0;
-  }
-
-  // 5. Glazing Dividers & Iron Angles
-  if (name.includes('glazing divider') || name.includes('divider bar') || name.includes('georgian') || name.includes('colonial')) {
-    return p.glazingDivider || 24.0;
-  }
-  if (name.includes('iron angle') || name.includes('angle cleat')) {
-    return p.casementIronAngle || 12.0;
-  }
-
-  // 6. Sliding Profiles
+  // Top and bottom profile is 10000
   if (
     name.includes('top / bottom track') ||
     name.includes('two track') ||
     name.includes('two-track') ||
     name.includes('2 track') ||
     name.includes('top track') ||
-    name.includes('bottom track')
+    name.includes('bottom track') ||
+    name.includes('top and buttom') ||
+    name.includes('top & bottom')
   ) {
-    return p.topBottomTrack || 42.0;
-  }
-  if (name.includes('side jamb') || name.includes('double jamb')) {
-    return p.sideJambs || 36.0;
+    return p.topBottomTrack || 10000;
   }
   if (
     name.includes('top / bottom sash rail') ||
     name.includes('sash rail') ||
     name.includes('bottom sash') ||
-    name.includes('top sash') ||
-    name.includes('roller')
+    name.includes('top sash')
   ) {
-    return p.bottomSashRail || p.topSashRail || 38.0;
-  }
-  if (name.includes('lock frame') || name.includes('handle side')) {
-    return p.lockFrameStile || 40.0;
-  }
-  if (name.includes('interlock') || name.includes('meeting')) {
-    return p.interlockFrameStile || 32.0;
+    return p.bottomSashRail || p.topSashRail || 10000;
   }
 
-  // 7. Transom Window Profiles
-  if (name.includes('transom outer') || name.includes('transom window outer')) {
-    return p.transomOuterFrame || 45.0;
+  // 2. Net Profiles
+  // 11:32 profile is 3500
+  if (name.includes('11:32') || name.includes('1132')) {
+    return p.netFrame1132 || 3500;
+  }
+  // 11:26 and 11:25 is 5000
+  if (name.includes('11:25') || name.includes('1125')) {
+    return p.netFrame1125 || 5000;
+  }
+  if (name.includes('11:26') || name.includes('1126')) {
+    return p.netFrame1126 || 5000;
+  }
+  // Net profile/bomper is 20000
+  if (name.includes('net profile') || name.includes('bomper') || name.includes('bumper') || name.includes('sliding net frame')) {
+    return p.netProfileBumper || 20000;
+  }
+
+  // 3. Casement & Transom Mullions
+  // 3 panel mullion is 25000
+  if (name.includes('3-mullion') || name.includes('3 mullion') || name.includes('3 panel mullion') || name.includes('mullion 3 panel')) {
+    return p.casement3Mullion || 25000;
+  }
+  // Mullion 2 panel is 20000
+  if (name.includes('2-mullion') || name.includes('2 mullion') || name.includes('mullion 2 panel') || name.includes('2 panel mullion') || name.includes('casement 2-mullion')) {
+    return p.casement2Mullion || p.casementMullion || 20000;
   }
   if (name.includes('transom mullion') || name.includes('transom dividing') || name.includes('transom intermediate')) {
-    return p.transomMullion || 46.0;
+    return p.transomMullion || 20000;
+  }
+
+  // 4. D Curve Profile is 20000
+  if (name.includes('d curve') || name.includes('de curve') || name.includes('d-curve') || name.includes('de-curve') || name.includes('casement inner') || name.includes('casement sash')) {
+    return p.casementDeCurveSash || 20000;
+  }
+
+  // 5. Width and Height Profiles are 15000
+  if (name.includes('casement outer width') || name.includes('outer width') || name.includes('width profile')) {
+    return p.casementOuterWidth || p.casementOuterFrame || 15000;
+  }
+  if (name.includes('casement outer height') || name.includes('outer height') || name.includes('height profile')) {
+    return p.casementOuterHeight || p.casementOuterFrame || 15000;
+  }
+  if (name.includes('casement outer') || name.includes('casement frame')) {
+    return p.casementOuterFrame || 15000;
+  }
+
+  // 6. Dividers: divider small 8000, big 15000
+  if (name.includes('divider big') || name.includes('big divider') || name.includes('heavy divider')) {
+    return p.glazingDividerBig || 15000;
+  }
+  if (name.includes('divider small') || name.includes('small divider') || name.includes('glazing divider') || name.includes('divider bar') || name.includes('georgian') || name.includes('colonial')) {
+    return p.glazingDividerSmall || p.glazingDivider || 8000;
+  }
+
+  // 7. Iron Rod is 7000
+  if (name.includes('burglary iron rod') || name.includes('ballo straight') || name.includes('iron rod')) {
+    return p.burglaryIronRod || 7000;
+  }
+  if (name.includes('burglary top & side') || name.includes('burglary top') || name.includes('burglary side')) {
+    return p.casementBurglaryTopSideFrame || 15000;
+  }
+  if (name.includes('burglary bottom')) {
+    return p.casementBurglaryBottomFrame || 15000;
+  }
+  if (name.includes('iron angle') || name.includes('angle cleat')) {
+    return p.casementIronAngle || 3500;
+  }
+
+  // 8. Transom Profiles
+  if (name.includes('transom outer') || name.includes('transom window outer')) {
+    return p.transomOuterFrame || 15000;
   }
   if (name.includes('transom top-hung') || name.includes('transom vent') || name.includes('top-hung sash')) {
-    return p.transomTopHungSash || 41.0;
+    return p.transomTopHungSash || 20000;
   }
   if (name.includes('transom glazing bead') || name.includes('transom bead')) {
-    return p.transomGlazingBead || 18.0;
+    return p.transomGlazingBead || 4000;
+  }
+  if (name.includes('transom iron angle') || name.includes('transom angle')) {
+    return p.transomIronAngle || 3500;
   }
 
-  // 8. Casement De-Curve & Beads
-  if (name.includes('casement outer')) {
-    return p.casementOuterFrame || 44.0;
-  }
-  if (name.includes('casement mullion') || name.includes('mullion')) {
-    return p.casementMullion || 48.0;
-  }
-  if (name.includes('de curve') || name.includes('casement inner') || name.includes('casement sash')) {
-    return p.casementDeCurveSash || 42.0;
-  }
-  if (name.includes('casement glazing bead') || name.includes('casement bead')) {
-    return p.casementGlazingBead || 18.0;
-  }
-  if (name.includes('snap-in') || name.includes('bead')) {
-    return p.snapInGlassBead || 18.0;
+  // 9. Beads & Fixed
+  if (name.includes('casement glazing bead') || name.includes('casement bead') || name.includes('snap-in') || name.includes('bead')) {
+    return p.casementGlazingBead || p.snapInGlassBead || 4000;
   }
   if (name.includes('fixed')) {
-    return p.fixedFrame || 35.0;
+    return p.fixedFrame || 15000;
   }
 
-  // 9. Doors
+  // 10. Doors
   if (name.includes('door outer')) {
-    return p.doorOuterFrame || 65.0;
+    return p.doorOuterFrame || 22000;
   }
   if (name.includes('door stile') || name.includes('door vertical')) {
-    return p.doorStile || 58.0;
+    return p.doorStile || 20000;
   }
   if (name.includes('door top')) {
-    return p.doorTopRail || 55.0;
+    return p.doorTopRail || 18000;
   }
   if (name.includes('door bottom')) {
-    return p.doorBottomRail || 68.0;
+    return p.doorBottomRail || 22000;
   }
 
   // Fallback average extrusion price
-  return 40.0;
+  return 15000;
 }
 
 function getAccessoryPrice(accName: string, prices: MaterialPricesConfig): number {
   const a = prices.accessoryPrices;
   const name = accName.toLowerCase();
 
-  if (name.includes('stopper') || name.includes('restrictor')) return a.steelStopperPiece || 3.5;
-  if (name.includes('butt') || name.includes('friction hinge') || name.includes('casement hinge')) return a.casementHingePiece || 4.0;
-  if (name.includes('insect') || name.includes('mosquito') || name.includes('net mesh')) return a.netRollPrice ? a.netRollPrice / 5.8 : 3.8;
-  if (name.includes('spline') || name.includes('net rubber')) return a.netRubberRollPrice ? a.netRubberRollPrice / 5.0 : 1.0;
-  if (name.includes('roller')) return a.slidingRollerPair || 4.5;
-  if (name.includes('crescent') || name.includes('hook lock') || name.includes('flush lock')) return a.crescentHookLock || 6.0;
-  if (name.includes('woolpile')) return a.woolpilePerMeter || 0.45;
-  if (name.includes('rubber') || name.includes('gasket') || name.includes('wedge')) return a.rubberGasketPerMeter || 0.55;
-  if (name.includes('iron angle') || name.includes('cleat') || name.includes('miter joint')) return a.cornerCleatPiece || 0.8;
-  if (name.includes('friction stay') || name.includes('stay')) return a.frictionStayPair || 8.5;
-  if (name.includes('cam handle') || name.includes('cockspur') || name.includes('fastener') || name.includes('espagnolette')) return a.casementCamHandle || 4.0;
-  if (name.includes('screw') || name.includes('self-tapping')) return a.assemblyScrewPiece || 0.05;
-  if (name.includes('silicone') || name.includes('sealant')) return a.siliconeSealantTube || 4.5;
-  if (name.includes('anchor') || name.includes('plug')) return a.wallAnchorPlug || 0.2;
-  if (name.includes('hinge')) return a.doorHingePair || 7.5;
-  if (name.includes('mortise') || name.includes('lockset')) return a.doorMortiseLockset || 24.0;
-  if (name.includes('flush bolt')) return a.flushBoltPiece || 5.0;
+  // Roller is 1000
+  if (name.includes('roller')) {
+    return a.slidingRollerPair || 1000;
+  }
 
-  return 2.0;
+  // Net rubber is 700
+  if (name.includes('net rubber') || name.includes('spline')) {
+    return a.netRubberRollPrice ? Math.round(a.netRubberRollPrice / 5.0) : 140;
+  }
+
+  // Glasing rubber is 1000
+  if (
+    name.includes('glasing rubber') ||
+    name.includes('glazing rubber') ||
+    name.includes('rubber gasket') ||
+    name.includes('wedge rubber') ||
+    name.includes('u-channel rubber') ||
+    (name.includes('rubber') && !name.includes('net'))
+  ) {
+    return a.rubberGasketPerMeter || 70;
+  }
+
+  // Net is 13000 (per roll, or approx ₦850/m² fabricated)
+  if (name.includes('insect') || name.includes('mosquito') || name.includes('net mesh') || (name.includes('net') && !name.includes('rubber') && !name.includes('frame') && !name.includes('spline'))) {
+    return a.netRollPrice ? Math.round(a.netRollPrice / 15.0) : 850;
+  }
+
+  // Screw is 5000 (pack of 1,000 screws = ₦5/piece)
+  if (name.includes('screw') || name.includes('self-tapping') || name.includes('fastener')) {
+    return a.assemblyScrewPiece || 5;
+  }
+
+  // Hardware & Stays
+  if (name.includes('stopper') || name.includes('restrictor')) return a.steelStopperPiece || 1500;
+  if (name.includes('butt') || name.includes('friction hinge') || name.includes('casement hinge')) return a.casementHingePiece || 1500;
+  if (name.includes('crescent') || name.includes('hook lock') || name.includes('flush lock')) return a.crescentHookLock || 2000;
+  if (name.includes('woolpile')) return a.woolpilePerMeter || 200;
+  if (name.includes('iron angle') || name.includes('cleat') || name.includes('miter joint')) return a.cornerCleatPiece || 500;
+  if (name.includes('friction stay') || name.includes('stay')) return a.frictionStayPair || 3500;
+  if (name.includes('cam handle') || name.includes('cockspur')) return a.casementCamHandle || 2000;
+  if (name.includes('silicone') || name.includes('sealant')) return a.siliconeSealantTube || 2500;
+  if (name.includes('anchor') || name.includes('plug')) return a.wallAnchorPlug || 100;
+  if (name.includes('hinge')) return a.doorHingePair || 3500;
+  if (name.includes('mortise') || name.includes('lockset')) return a.doorMortiseLockset || 12000;
+  if (name.includes('flush bolt')) return a.flushBoltPiece || 2500;
+
+  return 500;
 }

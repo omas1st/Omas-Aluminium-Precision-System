@@ -148,12 +148,24 @@ export const QuotationOutput: React.FC<QuotationOutputProps> = ({
 
   const [copied, setCopied] = useState(false);
 
+  const exchangeRate = prices?.exchangeRateToUSD || 1400;
+  const isUSD = selectedCurrency.code === 'USD';
+
   // Currency change handler
   const handleCurrencyChange = (currCode: string) => {
     const found = POPULAR_CURRENCIES.find((c) => c.code === currCode);
     if (found) {
+      const prevCode = selectedCurrency.code;
       setSelectedCurrency(found);
       saveUserSelectedCurrency(found);
+      // If switching between NGN and USD, scale clientLaborAmount & clientTransportAmount
+      if (prevCode === 'NGN' && found.code === 'USD') {
+        setClientLaborAmount((prev) => Math.round((prev / exchangeRate) * 100) / 100);
+        setClientTransportAmount((prev) => Math.round((prev / exchangeRate) * 100) / 100);
+      } else if (prevCode === 'USD' && found.code === 'NGN') {
+        setClientLaborAmount((prev) => Math.round(prev * exchangeRate));
+        setClientTransportAmount((prev) => Math.round(prev * exchangeRate));
+      }
     }
   };
 
@@ -168,13 +180,23 @@ export const QuotationOutput: React.FC<QuotationOutputProps> = ({
       const itemId = actualItem?.id || `item-${idx}`;
       const manualVal = manualPriceOverrides[itemId];
       const calcResult = calculateItemClientPrice(actualItem, pricingRules, manualVal);
+
+      // If currency is USD and pricing rule price is in Naira, convert by dividing by exchangeRate (1400)
+      const unitPrice = isUSD && !manualVal && calcResult.unitPrice > 200
+        ? Math.round((calcResult.unitPrice / exchangeRate) * 100) / 100
+        : calcResult.unitPrice;
+      const qty = Number(actualItem?.quantity) || 1;
+      const totalPrice = Math.round(unitPrice * qty * 100) / 100;
+
       return {
         item: actualItem,
         itemId,
         ...calcResult,
+        unitPrice,
+        totalPrice,
       };
     });
-  }, [calc?.items, pricingRules, manualPriceOverrides]);
+  }, [calc?.items, pricingRules, manualPriceOverrides, isUSD, exchangeRate]);
 
   // Check if any work requires manual pricing
   const unpricedWorksCount = useMemo(() => {
@@ -526,11 +548,16 @@ export const QuotationOutput: React.FC<QuotationOutputProps> = ({
                 Default: <strong className="text-slate-900">₦ Nigerian Naira</strong> (or $ USD abroad)
               </span>
             </div>
-            <div className="text-sm font-bold text-slate-900 mt-0.5 flex items-center gap-2">
+            <div className="text-sm font-bold text-slate-900 mt-0.5 flex flex-wrap items-center gap-2">
               <span>Active Billing Currency:</span>
               <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-mono text-xs font-black border border-emerald-200">
                 {selectedCurrency.code} ({sym})
               </span>
+              {isUSD && (
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded border border-emerald-300">
+                  1 USD = ₦{exchangeRate.toLocaleString()} (Dollar price = Nigerian price ÷ 1,400)
+                </span>
+              )}
             </div>
           </div>
         </div>

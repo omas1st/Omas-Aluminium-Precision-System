@@ -55,6 +55,7 @@ const PROFILE_ITEMS: ProfileItemDef[] = [
   { key: 'casementGlazingBead', label: 'Casement Glazing Retaining Bead', category: 'Casement Systems', unit: 'per 5.8m bar' },
 
   // Burglary & Net
+  { key: 'netProfileBumper', label: 'Sliding Net Profile / Bumper Frame', category: 'Burglary & Net', unit: 'per 5.8m bar' },
   { key: 'casementBurglaryTopSideFrame', label: 'Burglary Top & Side Frame Section', category: 'Burglary & Net', unit: 'per 5.8m bar' },
   { key: 'casementBurglaryBottomFrame', label: 'Burglary Bottom Frame Section', category: 'Burglary & Net', unit: 'per 5.8m bar' },
   { key: 'netFrame1125', label: 'Mosquito Net Frame Profile 1125', category: 'Burglary & Net', unit: 'per 5.8m bar' },
@@ -62,13 +63,16 @@ const PROFILE_ITEMS: ProfileItemDef[] = [
   { key: 'netFrame1132', label: 'Mosquito Net Frame Profile 1132', category: 'Burglary & Net', unit: 'per 5.8m bar' },
   { key: 'burglaryIronRod', label: 'Solid Burglary Security Iron Rod', category: 'Burglary & Net', unit: 'per 5.8m rod' },
   { key: 'casementIronAngle', label: 'Casement Angle Reinforcement Iron', category: 'Burglary & Net', unit: 'per 5.8m length' },
-  { key: 'glazingDivider', label: 'Glazing Grid Architectural Divider', category: 'Burglary & Net', unit: 'per 5.8m bar' },
+  { key: 'glazingDivider', label: 'Glazing Grid Architectural Divider (Standard)', category: 'Burglary & Net', unit: 'per 5.8m bar' },
+  { key: 'glazingDividerSmall', label: 'Small Glazing Divider Bar (Georgian)', category: 'Burglary & Net', unit: 'per 5.8m bar' },
+  { key: 'glazingDividerBig', label: 'Big Heavy Glazing Divider Section', category: 'Burglary & Net', unit: 'per 5.8m bar' },
 
   // Transom
   { key: 'transomOuterFrame', label: 'Transom Window Outer Perimeter Frame', category: 'Transom Systems', unit: 'per 5.8m bar' },
   { key: 'transomMullion', label: 'Transom Dividing Mullion Profile', category: 'Transom Systems', unit: 'per 5.8m bar' },
   { key: 'transomTopHungSash', label: 'Top Hung / Awning Sash Profile', category: 'Transom Systems', unit: 'per 5.8m bar' },
   { key: 'transomGlazingBead', label: 'Transom Glazing Retaining Bead', category: 'Transom Systems', unit: 'per 5.8m bar' },
+  { key: 'transomIronAngle', label: 'Transom Corner Structural Iron Angle (5.0m Stock)', category: 'Transom Systems', unit: 'per 5.0m bar' },
 
   // Door
   { key: 'doorOuterFrame', label: 'Heavy Architectural Door Outer Frame', category: 'Door Systems', unit: 'per 5.8m bar' },
@@ -79,21 +83,23 @@ const PROFILE_ITEMS: ProfileItemDef[] = [
 ];
 
 const ACCESSORY_ITEMS: AccessoryItemDef[] = [
-  { key: 'slidingRollerPair', label: 'Sliding Wheel Roller Pair (Heavy Duty Bearings)', unit: 'per pair', description: 'Dual nylon/brass ball bearing rollers for smooth sliding sash action' },
+  { key: 'slidingRollerPair', label: 'Sliding Wheel Roller Pair (Heavy Duty Bearings)', unit: 'per pair', description: 'Dual nylon/brass ball bearing rollers for smooth sliding sash action (₦1,000)' },
   { key: 'crescentHookLock', label: 'Sliding Sash Crescent Hook Lockset', unit: 'per piece', description: 'Sash safety crescent hook latch with catch plate' },
   { key: 'woolpilePerMeter', label: 'Weatherstripping Woolpile Mohair Seal', unit: 'per meter', description: 'Dense weatherpile inserted into profile channels for dust and draft seal' },
-  { key: 'rubberGasketPerMeter', label: 'EPDM Glass Retaining Weather Gasket', unit: 'per meter', description: 'Heavy-duty weather-tight elastomeric rubber gasket for glazing compression' },
+  { key: 'rubberGasketPerMeter', label: 'EPDM Glass Retaining Weather Gasket (per meter)', unit: 'per meter', description: 'Weather-tight elastomeric rubber gasket for glazing compression' },
+  { key: 'glazingRubberRollPrice', label: 'Glazing Rubber Gasket (Full Roll)', unit: 'per roll', description: 'Full roll of EPDM glazing gasket rubber (₦1,000 / roll)' },
   { key: 'cornerCleatPiece', label: '90° Aluminum Corner Joint Cleats', unit: 'per piece', description: 'Corner joint alignment bracket crimped into mitred sash joints' },
   { key: 'frictionStayPair', label: 'Stainless Steel Heavy Friction Stays', unit: 'per pair', description: 'Top/side hung casement stainless steel friction window hinges' },
   { key: 'casementCamHandle', label: 'Casement Cockspur / Cam Multi-Point Handle', unit: 'per piece', description: 'Die-cast casement window locking handle' },
-  { key: 'assemblyScrewPiece', label: 'Corrosion-Resistant Assembly Screws', unit: 'per piece', description: 'Self-tapping stainless/zinc fasteners for mechanical corners' },
+  { key: 'assemblyScrewPiece', label: 'Corrosion-Resistant Assembly Screws (Individual)', unit: 'per piece', description: 'Self-tapping stainless/zinc fasteners for mechanical corners' },
+  { key: 'assemblyScrewPackPrice', label: 'Assembly Screws Box (1,000 pcs/box)', unit: 'per box', description: 'Bulk box of 1,000 pcs self-tapping assembly screws (₦5,000 / box)' },
   { key: 'siliconeSealantTube', label: 'Neutral Cure Structural Silicone Sealant', unit: 'per cartridge', description: '300ml structural silicone sealant tube for perimeter glazing joints' },
   { key: 'wallAnchorPlug', label: 'Wall Expansion Anchor Plug & Heavy Screws', unit: 'per piece', description: 'Nylon masonry rawl plug with zinc wall fixing screws' },
   { key: 'doorHingePair', label: 'Architectural Heavy Door Hinges', unit: 'per pair', description: 'Heavy 3-knuckle/4-inch aluminum door butt hinges' },
   { key: 'doorMortiseLockset', label: 'High Security Mortise Lockset & Cylinder', unit: 'per piece', description: 'Euro-profile cylinder mortise lock with dual handles and keys' },
   { key: 'flushBoltPiece', label: 'Concealed Double-Door Flush Bolt', unit: 'per piece', description: 'Top/bottom concealed brass/steel flush bolt mechanism' },
-  { key: 'netRollPrice', label: 'Fiberglass Insect Mosquito Mesh Roll', unit: 'per roll', description: '30-meter roll of fine architectural charcoal mesh screen' },
-  { key: 'netRubberRollPrice', label: 'Screen Retaining Spline Rubber Cord', unit: 'per roll', description: 'Hollow serrated rubber spline roll for tensioning mosquito net' },
+  { key: 'netRollPrice', label: 'Fiberglass Insect Mosquito Mesh Roll (30m)', unit: 'per roll', description: 'Fine architectural mesh screen roll (₦13,000 / roll)' },
+  { key: 'netRubberRollPrice', label: 'Screen Retaining Spline Rubber Cord Roll', unit: 'per roll', description: 'Hollow serrated rubber spline roll for tensioning mosquito net (₦700 / roll)' },
   { key: 'steelStopperPiece', label: 'Sliding Sash Anti-Jump & Safety Stopper', unit: 'per piece', description: 'Rubberized steel bumper stopper for track travel limit' },
   { key: 'casementHingePiece', label: 'Heavy Duty Casement Butt Hinges', unit: 'per piece', description: 'Standard heavy duty aluminum pivot/butt hinge' },
 ];
@@ -278,12 +284,12 @@ export const MaterialPricesEditor: React.FC<MaterialPricesEditorProps> = ({
                 onChange={(e) => setPrices((prev) => ({ ...prev, glassTypeName: e.target.value }))}
                 className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500"
               />
-              <p className="text-[11px] text-slate-400 mt-1">E.g., 5mm Clear / Tinted Bronze Float Glass or 6mm Reflective</p>
+              <p className="text-[11px] text-slate-400 mt-1">E.g., 5mm Clear / Tinted Float Glass (₦140,000/sheet 3300×2140)</p>
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Unit Cost per Square Meter (m²)
+                Active Glass Price per Square Meter (m²)
               </label>
               <div className="relative">
                 <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-bold">
@@ -292,13 +298,75 @@ export const MaterialPricesEditor: React.FC<MaterialPricesEditorProps> = ({
                 <input
                   type="number"
                   min="0"
-                  step="0.5"
+                  step="10"
                   value={prices.glassPricePerM2}
                   onChange={(e) => setPrices((prev) => ({ ...prev, glassPricePerM2: parseFloat(e.target.value) || 0 }))}
                   className="w-full pl-8 pr-3 py-2 text-xs font-semibold text-slate-900 bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-1">Total glass pane area is multiplied directly by this rate.</p>
+              <span className="text-[10px] text-emerald-600 font-medium mt-1 block">
+                ≈ ${(prices.glassPricePerM2 / (prices.exchangeRateToUSD || 1400)).toFixed(2)} USD / m² (@ ₦{prices.exchangeRateToUSD || 1400}/$)
+              </span>
+            </div>
+          </div>
+
+          {/* Standard Glass Sheet Rates (3300 × 2140mm = 7.062 m²) */}
+          <div className="p-4 bg-sky-50/70 border border-sky-200 rounded-xl space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-sky-950">Standard Sheet Rates (3300 × 2140 mm = 7.062 m²)</span>
+              <span className="text-[10px] font-mono text-sky-700 font-bold bg-white px-2 py-0.5 rounded border border-sky-200">
+                1 USD = ₦{prices.exchangeRateToUSD || 1400}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3 bg-white rounded-lg border border-sky-200 shadow-2xs space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span>4mm Float Glass (1 Sheet)</span>
+                  <span className="text-emerald-700 font-mono">₦110,000</span>
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  ≈ ${(110000 / (prices.exchangeRateToUSD || 1400)).toFixed(2)} USD • ₦15,576 / m²
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPrices((prev) => ({
+                      ...prev,
+                      glassPricePerM2: 15576,
+                      glassTypeName: '4mm Clear / Tinted Float Glass (₦110,000/sheet 3300×2140)',
+                      glassSheetPrice4mm: 110000,
+                    }))
+                  }
+                  className="w-full mt-1.5 py-1 text-[11px] font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-md border border-sky-200 transition-colors"
+                >
+                  Use 4mm Rate (₦15,576 / m²)
+                </button>
+              </div>
+
+              <div className="p-3 bg-white rounded-lg border border-sky-200 shadow-2xs space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                  <span>5mm Float Glass (1 Sheet)</span>
+                  <span className="text-emerald-700 font-mono">₦140,000</span>
+                </div>
+                <div className="text-[10px] text-slate-500">
+                  ≈ ${(140000 / (prices.exchangeRateToUSD || 1400)).toFixed(2)} USD • ₦19,825 / m²
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPrices((prev) => ({
+                      ...prev,
+                      glassPricePerM2: 19825,
+                      glassTypeName: '5mm Clear / Tinted Float Glass (₦140,000/sheet 3300×2140)',
+                      glassSheetPrice5mm: 140000,
+                    }))
+                  }
+                  className="w-full mt-1.5 py-1 text-[11px] font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 rounded-md border border-sky-200 transition-colors"
+                >
+                  Use 5mm Rate (₦19,825 / m²)
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -351,18 +419,25 @@ export const MaterialPricesEditor: React.FC<MaterialPricesEditorProps> = ({
                       </td>
                       <td className="py-2.5 px-3 text-slate-500">{p.unit}</td>
                       <td className="py-2.5 px-3 text-right">
-                        <div className="inline-flex items-center relative max-w-[130px]">
-                          <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 text-xs font-semibold">
-                            {currencySymbol}
-                          </span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.5"
-                            value={currentVal}
-                            onChange={(e) => handleProfilePriceChange(p.key, parseFloat(e.target.value) || 0)}
-                            className="w-full pl-6 pr-2 py-1 text-right font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500"
-                          />
+                        <div className="inline-flex flex-col items-end">
+                          <div className="inline-flex items-center relative max-w-[130px]">
+                            <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 text-xs font-semibold">
+                              {currencySymbol}
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="100"
+                              value={currentVal}
+                              onChange={(e) => handleProfilePriceChange(p.key, parseFloat(e.target.value) || 0)}
+                              className="w-full pl-6 pr-2 py-1 text-right font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          {currentVal > 0 && (
+                            <span className="text-[10px] text-emerald-600 font-semibold mt-0.5">
+                              ≈ ${(currentVal / (prices.exchangeRateToUSD || 1400)).toFixed(2)} USD
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -421,18 +496,25 @@ export const MaterialPricesEditor: React.FC<MaterialPricesEditorProps> = ({
                         {a.description}
                       </td>
                       <td className="py-2.5 px-3 text-right">
-                        <div className="inline-flex items-center relative max-w-[130px]">
-                          <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 text-xs font-semibold">
-                            {currencySymbol}
-                          </span>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.1"
-                            value={currentVal}
-                            onChange={(e) => handleAccessoryPriceChange(a.key, parseFloat(e.target.value) || 0)}
-                            className="w-full pl-6 pr-2 py-1 text-right font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500"
-                          />
+                        <div className="inline-flex flex-col items-end">
+                          <div className="inline-flex items-center relative max-w-[130px]">
+                            <span className="absolute inset-y-0 left-0 pl-2 flex items-center text-slate-400 text-xs font-semibold">
+                              {currencySymbol}
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              step="50"
+                              value={currentVal}
+                              onChange={(e) => handleAccessoryPriceChange(a.key, parseFloat(e.target.value) || 0)}
+                              className="w-full pl-6 pr-2 py-1 text-right font-bold text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500"
+                            />
+                          </div>
+                          {currentVal > 0 && (
+                            <span className="text-[10px] text-emerald-600 font-semibold mt-0.5">
+                              ≈ ${(currentVal / (prices.exchangeRateToUSD || 1400)).toFixed(2)} USD
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -157,6 +157,13 @@ export const DEFAULT_MATERIAL_CATALOG: MaterialCatalogItem[] = [
     unit: 'per 5.8m bar',
     description: 'Solid galvanized/painted security grill bars with pressed end connections',
   },
+  {
+    key: 'netProfileBumper',
+    defaultName: 'Net Profile / Bumper Frame Profile',
+    category: 'Insect Netting Systems',
+    unit: 'per 5.8m bar',
+    description: 'Extrusion profile for sliding mosquito net sash screen and bumper track',
+  },
 
   // 4. Glazing Dividers & Transom Systems
   {
@@ -165,6 +172,20 @@ export const DEFAULT_MATERIAL_CATALOG: MaterialCatalogItem[] = [
     category: 'Glazing Bars',
     unit: 'per 5.8m bar',
     description: 'Colonial / Georgian decorative grid bar applied over glass surface',
+  },
+  {
+    key: 'glazingDividerSmall',
+    defaultName: 'Small Glazing Divider Profile (Georgian)',
+    category: 'Glazing Bars',
+    unit: 'per 5.8m bar',
+    description: 'Small profile divider for decorative glass grid mullions (₦8,000)',
+  },
+  {
+    key: 'glazingDividerBig',
+    defaultName: 'Big Glazing Divider Profile (Heavy Section)',
+    category: 'Glazing Bars',
+    unit: 'per 5.8m bar',
+    description: 'Heavy wide-face profile divider for architectural glass partitions (₦15,000)',
   },
   {
     key: 'transomOuterFrame',
@@ -381,6 +402,20 @@ export const DEFAULT_MATERIAL_CATALOG: MaterialCatalogItem[] = [
     category: 'Fasteners & Screws',
     unit: 'per piece',
     description: 'Corrosion-resistant zinc-plated screws for outer frame and sash corner fabrication',
+  },
+  {
+    key: 'assemblyScrewPackPrice',
+    defaultName: 'Assembly Screws Box (1,000 pcs/box)',
+    category: 'Fasteners & Screws',
+    unit: 'per box',
+    description: 'Bulk 1,000-pack box of #8 x 1½" self-tapping assembly screws (₦5,000)',
+  },
+  {
+    key: 'glazingRubberRollPrice',
+    defaultName: 'Glazing Rubber Gasket (Full Roll)',
+    category: 'Weatherstripping & Seals',
+    unit: 'per roll',
+    description: 'Full factory roll of EPDM rubber glazing gasket (₦1,000)',
   },
   {
     key: 'wallAnchorPlug',
